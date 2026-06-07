@@ -1,0 +1,251 @@
+import { useEffect, useRef, useState } from 'react'
+import SpotCard from './SpotCard'
+import './MapView.css'
+
+const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
+
+export default function MapView({ spots, onSelectSpot, savedSpots, onRegister }) {
+  const mapRef = useRef(null)
+  const mapInstance = useRef(null)
+  const [mapReady, setMapReady] = useState(false)
+  const [activeFilter, setActiveFilter] = useState('전체')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [previewSpot, setPreviewSpot] = useState(null)
+
+  const filters = ['전체', '일출', '일몰', '야경', '자연', '도심']
+
+  const filteredSpots = spots.filter(spot => {
+    const matchFilter =
+      activeFilter === '전체' ||
+      spot.tags.some(t => t.toLowerCase().includes(activeFilter.toLowerCase())) ||
+      spot.name.includes(activeFilter)
+    const matchSearch =
+      !searchQuery ||
+      spot.name.includes(searchQuery) ||
+      spot.address.includes(searchQuery) ||
+      spot.tags.some(t => t.includes(searchQuery))
+    return matchFilter && matchSearch
+  })
+
+  useEffect(() => {
+    if (!KAKAO_KEY) return
+
+    const load = () => window.kakao.maps.load(() => {
+      if (mapRef.current) initMap()
+    })
+
+    if (window.kakao?.maps) {
+      load(); return
+    }
+
+    if (document.querySelector('script[data-kakao]')) {
+      window.addEventListener('kakaoReady', initMap, { once: true }); return
+    }
+
+    const script = document.createElement('script')
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`
+    script.setAttribute('data-kakao', 'true')
+    script.async = true
+    script.onload = () => {
+      window.kakao.maps.load(() => {
+        window.dispatchEvent(new Event('kakaoReady'))
+        if (mapRef.current) initMap()
+      })
+    }
+    document.head.appendChild(script)
+  }, [])
+
+  function initMap() {
+    if (!mapRef.current) return
+    const { Map, LatLng, Marker, InfoWindow, event } = window.kakao.maps
+
+    const map = new Map(mapRef.current, {
+      center: new LatLng(37.5665, 126.9780),
+      level: 9,
+    })
+    mapInstance.current = map
+
+    spots.forEach(spot => {
+      const pos = new LatLng(spot.lat, spot.lng)
+      const marker = new Marker({ position: pos, map })
+
+      const infoContent = `
+        <div style="padding:6px 10px;font-size:12px;font-weight:600;
+          color:#111827;border-radius:6px;white-space:nowrap;">
+          ${spot.name}
+        </div>`
+      const infoWindow = new InfoWindow({ content: infoContent, removable: false })
+
+      event.addListener(marker, 'mouseover', () => infoWindow.open(map, marker))
+      event.addListener(marker, 'mouseout', () => infoWindow.close())
+      event.addListener(marker, 'click', () => setPreviewSpot(spot))
+    })
+
+    setMapReady(true)
+  }
+
+  return (
+    <div className="map-view">
+      {/* Sidebar */}
+      <aside className={`map-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+
+        <div className="sidebar-top">
+          <div className="sidebar-title-row">
+            <div>
+              <h2 className="sidebar-title">스팟 탐색</h2>
+              <p className="sidebar-subtitle">서울의 숨은 명소를 찾아보세요</p>
+            </div>
+            <span className="sidebar-badge">{filteredSpots.length}</span>
+          </div>
+        </div>
+
+        <div className="sidebar-header">
+          <div className="sidebar-search">
+            <svg className="search-svg" viewBox="0 0 20 20" fill="none">
+              <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.8"/>
+              <path d="M13.5 13.5L17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="장소, 지역, 태그 검색"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="search-clear" onClick={() => setSearchQuery('')}>✕</button>
+            )}
+          </div>
+
+          <div className="filter-chips">
+            {filters.map(f => (
+              <button
+                key={f}
+                className={`filter-chip ${activeFilter === f ? 'active' : ''}`}
+                onClick={() => setActiveFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          <div className="sidebar-count">
+            <span>{filteredSpots.length}개의 스팟</span>
+            <button className="btn-register-small" onClick={onRegister}>
+              + 스팟 등록
+            </button>
+          </div>
+        </div>
+
+        <div className="sidebar-list">
+          {filteredSpots.map(spot => (
+            <SpotCard
+              key={spot.id}
+              spot={spot}
+              compact
+              onClick={() => onSelectSpot(spot)}
+              isSaved={savedSpots.includes(spot.id)}
+            />
+          ))}
+          {filteredSpots.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon" />
+              <p>검색 결과가 없어요</p>
+              <small>다른 키워드로 검색해보세요</small>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Toggle button */}
+      <button
+        className={`sidebar-toggle ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(v => !v)}
+        title={sidebarOpen ? '목록 닫기' : '목록 열기'}
+      >
+        <svg viewBox="0 0 24 24" fill="none">
+          <path
+            d={sidebarOpen ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'}
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {/* Map area */}
+      <div className="map-area" onClick={() => setPreviewSpot(null)}>
+        {KAKAO_KEY ? (
+          <div ref={mapRef} className="kakao-map" />
+        ) : (
+          <MockMap spots={filteredSpots} onSelectSpot={setPreviewSpot} />
+        )}
+
+        {!KAKAO_KEY && (
+          <div className="map-notice">
+            <strong>Kakao Maps</strong> API 키를 <code>.env</code> 파일에 추가하면 실제 지도가 표시됩니다.
+          </div>
+        )}
+
+        {/* 마커 클릭 프리뷰 카드 */}
+        {previewSpot && (
+          <div className="map-preview-card" onClick={e => e.stopPropagation()}>
+            <div className="preview-img">
+              <img src={previewSpot.photos[0]} alt={previewSpot.name} />
+            </div>
+            <div className="preview-body">
+              <div className="preview-tags">
+                {previewSpot.tags.slice(0, 3).map(t => (
+                  <span key={t} className="preview-tag">{t}</span>
+                ))}
+              </div>
+              <h3 className="preview-name">{previewSpot.name}</h3>
+              <p className="preview-addr">{previewSpot.address}</p>
+              <div className="preview-meta">
+                <span>좋아요 {previewSpot.likes.toLocaleString()}</span>
+                <span>·</span>
+                <span>{previewSpot.bestTime}</span>
+              </div>
+            </div>
+            <div className="preview-actions">
+              <button className="preview-detail" onClick={() => { onSelectSpot(previewSpot); setPreviewSpot(null) }}>
+                자세히 보기
+              </button>
+              <button className="preview-close" onClick={() => setPreviewSpot(null)}>✕</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function MockMap({ spots, onSelectSpot }) {
+  return (
+    <div className="mock-map">
+      <div className="mock-map-bg" />
+      <div className="mock-map-label">지도 영역 (Kakao Maps)</div>
+      <div className="mock-markers">
+        {spots.map((spot, i) => {
+          const positions = [
+            { top: '30%', left: '45%' },
+            { top: '55%', left: '46%' },
+            { top: '62%', left: '50%' },
+            { top: '45%', left: '30%' },
+          ]
+          const pos = positions[i] || { top: `${20 + i * 8}%`, left: `${40 + i * 5}%` }
+          return (
+            <button
+              key={spot.id}
+              className="mock-marker"
+              style={pos}
+              onClick={() => onSelectSpot(spot)}
+              title={spot.name}
+            >
+              <span className="marker-dot" />
+              <span className="marker-label">{spot.name}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
