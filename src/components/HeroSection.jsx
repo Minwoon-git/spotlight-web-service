@@ -1,99 +1,184 @@
+import { useEffect, useRef } from 'react'
 import SpotCard from './SpotCard'
 import './HeroSection.css'
+
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll('.reveal')
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) }
+      }),
+      { threshold: 0.12 }
+    )
+    els.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+}
 
 export default function HeroSection({ spots, onExplore, onRegister }) {
   const featured = spots.slice(0, 3)
   const spotCount = spots.length
   const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
+  const scrollRef = useRef(null)
+
+  useScrollReveal()
+
+  const scrollToFeatured = () => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   return (
     <div className="hero-page">
+
+      {/* ── Hero Banner ── */}
       <section className="hero-banner">
-        <div className="hero-overlay" />
+        <div className="hero-bg-orb orb-1" />
+        <div className="hero-bg-orb orb-2" />
+        <div className="hero-bg-orb orb-3" />
+        <div className="hero-noise" />
+
         <div className="hero-content">
-          <div className="hero-badge">숨은 명소를 발견하세요</div>
+
           <h1 className="hero-title">
-            숨은 사진 명소를<br />공유하는 지도 서비스
+            당신의 <span className="gradient-text">숨은 명소</span>를<br />
+            지도에 기록하세요
           </h1>
           <p className="hero-desc">
-            나만 알던 촬영 명소를 지도에 기록하고 공유하세요.<br />
-            당신이 찾은 최고의 순간들을 지도에서 만나보세요.
+            나만 알던 촬영 명소를 지도에 올리고 공유하세요.<br />
+            전국의 숨겨진 포토스팟을 한 곳에서 만나보세요.
           </p>
           <div className="hero-actions">
             <button className="btn-primary" onClick={onExplore}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               지도 탐색하기
             </button>
             <button className="btn-ghost" onClick={onRegister}>
-              스팟 등록하기
+              스팟 등록하기 →
             </button>
           </div>
         </div>
+
         <div className="hero-stats">
           <div className="stat">
-            <span className="stat-num">{spotCount}</span>
+            <span className="stat-num">{spotCount}+</span>
             <span className="stat-label">등록된 스팟</span>
-          </div>
-          <div className="stat-divider" />
-          <div className="stat">
-            <span className="stat-num">1</span>
-            <span className="stat-label">사용자</span>
           </div>
           <div className="stat-divider" />
           <div className="stat">
             <span className="stat-num">{regionCount}개</span>
             <span className="stat-label">지역 커버</span>
           </div>
+          <div className="stat-divider" />
+          <div className="stat">
+            <span className="stat-num">1</span>
+            <span className="stat-label">사용자</span>
+          </div>
+        </div>
+
+        <button className="scroll-indicator" onClick={scrollToFeatured}>
+          <span>스크롤</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </section>
+
+      {/* ── Featured ── */}
+      <section className="featured-section" ref={scrollRef}>
+        <div className="reveal">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">인기 스팟</div>
+              <h2 className="section-title">많은 사랑을 받은 명소</h2>
+              <p className="section-desc">지금 가장 주목받는 촬영 포인트를 확인해보세요</p>
+            </div>
+            <button className="btn-more" onClick={onExplore}>
+              전체 보기
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div className="spot-grid">
+            {featured.map((spot, i) => (
+              <div key={spot.id} className="card-reveal" style={{ animationDelay: `${i * 0.1}s` }}>
+                <SpotCard spot={spot} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="featured-section">
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">인기 스팟</h2>
-            <p className="section-desc">이번 주 가장 많은 사랑을 받은 촬영 명소</p>
+      {/* ── Feature Highlights ── */}
+      <section className="highlights-section reveal">
+        <div className="highlights-inner">
+          <div className="highlight-card purple">
+            <div className="highlight-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <h3>지도로 발견</h3>
+            <p>카카오맵 기반으로 주변 촬영 명소를 한눈에 탐색하세요.</p>
           </div>
-          <button className="btn-more" onClick={onExplore}>전체 보기 →</button>
-        </div>
-        <div className="spot-grid">
-          {featured.map(spot => (
-            <SpotCard key={spot.id} spot={spot} />
-          ))}
-        </div>
-      </section>
-
-      <section className="how-section">
-        <h2 className="section-title center">이렇게 사용하세요</h2>
-        <p className="section-desc center">탐색 → 저장 → 등록의 선순환으로 함께 만들어가는 스팟 지도</p>
-        <div className="how-grid">
-          <div className="how-card">
-            <div className="how-num">01</div>
-            <h3>지도 탐색</h3>
-            <p>숨겨진 사진 명소를 지도에서 발견하고 탐색하세요.</p>
+          <div className="highlight-card blue">
+            <div className="highlight-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <h3>사진 비교</h3>
+            <p>같은 장소를 다양한 구도와 시간대로 비교해보세요.</p>
           </div>
-          <div className="how-arrow">→</div>
-          <div className="how-card">
-            <div className="how-num">02</div>
-            <h3>사진 모아보기</h3>
-            <p>한 장소를 여러 사람이 찍은 다양한 사진과 구도를 비교해보세요.</p>
-          </div>
-          <div className="how-arrow">→</div>
-          <div className="how-card">
-            <div className="how-num">03</div>
+          <div className="highlight-card indigo">
+            <div className="highlight-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
             <h3>나만의 지도</h3>
-            <p>가보고 싶은 스팟을 저장해 나만의 지도로 정리하세요.</p>
-          </div>
-          <div className="how-arrow">→</div>
-          <div className="how-card">
-            <div className="how-num">04</div>
-            <h3>스팟 등록</h3>
-            <p>다녀온 곳의 사진을 올리면 새 스팟으로 지도에 추가됩니다.</p>
+            <p>가보고 싶은 스팟을 저장해 나만의 컬렉션으로 만드세요.</p>
           </div>
         </div>
       </section>
 
+      {/* ── How Section ── */}
+      <section className="how-section">
+        <div className="reveal">
+          <div className="section-eyebrow center">사용 방법</div>
+          <h2 className="section-title center">이렇게 시작하세요</h2>
+          <p className="section-desc center">탐색 → 저장 → 등록의 선순환으로 함께 만들어가는 스팟 지도</p>
+          <div className="how-grid">
+            {[
+              { num: '01', title: '지도 탐색', desc: '지도에서 숨겨진 포토스팟을 발견하고 상세 정보를 확인하세요.' },
+              { num: '02', title: '사진 비교', desc: '한 장소를 여러 구도로 찍은 사진들을 비교해보세요.' },
+              { num: '03', title: '스팟 저장', desc: '가보고 싶은 스팟을 북마크해 나만의 지도로 정리하세요.' },
+              { num: '04', title: '스팟 등록', desc: '다녀온 명소를 직접 올려 모두와 공유하세요.' },
+            ].map((step, i) => (
+              <div key={step.num} className="how-step" style={{ animationDelay: `${i * 0.08}s` }}>
+                <div className="how-num">{step.num}</div>
+                <div className="how-connector" />
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="cta-section reveal">
+        <div className="cta-inner">
+          <div className="cta-bg-orb" />
+          <h2 className="cta-title">지금 바로 시작해보세요</h2>
+          <p className="cta-desc">전국의 숨은 포토스팟이 당신을 기다리고 있어요.</p>
+          <div className="cta-actions">
+            <button className="btn-primary" onClick={onExplore}>지도 탐색하기</button>
+            <button className="cta-btn-ghost" onClick={onRegister}>스팟 등록하기</button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
       <footer className="footer">
-        <span className="footer-logo">SpotLight</span>
-        <span className="footer-copy">© 2025 SpotLight. 숨은 명소를 함께 발견해요.</span>
+        <div className="footer-inner">
+          <div className="footer-left">
+            <span className="footer-logo">SpotLight</span>
+            <span className="footer-tagline">숨은 명소를 함께 발견해요</span>
+          </div>
+          <span className="footer-copy">© 2025 SpotLight. All rights reserved.</span>
+        </div>
       </footer>
     </div>
   )

@@ -60,11 +60,23 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister })
     if (!mapRef.current) return
     const { Map, LatLng, Marker, InfoWindow, event } = window.kakao.maps
 
-    const map = new Map(mapRef.current, {
-      center: new LatLng(37.5665, 126.9780),
-      level: 9,
-    })
+    const saved = JSON.parse(localStorage.getItem('mapState') || 'null')
+    const center = saved
+      ? new LatLng(saved.lat, saved.lng)
+      : new LatLng(37.5665, 126.9780)
+    const level = saved?.level ?? 9
+
+    const map = new Map(mapRef.current, { center, level })
     mapInstance.current = map
+
+    const saveMapState = () => {
+      const c = map.getCenter()
+      localStorage.setItem('mapState', JSON.stringify({
+        lat: c.getLat(), lng: c.getLng(), level: map.getLevel()
+      }))
+    }
+    event.addListener(map, 'dragend', saveMapState)
+    event.addListener(map, 'zoom_changed', saveMapState)
 
     spots.forEach(spot => {
       const pos = new LatLng(spot.lat, spot.lng)
@@ -81,6 +93,8 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister })
       event.addListener(marker, 'mouseout', () => infoWindow.close())
       event.addListener(marker, 'click', () => setPreviewSpot(spot))
     })
+
+    event.addListener(map, 'click', () => setPreviewSpot(null))
 
     setMapReady(true)
   }
@@ -172,7 +186,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister })
       </button>
 
       {/* Map area */}
-      <div className="map-area" onClick={() => setPreviewSpot(null)}>
+      <div className="map-area">
         {KAKAO_KEY ? (
           <div ref={mapRef} className="kakao-map" />
         ) : (
@@ -237,7 +251,7 @@ function MockMap({ spots, onSelectSpot }) {
               key={spot.id}
               className="mock-marker"
               style={pos}
-              onClick={() => onSelectSpot(spot)}
+              onClick={(e) => { e.stopPropagation(); onSelectSpot(spot) }}
               title={spot.name}
             >
               <span className="marker-dot" />
