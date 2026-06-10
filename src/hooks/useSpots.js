@@ -2,26 +2,33 @@ import { useState } from 'react'
 import { mockSpots } from '../data/mockSpots'
 
 const STORAGE_KEY = 'spotlight_user_spots'
+const CONTRIB_KEY = 'spotlight_contributions'
 
 function loadUserSpots() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 function saveUserSpots(userSpots) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userSpots)) } catch {}
+}
+
+function loadContributions() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userSpots))
-  } catch {
-    // localStorage 용량 초과 등 무시
-  }
+    const raw = localStorage.getItem(CONTRIB_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+
+function saveContributions(contribs) {
+  try { localStorage.setItem(CONTRIB_KEY, JSON.stringify(contribs)) } catch {}
 }
 
 export function useSpots() {
   const [userSpots, setUserSpots] = useState(loadUserSpots)
+  const [contributions, setContributions] = useState(loadContributions)
 
   const spots = [...mockSpots, ...userSpots]
 
@@ -50,5 +57,24 @@ export function useSpots() {
     return newSpot
   }
 
-  return { spots, addSpot }
+  const addContribution = (spotId, photo) => {
+    const entry = {
+      id: Date.now(),
+      photo,
+      author: '나',
+      createdAt: new Date().toISOString().split('T')[0],
+    }
+    setContributions(prev => {
+      const updated = {
+        ...prev,
+        [spotId]: [...(prev[spotId] || []), entry],
+      }
+      saveContributions(updated)
+      return updated
+    })
+  }
+
+  const getContributions = (spotId) => contributions[spotId] || []
+
+  return { spots, addSpot, addContribution, getContributions }
 }

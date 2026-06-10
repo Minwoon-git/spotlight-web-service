@@ -120,6 +120,7 @@ function LocationPicker({ onSelect }) {
       })
       mapObjRef.current = map
       markerRef.current = new Marker({ map: null })
+      setTimeout(() => map.relayout(), 100)
 
       event.addListener(map, 'click', (e) => {
         const latlng = e.latLng
@@ -345,7 +346,7 @@ export default function RegisterView({ addSpot, onNavigate }) {
         </div>
 
         <form className="register-layout" onSubmit={handleSubmit}>
-          {/* ── 왼쪽: 사진 ── */}
+          {/* ── 사진 ── */}
           <div className="register-left">
             <p className="section-label">
               사진

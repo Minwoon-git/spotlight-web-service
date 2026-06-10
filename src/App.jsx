@@ -9,7 +9,7 @@ import SpotDetailModal from './components/SpotDetailModal'
 import './App.css'
 
 function App() {
-  const { spots, addSpot } = useSpots()
+  const { spots, addSpot, addContribution, getContributions } = useSpots()
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
   const [savedSpots, setSavedSpots] = useState([1, 3, 5])
@@ -60,6 +60,8 @@ function App() {
           isSaved={savedSpots.includes(selectedSpot.id)}
           onSave={() => handleSaveToggle(selectedSpot.id)}
           onClose={() => setSelectedSpot(null)}
+          contributions={getContributions(selectedSpot.id)}
+          onAddContribution={(photo) => addContribution(selectedSpot.id, photo)}
         />
       )}
     </div>

@@ -29,18 +29,20 @@
   color: var(--text-secondary);
 }
 
-/* ── 2-column ── */
+/* ── 세로 단일 레이아웃 ── */
 .register-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-/* ── 왼쪽: 사진 ── */
+/* ── 사진 영역 ── */
 .register-left {
-  position: sticky;
-  top: calc(var(--navbar-height) + 20px);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
 }
 
 .section-label {
@@ -70,10 +72,10 @@
   border: 2px dashed var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--white);
+  background: var(--bg);
   transition: border-color 0.2s, box-shadow 0.2s;
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 7;
 }
 
 .photo-drop:hover {
@@ -281,11 +283,11 @@
   color: var(--accent);
 }
 
-/* ── 오른쪽: 폼 ── */
+/* ── 폼 영역 ── */
 .register-right {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px;
 }
 
 .form-section {
@@ -691,7 +693,6 @@
 
 /* ── Responsive ── */
 @media (max-width: 780px) {
-  .register-layout { grid-template-columns: 1fr; }
-  .register-left { position: static; }
+  .register-left { padding: 16px; }
   .photo-drop { aspect-ratio: 16 / 9; }
 }
