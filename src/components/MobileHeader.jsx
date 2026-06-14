@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import './MobileHeader.css'
 
 export default function MobileHeader({ onNavigate, onAuthOpen }) {
   const { user, logout } = useAuth() ?? {}
+  const [imgError, setImgError] = useState(false)
+
+  const initial = (user?.displayName || user?.email)?.[0]?.toUpperCase()
+  const showImg = user?.photoURL && !imgError
 
   return (
     <header className="mobile-header">
@@ -13,9 +18,9 @@ export default function MobileHeader({ onNavigate, onAuthOpen }) {
 
       {user ? (
         <button className="mobile-header-user" onClick={logout} aria-label="로그아웃">
-          {user.photoURL
-            ? <img src={user.photoURL} alt="" className="mobile-user-avatar" />
-            : <span className="mobile-user-initial">{(user.displayName || user.email)?.[0]?.toUpperCase()}</span>
+          {showImg
+            ? <img src={user.photoURL} alt="" className="mobile-user-avatar" onError={() => setImgError(true)} />
+            : <span className="mobile-user-initial">{initial}</span>
           }
         </button>
       ) : (
