@@ -110,3 +110,107 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(99,102,241,0.4);
 }
+
+/* ── User ── */
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+
+.user-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Hamburger ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.hamburger:hover { background: var(--border-light); }
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Mobile Menu ── */
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  padding: 8px 16px 16px;
+  border-top: 1px solid var(--border);
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(16px);
+  animation: slideDown 0.15s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mobile-nav-link {
+  background: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 12px 8px;
+  border-radius: var(--radius);
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  border-bottom: 1px solid var(--border-light);
+}
+.mobile-nav-link:last-of-type { border-bottom: none; }
+.mobile-nav-link:hover { background: var(--border-light); color: var(--text); }
+.mobile-nav-link.active { color: var(--accent); font-weight: 700; }
+.mobile-menu-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+}
+.mobile-menu-actions .btn-start { flex: 1; text-align: center; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .navbar { display: none; }
+  .mobile-menu { display: none !important; }
+}

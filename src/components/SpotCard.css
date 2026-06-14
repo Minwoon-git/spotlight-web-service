@@ -141,3 +141,113 @@
   color: var(--text-secondary);
   font-weight: 500;
 }
+
+/* ── Mobile: 가로형 카드 ── */
+@media (max-width: 768px) {
+  .spot-card {
+    display: flex;
+    flex-direction: row;
+    border-radius: var(--radius-lg);
+    height: auto;
+    min-height: 96px;
+  }
+
+  .spot-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+  }
+
+  .spot-card-img-wrap {
+    width: 96px;
+    min-width: 96px;
+    height: auto;
+    flex-shrink: 0;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  .spot-card.compact .spot-card-img-wrap {
+    width: 96px;
+    min-width: 96px;
+  }
+
+  .spot-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .spot-card-img-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spot-card-img-wrap::after { display: none; }
+
+  .spot-card-body {
+    flex: 1;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .spot-tags {
+    margin-bottom: 4px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .spot-tags .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  .spot-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .spot-addr {
+    font-size: 12px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .spot-addr svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  .spot-meta {
+    padding-top: 8px;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: space-between;
+  }
+
+  .spot-likes { font-size: 11px; }
+  .spot-besttime {
+    font-size: 10px;
+    padding: 2px 6px;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .save-btn {
+    top: 8px;
+    right: 8px;
+    font-size: 11px;
+    padding: 4px 9px;
+  }
+}

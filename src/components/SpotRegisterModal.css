@@ -230,6 +230,22 @@
 .btn-submit { background: #10B981; }
 .btn-submit:hover { background: #059669; }
 
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .register-panel {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .register-steps { padding: 14px 16px; }
+  .step-label { display: none; }
+  .register-form { padding: 0 16px 16px; }
+  .register-header { padding: 16px 16px 12px; }
+  .step-nav { justify-content: stretch; }
+  .btn-back, .btn-next, .btn-submit { flex: 1; text-align: center; justify-content: center; }
+}
+
 /* Success state */
 .register-success {
   display: flex;

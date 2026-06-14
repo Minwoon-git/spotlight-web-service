@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import SpotCard from './SpotCard'
+import MobileHeader from './MobileHeader'
 import './HeroSection.css'
 
 function useScrollReveal() {
@@ -16,7 +17,18 @@ function useScrollReveal() {
   }, [])
 }
 
-export default function HeroSection({ spots, onExplore, onRegister }) {
+const QUICK_TAGS = ['#궁궐', '#야경', '#새벽', '#카페', '#숲', '#골목', '#한옥', '#도심', '#바다', '#일몰']
+
+const REGIONS = [
+  { name: '서울', emoji: '🏙️' },
+  { name: '경기', emoji: '🌿' },
+  { name: '부산', emoji: '🌊' },
+  { name: '강원', emoji: '🏔️' },
+  { name: '제주', emoji: '🍊' },
+  { name: '경주', emoji: '🏛️' },
+]
+
+export default function HeroSection({ spots, onExplore, onRegister, onNavigate, onAuthOpen }) {
   const featured = spots.slice(0, 3)
   const spotCount = spots.length
   const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
@@ -33,13 +45,13 @@ export default function HeroSection({ spots, onExplore, onRegister }) {
 
       {/* ── Hero Banner ── */}
       <section className="hero-banner">
+        <MobileHeader onNavigate={onNavigate} onAuthOpen={onAuthOpen} />
         <div className="hero-bg-orb orb-1" />
         <div className="hero-bg-orb orb-2" />
         <div className="hero-bg-orb orb-3" />
         <div className="hero-noise" />
 
         <div className="hero-content">
-
           <h1 className="hero-title">
             당신의 <span className="gradient-text">숨은 명소</span>를<br />
             지도에 기록하세요
@@ -82,6 +94,16 @@ export default function HeroSection({ spots, onExplore, onRegister }) {
         </button>
       </section>
 
+      {/* ── 모바일 전용: 빠른 탐색 태그 ── */}
+      <section className="quick-tags-section mobile-only">
+        <div className="quick-tags-label">빠른 탐색</div>
+        <div className="quick-tags-scroll">
+          {QUICK_TAGS.map(tag => (
+            <button key={tag} className="quick-tag-chip" onClick={onExplore}>{tag}</button>
+          ))}
+        </div>
+      </section>
+
       {/* ── Featured ── */}
       <section className="featured-section" ref={scrollRef}>
         <div className="reveal">
@@ -89,7 +111,7 @@ export default function HeroSection({ spots, onExplore, onRegister }) {
             <div>
               <div className="section-eyebrow">인기 스팟</div>
               <h2 className="section-title">많은 사랑을 받은 명소</h2>
-              <p className="section-desc">지금 가장 주목받는 촬영 포인트를 확인해보세요</p>
+              <p className="section-desc desktop-only">지금 가장 주목받는 촬영 포인트를 확인해보세요</p>
             </div>
             <button className="btn-more" onClick={onExplore}>
               전체 보기
@@ -106,8 +128,26 @@ export default function HeroSection({ spots, onExplore, onRegister }) {
         </div>
       </section>
 
-      {/* ── Feature Highlights ── */}
-      <section className="highlights-section reveal">
+      {/* ── 모바일 전용: 지역별 탐색 ── */}
+      <section className="region-section mobile-only">
+        <div className="section-eyebrow">지역별 탐색</div>
+        <h2 className="section-title">어디로 떠날까요?</h2>
+        <div className="region-grid">
+          {REGIONS.map((r) => {
+            const count = spots.filter(s => s.address.startsWith(r.name)).length
+            return (
+              <button key={r.name} className="region-card" onClick={onExplore}>
+                <span className="region-emoji">{r.emoji}</span>
+                <span className="region-name">{r.name}</span>
+                <span className="region-count">{count}곳</span>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── Feature Highlights (데스크탑만) ── */}
+      <section className="highlights-section reveal desktop-only">
         <div className="highlights-inner">
           <div className="highlight-card purple">
             <div className="highlight-icon">
@@ -133,8 +173,8 @@ export default function HeroSection({ spots, onExplore, onRegister }) {
         </div>
       </section>
 
-      {/* ── How Section ── */}
-      <section className="how-section">
+      {/* ── How Section (데스크탑만) ── */}
+      <section className="how-section desktop-only">
         <div className="reveal">
           <div className="section-eyebrow center">사용 방법</div>
           <h2 className="section-title center">이렇게 시작하세요</h2>
@@ -157,8 +197,8 @@ export default function HeroSection({ spots, onExplore, onRegister }) {
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="cta-section reveal">
+      {/* ── CTA (데스크탑만) ── */}
+      <section className="cta-section reveal desktop-only">
         <div className="cta-inner">
           <div className="cta-bg-orb" />
           <h2 className="cta-title">지금 바로 시작해보세요</h2>

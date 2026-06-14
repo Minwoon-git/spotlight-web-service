@@ -3,3 +3,9 @@
   display: flex;
   flex-direction: column;
 }
+
+@media (max-width: 768px) {
+  .app > *:not(nav.bottom-tab-bar):not(.map-view) {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+}

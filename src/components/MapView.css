@@ -527,3 +527,75 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── Mobile: 바텀시트 UI ── */
+@media (max-width: 768px) {
+  .map-view {
+    flex-direction: column;
+    height: calc(100vh - 68px);
+    position: relative;
+  }
+
+  /* 지도가 전체화면 */
+  .map-area {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* 사이드바 → 하단에서 올라오는 바텀시트 */
+  .map-sidebar {
+    position: absolute;
+    bottom: 68px;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    height: 46vh;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    transform: translateY(0) !important;
+    transition: height 0.35s cubic-bezier(.4,0,.2,1);
+    z-index: 10;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+  }
+
+  .map-sidebar.closed {
+    height: 90px !important;
+    width: 100% !important;
+    transform: translateY(0) !important;
+    overflow: hidden;
+  }
+
+  /* 바텀시트 핸들 */
+  .sidebar-top {
+    border-radius: 20px 20px 0 0;
+    cursor: pointer;
+  }
+
+  .sidebar-top::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 8px auto 10px;
+  }
+
+  /* 토글 버튼 숨김 (핸들로 대체) */
+  .sidebar-toggle { display: none; }
+
+  /* 프리뷰 카드 모바일 */
+  .map-preview-card {
+    width: calc(100% - 32px);
+    top: auto;
+    bottom: calc(46vh + 68px + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .map-sidebar.closed ~ .map-area .map-preview-card {
+    bottom: calc(90px + 68px + 12px);
+  }
+}

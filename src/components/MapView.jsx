@@ -10,7 +10,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister })
   const [mapReady, setMapReady] = useState(false)
   const [activeFilter, setActiveFilter] = useState('전체')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768)
   const [previewSpot, setPreviewSpot] = useState(null)
 
   const filters = ['전체', '일출', '일몰', '야경', '자연', '도심']
@@ -27,6 +27,41 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister })
       spot.tags.some(t => t.includes(searchQuery))
     return matchFilter && matchSearch
   })
+
+  useEffect(() => {
+    if (!mapInstance.current || window.innerWidth > 768) return
+    const panAmount = sidebarOpen ? 80 : -80
+    mapInstance.current.panBy(0, panAmount)
+  }, [sidebarOpen])
+
+  useEffect(() => {
+    if (!mapInstance.current || !window.kakao?.maps) return
+    const timer = setTimeout(() => {
+      const map = mapInstance.current
+      if (!map) return
+      const { LatLng, LatLngBounds } = window.kakao.maps
+      const isMobile = window.innerWidth <= 768
+      const sheetOffset = isMobile && sidebarOpen ? Math.round(window.innerHeight * 0.46 / 2) : 0
+
+      if (!searchQuery && activeFilter === '전체') {
+        const defaultLat = isMobile && sidebarOpen ? 37.52 : 37.5665
+        map.setCenter(new LatLng(defaultLat, 126.9780))
+        map.setLevel(9)
+        return
+      }
+      if (filteredSpots.length === 0) return
+      if (filteredSpots.length === 1) {
+        map.setCenter(new LatLng(filteredSpots[0].lat, filteredSpots[0].lng))
+        map.setLevel(4)
+        if (sheetOffset) map.panBy(0, sheetOffset)
+      } else {
+        const bounds = new LatLngBounds()
+        filteredSpots.forEach(s => bounds.extend(new LatLng(s.lat, s.lng)))
+        map.setBounds(bounds, isMobile ? sheetOffset + 40 : 80)
+      }
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery, activeFilter, filteredSpots, sidebarOpen])
 
   useEffect(() => {
     if (!KAKAO_KEY) return
@@ -104,7 +139,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister })
       {/* Sidebar */}
       <aside className={`map-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
 
-        <div className="sidebar-top">
+        <div className="sidebar-top" onClick={() => setSidebarOpen(v => !v)}>
           <div className="sidebar-title-row">
             <div>
               <h2 className="sidebar-title">스팟 탐색</h2>

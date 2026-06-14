@@ -693,6 +693,25 @@
 
 /* ── Responsive ── */
 @media (max-width: 780px) {
+  .register-page { padding: 20px 16px 16px; }
+  .register-page-header { margin-bottom: 20px; }
+  .register-page-header h1 { font-size: 20px; }
+  .register-page-header p { font-size: 13px; }
+
   .register-left { padding: 16px; }
   .photo-drop { aspect-ratio: 16 / 9; }
+  .photo-thumb-grid { grid-template-columns: repeat(4, 1fr); }
+
+  .form-section { padding: 16px; }
+
+  .location-search { flex-direction: row; }
+  .location-search input { font-size: 14px; }
+  .location-search button { white-space: nowrap; padding: 10px 14px; font-size: 13px; }
+
+  .location-map-wrap { height: 200px; }
+
+  .btn-submit { padding: 14px; font-size: 15px; }
+
+  .success-actions { flex-direction: column; }
+  .btn-outline, .btn-filled { width: 100%; text-align: center; justify-content: center; padding: 13px; }
 }

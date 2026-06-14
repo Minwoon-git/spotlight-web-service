@@ -1,18 +1,22 @@
 import { useState } from 'react'
 import { useSpots } from './hooks/useSpots'
+import { AuthProvider } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
+import BottomTabBar from './components/BottomTabBar'
 import HeroSection from './components/HeroSection'
 import MapView from './components/MapView'
 import MyMapView from './components/MyMapView'
 import RegisterView from './components/RegisterView'
 import SpotDetailModal from './components/SpotDetailModal'
+import AuthModal from './components/AuthModal'
 import './App.css'
 
-function App() {
+function AppInner() {
   const { spots, addSpot, addContribution, getContributions } = useSpots()
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
   const [savedSpots, setSavedSpots] = useState([1, 3, 5])
+  const [authOpen, setAuthOpen] = useState(false)
 
   const handleSaveToggle = (spotId) => {
     setSavedSpots(prev =>
@@ -22,13 +26,16 @@ function App() {
 
   return (
     <div className="app">
-      <Navbar view={view} onNavigate={setView} />
+      <Navbar view={view} onNavigate={setView} onAuthOpen={() => setAuthOpen(true)} />
+      <BottomTabBar view={view} onNavigate={setView} />
 
       {view === 'home' && (
         <HeroSection
           spots={spots}
           onExplore={() => setView('explore')}
           onRegister={() => setView('register')}
+          onNavigate={setView}
+          onAuthOpen={() => setAuthOpen(true)}
         />
       )}
 
@@ -64,8 +71,16 @@ function App() {
           onAddContribution={(photo) => addContribution(selectedSpot.id, photo)}
         />
       )}
+
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
     </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppInner />
+    </AuthProvider>
+  )
+}

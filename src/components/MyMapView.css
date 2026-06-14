@@ -105,3 +105,61 @@
   font-size: 14px;
   color: var(--text-secondary);
 }
+
+/* ── Mobile App UI ── */
+@media (max-width: 768px) {
+  .mymap-page { padding: 20px 16px 16px; }
+
+  .mymap-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  /* 프로필 카드 */
+  .mymap-profile {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 16px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .profile-name { font-size: 18px; color: white; }
+  .profile-sub { font-size: 13px; color: rgba(255,255,255,0.75); }
+
+  /* 통계 가로 배열 */
+  .mymap-stats {
+    display: flex;
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .mymap-stat {
+    flex: 1;
+    padding: 14px 8px;
+    border-right: 1px solid var(--border-light);
+    border-radius: 0;
+  }
+
+  .mymap-stat:last-child { border-right: none; }
+  .mymap-stat-num { font-size: 20px; }
+  .mymap-stat-label { font-size: 11px; }
+
+  .mymap-grid { grid-template-columns: 1fr; gap: 12px; }
+  .mymap-content { min-height: 200px; }
+}

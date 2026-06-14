@@ -1,0 +1,194 @@
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-panel {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  position: relative;
+}
+
+.auth-handle { display: none; }
+
+.auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.4px;
+}
+
+.auth-logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+  flex-shrink: 0;
+}
+
+.auth-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.auth-close:hover { background: var(--border-light); }
+
+/* Tabs */
+.auth-tabs {
+  display: flex;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 9px;
+  border-radius: calc(var(--radius-lg) - 2px);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.auth-tabs button.active {
+  background: var(--white);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Google */
+.auth-google-btn {
+  width: 100%;
+  padding: 11px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+}
+.auth-google-btn:hover { background: var(--surface); border-color: var(--border-light); }
+.auth-google-btn:disabled { opacity: 0.6; }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+/* Form */
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+.auth-field { display: flex; flex-direction: column; gap: 6px; }
+
+.auth-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.auth-field input {
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color 0.15s;
+  outline: none;
+}
+.auth-field input:focus { border-color: var(--accent); }
+.auth-field input::placeholder { color: var(--text-muted); }
+
+.auth-error {
+  font-size: 13px;
+  color: #EF4444;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.auth-submit-btn {
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  font-weight: 700;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-top: 2px;
+}
+.auth-submit-btn:hover { opacity: 0.92; }
+.auth-submit-btn:active { transform: scale(0.98); }
+.auth-submit-btn:disabled { opacity: 0.6; }
+
+/* ── Mobile: 바텀시트 ── */
+@media (max-width: 768px) {
+  .auth-overlay {
+    align-items: flex-end;
+  }
+
+  .auth-panel {
+    border-radius: 20px 20px 0 0;
+    padding: 0 24px 40px;
+    max-width: 100%;
+  }
+
+  .auth-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 12px auto 20px;
+  }
+
+  .auth-close { display: none; }
+}
