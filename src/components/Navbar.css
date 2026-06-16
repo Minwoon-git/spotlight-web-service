@@ -139,6 +139,18 @@
   justify-content: center;
 }
 
+.navbar-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border-radius: var(--radius-full);
+  padding: 4px 10px 4px 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.navbar-user-btn:hover { background: var(--border-light); }
+
 .user-name {
   font-size: 14px;
   font-weight: 600;
