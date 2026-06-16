@@ -1,8 +1,23 @@
+import { useAuth } from '../contexts/AuthContext'
 import SpotCard from './SpotCard'
 import './MyMapView.css'
 
-export default function MyMapView({ spots, savedSpots, onSelectSpot, onUnsave }) {
+export default function MyMapView({ spots, savedSpots, onSelectSpot, onUnsave, onAuthOpen }) {
+  const { user } = useAuth() ?? {}
   const saved = spots.filter(s => savedSpots.includes(s.id))
+
+  if (!user) {
+    return (
+      <div className="mymap-page">
+        <div className="mymap-empty">
+          <div className="empty-circle" />
+          <h3>로그인이 필요해요</h3>
+          <p>로그인하면 저장한 스팟을 한눈에 볼 수 있어요.</p>
+          <button className="btn-auth" onClick={onAuthOpen}>로그인 / 회원가입</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mymap-page">

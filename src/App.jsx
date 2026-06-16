@@ -55,6 +55,7 @@ function AppInner() {
           savedSpots={savedSpots}
           onSelectSpot={setSelectedSpot}
           onUnsave={handleSaveToggle}
+          onAuthOpen={() => setAuthOpen(true)}
         />
       )}
 
