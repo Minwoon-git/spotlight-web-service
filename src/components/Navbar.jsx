@@ -20,6 +20,7 @@ export default function Navbar({ view, onNavigate, onAuthOpen }) {
           <button className={`nav-link ${view === 'explore' ? 'active' : ''}`} onClick={() => navigate('explore')}>탐색</button>
           <button className={`nav-link ${view === 'mymap' ? 'active' : ''}`} onClick={() => navigate('mymap')}>내 지도</button>
           <button className={`nav-link ${view === 'register' ? 'active' : ''}`} onClick={() => navigate('register')}>스팟 등록</button>
+          <button className={`nav-link ${view === 'mypage' ? 'active' : ''}`} onClick={() => navigate('mypage')}>마이페이지</button>
         </div>
 
         <div className="navbar-actions">
@@ -50,6 +51,7 @@ export default function Navbar({ view, onNavigate, onAuthOpen }) {
           <button className={`mobile-nav-link ${view === 'explore' ? 'active' : ''}`} onClick={() => navigate('explore')}>탐색</button>
           <button className={`mobile-nav-link ${view === 'mymap' ? 'active' : ''}`} onClick={() => navigate('mymap')}>내 지도</button>
           <button className={`mobile-nav-link ${view === 'register' ? 'active' : ''}`} onClick={() => navigate('register')}>스팟 등록</button>
+          <button className={`mobile-nav-link ${view === 'mypage' ? 'active' : ''}`} onClick={() => navigate('mypage')}>마이페이지</button>
           <div className="mobile-menu-actions">
             {user
               ? <button className="btn-login" onClick={logout}>로그아웃</button>

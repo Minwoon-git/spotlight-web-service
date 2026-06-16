@@ -6,6 +6,7 @@ import BottomTabBar from './components/BottomTabBar'
 import HeroSection from './components/HeroSection'
 import MapView from './components/MapView'
 import MyMapView from './components/MyMapView'
+import MyPage from './components/MyPage'
 import RegisterView from './components/RegisterView'
 import SpotDetailModal from './components/SpotDetailModal'
 import AuthModal from './components/AuthModal'
@@ -54,6 +55,15 @@ function AppInner() {
           savedSpots={savedSpots}
           onSelectSpot={setSelectedSpot}
           onUnsave={handleSaveToggle}
+        />
+      )}
+
+      {view === 'mypage' && (
+        <MyPage
+          spots={spots}
+          onSelectSpot={setSelectedSpot}
+          onAuthOpen={() => setAuthOpen(true)}
+          onNavigate={setView}
         />
       )}
 
