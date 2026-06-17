@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSpots } from './hooks/useSpots'
+import { useSavedSpots } from './hooks/useSavedSpots'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import BottomTabBar from './components/BottomTabBar'
@@ -15,16 +16,10 @@ import './App.css'
 function AppInner() {
   const { user } = useAuth() ?? {}
   const { spots, addSpot, addContribution, getContributions } = useSpots(user)
+  const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
-  const [savedSpots, setSavedSpots] = useState([1, 3, 5])
   const [authOpen, setAuthOpen] = useState(false)
-
-  const handleSaveToggle = (spotId) => {
-    setSavedSpots(prev =>
-      prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId]
-    )
-  }
 
   return (
     <div className="app">
