@@ -1,40 +1,31 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import {
+  collection, addDoc, onSnapshot,
+  query, orderBy, serverTimestamp,
+} from 'firebase/firestore'
+import { db } from '../firebase'
 import { mockSpots } from '../data/mockSpots'
 
-const STORAGE_KEY = 'spotlight_user_spots'
-const CONTRIB_KEY = 'spotlight_contributions'
+export function useSpots(user) {
+  const [userSpots, setUserSpots] = useState([])
+  const [contributions, setContributions] = useState({})
 
-function loadUserSpots() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch { return [] }
-}
+  useEffect(() => {
+    const q = query(collection(db, 'spots'), orderBy('createdAt', 'desc'))
+    const unsub = onSnapshot(q, snapshot => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      setUserSpots(data)
+    })
+    return unsub
+  }, [])
 
-function saveUserSpots(userSpots) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userSpots)) } catch {}
-}
+  const spots = [
+    ...mockSpots,
+    ...userSpots.filter(s => !mockSpots.some(m => m.id === s.id)),
+  ]
 
-function loadContributions() {
-  try {
-    const raw = localStorage.getItem(CONTRIB_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch { return {} }
-}
-
-function saveContributions(contribs) {
-  try { localStorage.setItem(CONTRIB_KEY, JSON.stringify(contribs)) } catch {}
-}
-
-export function useSpots() {
-  const [userSpots, setUserSpots] = useState(loadUserSpots)
-  const [contributions, setContributions] = useState(loadContributions)
-
-  const spots = [...mockSpots, ...userSpots]
-
-  const addSpot = (data) => {
+  const addSpot = async (data) => {
     const newSpot = {
-      id: Date.now(),
       name: data.name,
       address: data.address,
       lat: data.lat,
@@ -45,33 +36,26 @@ export function useSpots() {
       bestTime: data.bestTime,
       likes: 0,
       saves: 0,
-      author: '나',
-      createdAt: new Date().toISOString().split('T')[0],
+      author: user?.displayName || user?.email?.split('@')[0] || '익명',
+      authorId: user?.uid || null,
+      createdAt: serverTimestamp(),
       isUserAdded: true,
     }
-    setUserSpots(prev => {
-      const updated = [...prev, newSpot]
-      saveUserSpots(updated)
-      return updated
-    })
-    return newSpot
+    const docRef = await addDoc(collection(db, 'spots'), newSpot)
+    return { id: docRef.id, ...newSpot }
   }
 
   const addContribution = (spotId, photo) => {
     const entry = {
       id: Date.now(),
       photo,
-      author: '나',
+      author: user?.displayName || '익명',
       createdAt: new Date().toISOString().split('T')[0],
     }
-    setContributions(prev => {
-      const updated = {
-        ...prev,
-        [spotId]: [...(prev[spotId] || []), entry],
-      }
-      saveContributions(updated)
-      return updated
-    })
+    setContributions(prev => ({
+      ...prev,
+      [spotId]: [...(prev[spotId] || []), entry],
+    }))
   }
 
   const getContributions = (spotId) => contributions[spotId] || []

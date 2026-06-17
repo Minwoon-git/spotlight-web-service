@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useSpots } from './hooks/useSpots'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import BottomTabBar from './components/BottomTabBar'
 import HeroSection from './components/HeroSection'
@@ -13,7 +13,8 @@ import AuthModal from './components/AuthModal'
 import './App.css'
 
 function AppInner() {
-  const { spots, addSpot, addContribution, getContributions } = useSpots()
+  const { user } = useAuth() ?? {}
+  const { spots, addSpot, addContribution, getContributions } = useSpots(user)
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
   const [savedSpots, setSavedSpots] = useState([1, 3, 5])
