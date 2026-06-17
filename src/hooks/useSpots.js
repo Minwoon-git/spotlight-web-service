@@ -4,25 +4,19 @@ import {
   query, orderBy, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../firebase'
-import { mockSpots } from '../data/mockSpots'
 
 export function useSpots(user) {
-  const [userSpots, setUserSpots] = useState([])
+  const [spots, setSpots] = useState([])
   const [contributions, setContributions] = useState({})
 
   useEffect(() => {
     const q = query(collection(db, 'spots'), orderBy('createdAt', 'desc'))
     const unsub = onSnapshot(q, snapshot => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setUserSpots(data)
+      setSpots(data)
     })
     return unsub
   }, [])
-
-  const spots = [
-    ...mockSpots,
-    ...userSpots.filter(s => !mockSpots.some(m => m.id === s.id)),
-  ]
 
   const addSpot = async (data) => {
     const newSpot = {
@@ -60,5 +54,7 @@ export function useSpots(user) {
 
   const getContributions = (spotId) => contributions[spotId] || []
 
-  return { spots, addSpot, addContribution, getContributions }
+  const mySpots = user ? spots.filter(s => s.authorId === user.uid) : []
+
+  return { spots, mySpots, addSpot, addContribution, getContributions }
 }

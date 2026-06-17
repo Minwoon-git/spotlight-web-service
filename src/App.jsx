@@ -15,7 +15,7 @@ import './App.css'
 
 function AppInner() {
   const { user } = useAuth() ?? {}
-  const { spots, addSpot, addContribution, getContributions } = useSpots(user)
+  const { spots, mySpots, addSpot, addContribution, getContributions } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
@@ -57,7 +57,7 @@ function AppInner() {
 
       {view === 'mypage' && (
         <MyPage
-          spots={spots}
+          mySpots={mySpots}
           onSelectSpot={setSelectedSpot}
           onAuthOpen={() => setAuthOpen(true)}
           onNavigate={setView}
@@ -65,7 +65,13 @@ function AppInner() {
       )}
 
       {view === 'register' && (
-        <RegisterView addSpot={addSpot} onNavigate={setView} />
+        user
+          ? <RegisterView addSpot={addSpot} onNavigate={setView} />
+          : <div className="auth-required">
+              <h2>로그인이 필요해요</h2>
+              <p>스팟을 등록하려면 로그인하세요.</p>
+              <button className="btn-primary-center" onClick={() => setAuthOpen(true)}>로그인 / 회원가입</button>
+            </div>
       )}
 
       {selectedSpot && (

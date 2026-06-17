@@ -2,10 +2,8 @@ import { useAuth } from '../contexts/AuthContext'
 import SpotCard from './SpotCard'
 import './MyPage.css'
 
-export default function MyPage({ spots, onSelectSpot, onAuthOpen, onNavigate }) {
+export default function MyPage({ mySpots = [], onSelectSpot, onAuthOpen, onNavigate }) {
   const { user, logout } = useAuth() ?? {}
-
-  const mySpots = spots.filter(s => s.isUserAdded)
 
   if (!user) {
     return (
