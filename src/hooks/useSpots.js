@@ -4,19 +4,25 @@ import {
   query, orderBy, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../firebase'
+import { mockSpots } from '../data/mockSpots'
 
 export function useSpots(user) {
-  const [spots, setSpots] = useState([])
+  const [firestoreSpots, setFirestoreSpots] = useState([])
   const [contributions, setContributions] = useState({})
 
   useEffect(() => {
+    if (!user) return
     const q = query(collection(db, 'spots'), orderBy('createdAt', 'desc'))
     const unsub = onSnapshot(q, snapshot => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      setSpots(data)
+      setFirestoreSpots(data)
     })
     return unsub
-  }, [])
+  }, [user])
+
+  const spots = user
+    ? [...mockSpots, ...firestoreSpots]
+    : mockSpots
 
   const addSpot = async (data) => {
     const newSpot = {
