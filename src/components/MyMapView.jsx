@@ -1,5 +1,6 @@
 import { useAuth } from '../contexts/AuthContext'
 import SpotCard from './SpotCard'
+import AuthRequired from './AuthRequired'
 import './MyMapView.css'
 
 export default function MyMapView({ spots, savedSpots, onSelectSpot, onUnsave, onAuthOpen }) {
@@ -8,14 +9,12 @@ export default function MyMapView({ spots, savedSpots, onSelectSpot, onUnsave, o
 
   if (!user) {
     return (
-      <div className="mymap-page">
-        <div className="mymap-empty">
-          <div className="empty-circle" />
-          <h3>로그인이 필요해요</h3>
-          <p>로그인하면 저장한 스팟을 한눈에 볼 수 있어요.</p>
-          <button className="btn-auth" onClick={onAuthOpen}>로그인 / 회원가입</button>
-        </div>
-      </div>
+      <AuthRequired
+        icon="🗺️"
+        title="로그인이 필요해요"
+        description="로그인하면 저장한 스팟을 한눈에 볼 수 있어요."
+        onAuthOpen={onAuthOpen}
+      />
     )
   }
 

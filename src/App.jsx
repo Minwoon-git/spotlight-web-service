@@ -11,6 +11,7 @@ import MyPage from './components/MyPage'
 import RegisterView from './components/RegisterView'
 import SpotDetailModal from './components/SpotDetailModal'
 import AuthModal from './components/AuthModal'
+import AuthRequired from './components/AuthRequired'
 import './App.css'
 
 function AppInner() {
@@ -69,11 +70,12 @@ function AppInner() {
       {view === 'register' && (
         user
           ? <RegisterView addSpot={addSpot} onNavigate={setView} />
-          : <div className="auth-required">
-              <h2>로그인이 필요해요</h2>
-              <p>스팟을 등록하려면 로그인하세요.</p>
-              <button className="btn-primary-center" onClick={() => setAuthOpen(true)}>로그인 / 회원가입</button>
-            </div>
+          : <AuthRequired
+              icon="📍"
+              title="로그인이 필요해요"
+              description="스팟을 등록하려면 로그인하세요."
+              onAuthOpen={() => setAuthOpen(true)}
+            />
       )}
 
       {selectedSpot && (
