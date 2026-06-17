@@ -28,8 +28,8 @@ const REGIONS = [
   { name: '경주', emoji: '🏛️' },
 ]
 
-export default function HeroSection({ spots, onExplore, onRegister, onNavigate, onAuthOpen }) {
-  const featured = spots.slice(0, 3)
+export default function HeroSection({ spots, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
+  const featured = [...spots].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, 3)
   const spotCount = spots.length
   const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
   const scrollRef = useRef(null)
@@ -121,7 +121,7 @@ export default function HeroSection({ spots, onExplore, onRegister, onNavigate, 
           <div className="spot-grid">
             {featured.map((spot, i) => (
               <div key={spot.id} className="card-reveal" style={{ animationDelay: `${i * 0.1}s` }}>
-                <SpotCard spot={spot} />
+                <SpotCard spot={spot} onClick={() => onSelectSpot(spot)} />
               </div>
             ))}
           </div>

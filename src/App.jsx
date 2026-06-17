@@ -34,6 +34,7 @@ function AppInner() {
           onRegister={() => setView('register')}
           onNavigate={setView}
           onAuthOpen={() => setAuthOpen(true)}
+          onSelectSpot={setSelectedSpot}
         />
       )}
 
