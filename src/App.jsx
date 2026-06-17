@@ -42,6 +42,8 @@ function AppInner() {
           onSelectSpot={setSelectedSpot}
           savedSpots={savedSpots}
           onRegister={() => setView('register')}
+          user={user}
+          onAuthOpen={() => setAuthOpen(true)}
         />
       )}
 
