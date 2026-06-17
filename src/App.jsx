@@ -87,6 +87,7 @@ function AppInner() {
           onClose={() => setSelectedSpot(null)}
           contributions={getContributions(selectedSpot.id)}
           onAddContribution={(photo) => addContribution(selectedSpot.id, photo)}
+          onAuthOpen={() => setAuthOpen(true)}
         />
       )}
 

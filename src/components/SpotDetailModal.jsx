@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 import './SpotDetailModal.css'
 
 function compressImage(file, maxWidth = 1920, quality = 0.85) {
@@ -19,9 +20,10 @@ function compressImage(file, maxWidth = 1920, quality = 0.85) {
   })
 }
 
-export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contributions = [], onAddContribution }) {
+export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contributions = [], onAddContribution, onAuthOpen }) {
+  const { user } = useAuth() ?? {}
   const [activePhoto, setActivePhoto] = useState(0)
-  const [activeSource, setActiveSource] = useState('original') // 'original' | 'community'
+  const [activeSource, setActiveSource] = useState('original')
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef(null)
 
@@ -80,10 +82,14 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
           >
             커뮤니티 사진 <span className="tab-count">{allCommunity.length}</span>
           </button>
-          <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
-            {uploading ? '업로드 중...' : '+ 내 사진 추가'}
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} hidden />
-          </label>
+          {user ? (
+            <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
+              {uploading ? '업로드 중...' : '+ 내 사진 추가'}
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} hidden />
+            </label>
+          ) : (
+            <button className="btn-upload-photo" onClick={onAuthOpen}>+ 내 사진 추가</button>
+          )}
         </div>
 
         {/* 갤러리 */}
@@ -116,10 +122,14 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
             <div className="gallery-empty">
               <p>아직 커뮤니티 사진이 없어요</p>
               <p>이 장소에서 찍은 사진을 올려보세요!</p>
+              {user ? (
               <label className="btn-upload-empty">
                 사진 추가하기
                 <input type="file" accept="image/*" onChange={handleFileChange} hidden />
               </label>
+            ) : (
+              <button className="btn-upload-empty" onClick={onAuthOpen}>로그인하고 사진 추가하기</button>
+            )}
             </div>
           )}
         </div>
