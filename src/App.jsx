@@ -16,7 +16,7 @@ import './App.css'
 
 function AppInner() {
   const { user } = useAuth() ?? {}
-  const { spots, mySpots, addSpot, addContribution, getContributions } = useSpots(user)
+  const { spots, mySpots, totalCount, addSpot, addContribution, getContributions } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
@@ -30,6 +30,7 @@ function AppInner() {
       {view === 'home' && (
         <HeroSection
           spots={spots}
+          totalCount={totalCount}
           onExplore={() => setView('explore')}
           onRegister={() => setView('register')}
           onNavigate={setView}

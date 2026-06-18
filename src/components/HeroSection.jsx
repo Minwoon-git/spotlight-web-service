@@ -28,9 +28,9 @@ const REGIONS = [
   { name: '경주', emoji: '🏛️' },
 ]
 
-export default function HeroSection({ spots, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
+export default function HeroSection({ spots, totalCount, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
   const featured = [...spots].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, 3)
-  const spotCount = spots.length
+  const spotCount = totalCount ?? spots.length
   const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
   const scrollRef = useRef(null)
 
