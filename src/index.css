@@ -57,7 +57,7 @@ a { text-decoration: none; color: inherit; }
   background: rgba(255,255,255,0.1);
   color: white;
   border-radius: var(--radius-full);
-  padding: 12px 28px;
+  padding: 12px 24px;
   font-size: 14px;
   font-weight: 600;
   border: 1.5px solid rgba(255,255,255,0.3);
