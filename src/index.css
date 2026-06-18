@@ -66,9 +66,7 @@ a { text-decoration: none; color: inherit; }
   white-space: nowrap;
 }
 .btn-primary:hover {
-  background: rgba(255,255,255,0.2);
   transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.5);
 }
 .btn-primary:active { transform: translateY(0); }
 
