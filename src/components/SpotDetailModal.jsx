@@ -146,7 +146,9 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
           </div>
           <div className="info-row">
             <span className="info-label">등록일</span>
-            <span className="info-value">{spot.createdAt}</span>
+            <span className="info-value">
+              {spot.createdAt?.toDate ? spot.createdAt.toDate().toLocaleDateString('ko-KR') : spot.createdAt}
+            </span>
           </div>
         </div>
 
@@ -156,8 +158,8 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
 
         <div className="modal-footer">
           <div className="modal-stats">
-            <span>좋아요 {spot.likes.toLocaleString()}</span>
-            <span>저장 {spot.saves.toLocaleString()}</span>
+            <span>좋아요 {(spot.likes ?? 0).toLocaleString()}</span>
+            <span>저장 {(spot.saves ?? 0).toLocaleString()}</span>
             <span>커뮤니티 사진 {allCommunity.length}장</span>
           </div>
         </div>
