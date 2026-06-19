@@ -1,0 +1,253 @@
+.spot-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.spot-card:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-6px);
+  border-color: transparent;
+}
+
+.spot-card.compact .spot-card-img-wrap {
+  height: 140px;
+}
+
+.spot-card-img-wrap {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: #E2E8F0;
+}
+
+.spot-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spot-card:hover .spot-card-img {
+  transform: scale(1.07);
+}
+
+/* Gradient overlay on image */
+.spot-card-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.spot-card:hover .spot-card-img-wrap::after {
+  opacity: 1;
+}
+
+.save-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.95);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+  z-index: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.save-btn.saved {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+}
+
+.save-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
+.save-btn.saved:hover {
+  box-shadow: 0 6px 16px rgba(99,102,241,0.5);
+  transform: scale(1.05);
+}
+
+.spot-card-body {
+  padding: 18px 20px 20px;
+}
+
+.spot-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.spot-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 5px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.spot-addr {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.spot-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+  padding-top: 12px;
+}
+
+.spot-likes {
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.spot-besttime {
+  font-size: 11px;
+  background: var(--border-light);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ── Mobile: 가로형 카드 ── */
+@media (max-width: 768px) {
+  .spot-card {
+    display: flex;
+    flex-direction: row;
+    border-radius: var(--radius-lg);
+    height: auto;
+    min-height: 96px;
+  }
+
+  .spot-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+  }
+
+  .spot-card-img-wrap {
+    width: 96px;
+    min-width: 96px;
+    height: auto;
+    flex-shrink: 0;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  .spot-card.compact .spot-card-img-wrap {
+    width: 96px;
+    min-width: 96px;
+  }
+
+  .spot-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .spot-card-img-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spot-card-img-wrap::after { display: none; }
+
+  .spot-card-body {
+    flex: 1;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .spot-tags {
+    margin-bottom: 4px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .spot-tags .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  .spot-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .spot-addr {
+    font-size: 12px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .spot-addr svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  .spot-meta {
+    padding-top: 8px;
+    flex-wrap: nowrap;
+    gap: 0;
+    justify-content: space-between;
+  }
+
+  .spot-likes { font-size: 11px; }
+  .spot-besttime {
+    font-size: 10px;
+    padding: 2px 6px;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .save-btn {
+    top: 8px;
+    right: 8px;
+    font-size: 11px;
+    padding: 4px 9px;
+  }
+}

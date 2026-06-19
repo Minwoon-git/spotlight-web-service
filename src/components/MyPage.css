@@ -1,0 +1,235 @@
+.mypage {
+  flex: 1;
+  padding: 40px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mypage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mypage-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mypage-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mypage-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.mypage-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.mypage-email {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.mypage-stats {
+  display: flex;
+  gap: 32px;
+}
+
+.mypage-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mypage-stat-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.mypage-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mypage-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.mypage-section-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.btn-register {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.mypage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.mypage-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+}
+
+.mypage-empty h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.mypage-empty p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mypage-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-logout {
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 20px;
+  cursor: pointer;
+}
+
+.mypage-login {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  gap: 12px;
+}
+
+.mypage-login-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.mypage-login h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mypage-login p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .mypage { padding: 20px 16px 16px; }
+
+  .mypage-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .mypage-profile {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .mypage-avatar, .mypage-avatar-placeholder {
+    width: 52px;
+    height: 52px;
+    font-size: 16px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .mypage-name { font-size: 18px; color: white; }
+  .mypage-email { font-size: 13px; color: rgba(255,255,255,0.75); }
+
+  .mypage-stats {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    gap: 0;
+  }
+
+  .mypage-stat {
+    flex: 1;
+    padding: 14px 8px;
+    border-right: 1px solid var(--border-light);
+    border-radius: 0;
+  }
+
+  .mypage-stat:last-child { border-right: none; }
+  .mypage-stat-num { font-size: 20px; }
+  .mypage-stat-label { font-size: 11px; }
+
+  .mypage-grid { grid-template-columns: 1fr; gap: 12px; }
+}

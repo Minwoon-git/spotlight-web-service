@@ -1,0 +1,177 @@
+.mymap-page {
+  flex: 1;
+  padding: 40px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.mymap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mymap-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.profile-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.mymap-stats {
+  display: flex;
+  gap: 32px;
+}
+
+.mymap-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mymap-stat-num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.mymap-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mymap-content { min-height: 300px; }
+
+.mymap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.mymap-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--border-light);
+  border: 2px solid var(--border);
+  margin: 0 auto 20px;
+}
+
+.btn-auth {
+  margin-top: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mymap-empty h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.mymap-empty p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ── Mobile App UI ── */
+@media (max-width: 768px) {
+  .mymap-page { padding: 20px 16px 16px; }
+
+  .mymap-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  /* 프로필 카드 */
+  .mymap-profile {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 16px;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .profile-name { font-size: 18px; color: white; }
+  .profile-sub { font-size: 13px; color: rgba(255,255,255,0.75); }
+
+  /* 통계 가로 배열 */
+  .mymap-stats {
+    display: flex;
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .mymap-stat {
+    flex: 1;
+    padding: 14px 8px;
+    border-right: 1px solid var(--border-light);
+    border-radius: 0;
+  }
+
+  .mymap-stat:last-child { border-right: none; }
+  .mymap-stat-num { font-size: 20px; }
+  .mymap-stat-label { font-size: 11px; }
+
+  .mymap-grid { grid-template-columns: 1fr; gap: 12px; }
+  .mymap-content { min-height: 200px; }
+}
