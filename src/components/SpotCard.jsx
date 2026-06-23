@@ -28,7 +28,7 @@ export default function SpotCard({ spot, onClick, isSaved, onSave, compact }) {
         <h3 className="spot-name">{spot.name}</h3>
         <p className="spot-addr">{spot.address}</p>
         <div className="spot-meta">
-          <span className="spot-likes">좋아요 {(spot.likes ?? 0).toLocaleString()}</span>
+          <span className="spot-likes">좋아요 {Math.max(0, spot.likes ?? 0).toLocaleString()}</span>
           <span className="spot-besttime">{spot.bestTime}</span>
         </div>
       </div>
