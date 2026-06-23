@@ -28,8 +28,11 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
   const [liked, setLiked] = useState(isLiked)
   const [likeCount, setLikeCount] = useState(() => {
     const base = spot.likes ?? 0
-    // Firestore 스팟의 likes에는 내 좋아요가 이미 반영돼 있고, mock 스팟은 미반영
-    return typeof spot.id === 'string' ? base : base + (isLiked ? 1 : 0)
+    if (typeof spot.id === 'string') {
+      // Firestore 스팟: likes 카운트가 isLiked를 반영 못한 경우 보정
+      return isLiked ? Math.max(base, 1) : base
+    }
+    return base + (isLiked ? 1 : 0)
   })
   const fileRef = useRef(null)
 
@@ -37,7 +40,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
     if (!user) { onAuthOpen(); return }
     const next = !liked
     setLiked(next)
-    setLikeCount(c => c + (next ? 1 : -1))
+    setLikeCount(c => Math.max(0, c + (next ? 1 : -1)))
     onLike()
   }
 
