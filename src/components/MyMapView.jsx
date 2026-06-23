@@ -4,7 +4,7 @@ import SpotCard from './SpotCard'
 import AuthRequired from './AuthRequired'
 import './MyMapView.css'
 
-export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, onUnsave, onAuthOpen, onNavigate }) {
+export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, onUnsave, onDelete, onAuthOpen, onNavigate }) {
   const { user } = useAuth() ?? {}
   const [tab, setTab] = useState('saved')
   const saved = spots.filter(s => savedSpots.includes(s.id))
@@ -93,11 +93,21 @@ export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, on
           ) : (
             <div className="mymap-grid">
               {mySpots.map(spot => (
-                <SpotCard
-                  key={spot.id}
-                  spot={spot}
-                  onClick={() => onSelectSpot(spot)}
-                />
+                <div key={spot.id} className="myspot-item">
+                  <SpotCard
+                    spot={spot}
+                    onClick={() => onSelectSpot(spot)}
+                  />
+                  <button
+                    className="btn-delete-spot"
+                    onClick={e => {
+                      e.stopPropagation()
+                      if (window.confirm(`"${spot.name}"을 삭제할까요?`)) onDelete(spot.id)
+                    }}
+                  >
+                    삭제
+                  </button>
+                </div>
               ))}
             </div>
           )

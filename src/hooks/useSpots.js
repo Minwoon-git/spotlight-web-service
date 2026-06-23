@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   collection, addDoc, onSnapshot,
-  query, orderBy, serverTimestamp, getCountFromServer, doc, getDoc,
+  query, orderBy, serverTimestamp, getCountFromServer, doc, getDoc, deleteDoc,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { mockSpots } from '../data/mockSpots'
@@ -71,7 +71,12 @@ export function useSpots(user) {
 
   const getContributions = (spotId) => contributions[spotId] || []
 
+  const deleteSpot = async (spotId) => {
+    if (typeof spotId !== 'string') return
+    await deleteDoc(doc(db, 'spots', spotId))
+  }
+
   const mySpots = user ? spots.filter(s => s.authorId === user.uid) : []
 
-  return { spots, mySpots, totalCount, userCount, addSpot, addContribution, getContributions }
+  return { spots, mySpots, totalCount, userCount, addSpot, deleteSpot, addContribution, getContributions }
 }

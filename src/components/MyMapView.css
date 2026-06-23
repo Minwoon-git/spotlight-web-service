@@ -121,6 +121,28 @@
   gap: 20px;
 }
 
+.myspot-item {
+  position: relative;
+}
+
+.btn-delete-spot {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  background: none;
+  border: 1px solid #FCA5A5;
+  border-radius: var(--radius);
+  color: #EF4444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-delete-spot:hover {
+  background: #FEF2F2;
+}
+
 .mymap-empty {
   text-align: center;
   padding: 80px 20px;

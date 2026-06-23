@@ -17,7 +17,7 @@ import './App.css'
 
 function AppInner() {
   const { user } = useAuth() ?? {}
-  const { spots, mySpots, totalCount, userCount, addSpot, addContribution, getContributions } = useSpots(user)
+  const { spots, mySpots, totalCount, userCount, addSpot, deleteSpot, addContribution, getContributions } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const { likedSpots, handleLikeToggle } = useLikedSpots(user)
   const [view, setView] = useState('home')
@@ -60,6 +60,7 @@ function AppInner() {
           savedSpots={savedSpots}
           onSelectSpot={setSelectedSpot}
           onUnsave={handleSaveToggle}
+          onDelete={deleteSpot}
           onAuthOpen={() => setAuthOpen(true)}
           onNavigate={setView}
         />
