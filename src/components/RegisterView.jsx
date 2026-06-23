@@ -345,107 +345,99 @@ export default function RegisterView({ addSpot, onNavigate }) {
           <p>나만 알던 촬영 명소를 지도에 추가해 모두와 공유하세요.</p>
         </div>
 
-        <form className="register-layout" onSubmit={handleSubmit}>
-          {/* ── 사진 ── */}
-          <div className="register-left">
-            <p className="section-label">
-              사진
-              {form.photos.length > 0 && (
-                <span className="photo-count">{form.photos.length} / 5</span>
-              )}
-            </p>
-
-            {/* 대표 사진 큰 영역 */}
-            {form.photos.length === 0 ? (
-              <label
-                className="photo-drop"
-                onDragOver={e => e.preventDefault()}
-                onDrop={handleDrop}
-              >
-                <div className="photo-empty">
-                  <div className="photo-empty-icon" />
-                  <p className="photo-empty-title">사진 업로드</p>
-                  <p className="photo-empty-hint">클릭하거나 드래그해서 추가<br/>최대 5장 · JPG · PNG · WEBP</p>
-                </div>
-                <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
-              </label>
-            ) : (
-              <div className="photo-main-wrap">
-                <img src={form.photos[0].preview} alt="main" className="photo-main" />
-                <div className="photo-main-badge">대표</div>
-              </div>
-            )}
-
-            {/* 썸네일 그리드 */}
-            {form.photos.length > 0 && (
-              <div className="photo-thumb-grid">
-                {form.photos.map((p, i) => (
-                  <div key={i} className={`photo-thumb-item ${i === 0 ? 'is-main' : ''}`}>
-                    <img src={p.preview} alt={`photo-${i}`} />
-                    <div className="thumb-actions">
-                      {i !== 0 && (
-                        <button type="button" className="thumb-btn" onClick={() => moveFirst(i)} title="대표로 설정">
-                          대표
-                        </button>
-                      )}
-                      <button type="button" className="thumb-remove" onClick={() => removePhoto(i)}>✕</button>
-                    </div>
-                  </div>
-                ))}
-                {form.photos.length < 5 && (
-                  <label className="photo-thumb-add">
-                    <span>+</span>
-                    <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
-                  </label>
+        <form onSubmit={handleSubmit}>
+          {/* ── 상단: 사진 | 기본정보 반반 ── */}
+          <div className="register-top">
+            <div className="register-left">
+              <p className="section-label">
+                사진
+                {form.photos.length > 0 && (
+                  <span className="photo-count">{form.photos.length} / 5</span>
                 )}
-              </div>
-            )}
-          </div>
+              </p>
 
-          {/* ── 오른쪽: 정보 ── */}
-          <div className="register-right">
+              {form.photos.length === 0 ? (
+                <label
+                  className="photo-drop"
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={handleDrop}
+                >
+                  <div className="photo-empty">
+                    <div className="photo-empty-icon" />
+                    <p className="photo-empty-title">사진 업로드</p>
+                    <p className="photo-empty-hint">클릭하거나 드래그해서 추가<br/>최대 5장 · JPG · PNG · WEBP</p>
+                  </div>
+                  <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
+                </label>
+              ) : (
+                <div className="photo-main-wrap">
+                  <img src={form.photos[0].preview} alt="main" className="photo-main" />
+                  <div className="photo-main-badge">대표</div>
+                </div>
+              )}
 
-            {/* 기본 정보 */}
-            <div className="form-section">
-              <p className="section-label">기본 정보</p>
-              <div className="form-group">
-                <label>스팟 이름 <span className="required">*</span></label>
-                <input
-                  type="text"
-                  placeholder="예: 북한산 소나무 숲 전망대"
-                  value={form.name}
-                  onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(v => ({ ...v, name: '' })) }}
-                />
-                {errors.name && <span className="error-msg">⚠ {errors.name}</span>}
-              </div>
-              <div className="form-group">
-                <label>최적 촬영 시간</label>
-                <input
-                  type="text"
-                  placeholder="예: 일출 직후 (06:00~07:30), 안개 낀 날 아침"
-                  value={form.bestTime}
-                  onChange={e => setForm(f => ({ ...f, bestTime: e.target.value }))}
-                />
-              </div>
+              {form.photos.length > 0 && (
+                <div className="photo-thumb-grid">
+                  {form.photos.map((p, i) => (
+                    <div key={i} className={`photo-thumb-item ${i === 0 ? 'is-main' : ''}`}>
+                      <img src={p.preview} alt={`photo-${i}`} />
+                      <div className="thumb-actions">
+                        {i !== 0 && (
+                          <button type="button" className="thumb-btn" onClick={() => moveFirst(i)}>대표</button>
+                        )}
+                        <button type="button" className="thumb-remove" onClick={() => removePhoto(i)}>✕</button>
+                      </div>
+                    </div>
+                  ))}
+                  {form.photos.length < 5 && (
+                    <label className="photo-thumb-add">
+                      <span>+</span>
+                      <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* 위치 */}
+            <div className="register-right">
+              <div className="form-section">
+                <p className="section-label">기본 정보</p>
+                <div className="form-group">
+                  <label>스팟 이름 <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    placeholder="예: 북한산 소나무 숲 전망대"
+                    value={form.name}
+                    onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(v => ({ ...v, name: '' })) }}
+                  />
+                  {errors.name && <span className="error-msg">⚠ {errors.name}</span>}
+                </div>
+                <div className="form-group">
+                  <label>최적 촬영 시간</label>
+                  <input
+                    type="text"
+                    placeholder="예: 일출 직후 (06:00~07:30), 안개 낀 날 아침"
+                    value={form.bestTime}
+                    onChange={e => setForm(f => ({ ...f, bestTime: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 하단: 전체 너비 ── */}
+          <div className="register-bottom">
             <div className="form-section">
               <p className="section-label">위치 <span className="required">*</span></p>
               <LocationPicker onSelect={loc => { setForm(f => ({ ...f, location: loc })); setErrors(v => ({ ...v, location: '' })) }} />
               {errors.location && <span className="error-msg">⚠ {errors.location}</span>}
             </div>
 
-            {/* 태그 */}
             <div className="form-section">
               <p className="section-label">태그</p>
-              <TagInput
-                tags={form.tags}
-                onChange={tags => setForm(f => ({ ...f, tags }))}
-              />
+              <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
             </div>
 
-            {/* 소개 */}
             <div className="form-section">
               <p className="section-label">스팟 소개</p>
               <div className="form-group">

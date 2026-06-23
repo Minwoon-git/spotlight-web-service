@@ -29,12 +29,20 @@
   color: var(--text-secondary);
 }
 
-/* ── 좌우 반반 레이아웃 ── */
-.register-layout {
+/* ── 상단 반반 ── */
+.register-top {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: start;
+  margin-bottom: 24px;
+}
+
+/* ── 하단 전체 너비 ── */
+.register-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* ── 사진 영역 ── */
@@ -76,7 +84,7 @@
   background: var(--bg);
   transition: border-color 0.2s, box-shadow 0.2s;
   position: relative;
-  aspect-ratio: 16 / 7;
+  aspect-ratio: 4 / 3;
 }
 
 .photo-drop:hover {
@@ -699,6 +707,7 @@
   .register-page-header h1 { font-size: 20px; }
   .register-page-header p { font-size: 13px; }
 
+  .register-top { grid-template-columns: 1fr; margin-bottom: 16px; }
   .register-left { padding: 16px; }
   .photo-drop { aspect-ratio: 16 / 9; }
   .photo-thumb-grid { grid-template-columns: repeat(4, 1fr); }
