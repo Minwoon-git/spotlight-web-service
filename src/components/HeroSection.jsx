@@ -28,7 +28,7 @@ const REGIONS = [
   { name: '경주', emoji: '🏛️' },
 ]
 
-export default function HeroSection({ spots, totalCount, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
+export default function HeroSection({ spots, totalCount, userCount, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
   const featured = [...spots].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, 3)
   const spotCount = totalCount ?? spots.length
   const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
@@ -83,7 +83,7 @@ export default function HeroSection({ spots, totalCount, onExplore, onRegister, 
           </div>
           <div className="stat-divider" />
           <div className="stat">
-            <span className="stat-num">1</span>
+            <span className="stat-num">{userCount}</span>
             <span className="stat-label">사용자</span>
           </div>
         </div>

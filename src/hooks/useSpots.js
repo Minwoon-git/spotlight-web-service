@@ -9,11 +9,15 @@ import { mockSpots } from '../data/mockSpots'
 export function useSpots(user) {
   const [firestoreSpots, setFirestoreSpots] = useState([])
   const [totalCount, setTotalCount] = useState(mockSpots.length)
+  const [userCount, setUserCount] = useState(0)
   const [contributions, setContributions] = useState({})
 
   useEffect(() => {
     getCountFromServer(collection(db, 'spots')).then(snap => {
       setTotalCount(mockSpots.length + snap.data().count)
+    })
+    getCountFromServer(collection(db, 'users')).then(snap => {
+      setUserCount(snap.data().count)
     })
   }, [])
 
@@ -69,5 +73,5 @@ export function useSpots(user) {
 
   const mySpots = user ? spots.filter(s => s.authorId === user.uid) : []
 
-  return { spots, mySpots, totalCount, addSpot, addContribution, getContributions }
+  return { spots, mySpots, totalCount, userCount, addSpot, addContribution, getContributions }
 }

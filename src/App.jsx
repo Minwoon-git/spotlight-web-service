@@ -17,7 +17,7 @@ import './App.css'
 
 function AppInner() {
   const { user } = useAuth() ?? {}
-  const { spots, mySpots, totalCount, addSpot, addContribution, getContributions } = useSpots(user)
+  const { spots, mySpots, totalCount, userCount, addSpot, addContribution, getContributions } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const { likedSpots, handleLikeToggle } = useLikedSpots(user)
   const [view, setView] = useState('home')
@@ -33,6 +33,7 @@ function AppInner() {
         <HeroSection
           spots={spots}
           totalCount={totalCount}
+          userCount={userCount}
           onExplore={() => setView('explore')}
           onRegister={() => setView('register')}
           onNavigate={setView}
