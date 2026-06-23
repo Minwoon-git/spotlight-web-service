@@ -29,11 +29,12 @@
   color: var(--text-secondary);
 }
 
-/* ── 세로 단일 레이아웃 ── */
+/* ── 좌우 반반 레이아웃 ── */
 .register-layout {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
+  align-items: start;
 }
 
 /* ── 사진 영역 ── */
