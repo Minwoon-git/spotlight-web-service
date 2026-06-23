@@ -296,7 +296,11 @@
 .register-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+}
+
+.register-right-section {
+  flex: 1;
+  height: 100%;
 }
 
 .form-section {

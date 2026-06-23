@@ -400,7 +400,7 @@ export default function RegisterView({ addSpot, onNavigate }) {
             </div>
 
             <div className="register-right">
-              <div className="form-section">
+              <div className="form-section register-right-section">
                 <p className="section-label">기본 정보</p>
                 <div className="form-group">
                   <label>스팟 이름 <span className="required">*</span></label>
@@ -421,33 +421,29 @@ export default function RegisterView({ addSpot, onNavigate }) {
                     onChange={e => setForm(f => ({ ...f, bestTime: e.target.value }))}
                   />
                 </div>
+                <div className="form-group">
+                  <label>태그</label>
+                  <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
+                </div>
+                <div className="form-group">
+                  <label>스팟 소개</label>
+                  <textarea
+                    placeholder="이 장소의 특징, 촬영 팁, 방문 시 주의사항 등을 자유롭게 적어주세요."
+                    value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    rows={5}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* ── 하단: 전체 너비 ── */}
+          {/* ── 하단: 위치 + 등록 버튼 ── */}
           <div className="register-bottom">
             <div className="form-section">
               <p className="section-label">위치 <span className="required">*</span></p>
               <LocationPicker onSelect={loc => { setForm(f => ({ ...f, location: loc })); setErrors(v => ({ ...v, location: '' })) }} />
               {errors.location && <span className="error-msg">⚠ {errors.location}</span>}
-            </div>
-
-            <div className="form-section">
-              <p className="section-label">태그</p>
-              <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
-            </div>
-
-            <div className="form-section">
-              <p className="section-label">스팟 소개</p>
-              <div className="form-group">
-                <textarea
-                  placeholder="이 장소의 특징, 촬영 팁, 방문 시 주의사항 등을 자유롭게 적어주세요."
-                  value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  rows={4}
-                />
-              </div>
             </div>
 
             <button type="submit" className="btn-submit">
