@@ -94,7 +94,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
             className={`photo-tab ${activeSource === 'community' ? 'active' : ''}`}
             onClick={() => { setActiveSource('community'); setActivePhoto(0) }}
           >
-            커뮤니티 사진 <span className="tab-count">{allCommunity.length}</span>
+            방문자 사진 <span className="tab-count">{allCommunity.length}</span>
           </button>
           {user ? (
             <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
@@ -134,7 +134,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
             </>
           ) : (
             <div className="gallery-empty">
-              <p>아직 커뮤니티 사진이 없어요</p>
+              <p>아직 방문자 사진이 없어요</p>
               <p>이 장소에서 찍은 사진을 올려보세요!</p>
               {user ? (
               <label className="btn-upload-empty">
@@ -181,7 +181,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
               좋아요 {likeCount.toLocaleString()}
             </button>
             <span>저장 {(spot.saves ?? 0).toLocaleString()}</span>
-            <span>커뮤니티 사진 {allCommunity.length}장</span>
+            <span>방문자 사진 {allCommunity.length}장</span>
           </div>
         </div>
 
