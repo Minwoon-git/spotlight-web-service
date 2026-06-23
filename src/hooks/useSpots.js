@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   collection, addDoc, onSnapshot,
-  query, orderBy, serverTimestamp, getCountFromServer,
+  query, orderBy, serverTimestamp, getCountFromServer, doc, getDoc,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { mockSpots } from '../data/mockSpots'
@@ -16,8 +16,8 @@ export function useSpots(user) {
     getCountFromServer(collection(db, 'spots')).then(snap => {
       setTotalCount(mockSpots.length + snap.data().count)
     })
-    getCountFromServer(collection(db, 'users')).then(snap => {
-      setUserCount(snap.data().count)
+    getDoc(doc(db, 'stats', 'global')).then(snap => {
+      if (snap.exists()) setUserCount(snap.data().userCount ?? 0)
     })
   }, [])
 
