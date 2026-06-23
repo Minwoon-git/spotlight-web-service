@@ -1,8 +1,7 @@
 import { useAuth } from '../contexts/AuthContext'
-import SpotCard from './SpotCard'
 import './MyPage.css'
 
-export default function MyPage({ mySpots = [], onSelectSpot, onAuthOpen, onNavigate }) {
+export default function MyPage({ onAuthOpen, onNavigate }) {
   const { user, logout } = useAuth() ?? {}
 
   if (!user) {
@@ -10,7 +9,7 @@ export default function MyPage({ mySpots = [], onSelectSpot, onAuthOpen, onNavig
       <div className="mypage-login">
         <div className="mypage-login-icon">👤</div>
         <h2>로그인이 필요해요</h2>
-        <p>로그인하면 내가 등록한 스팟을 관리할 수 있어요.</p>
+        <p>로그인하면 내 정보를 확인할 수 있어요.</p>
         <button className="btn-primary" onClick={onAuthOpen}>로그인 / 회원가입</button>
       </div>
     )
@@ -31,38 +30,19 @@ export default function MyPage({ mySpots = [], onSelectSpot, onAuthOpen, onNavig
             <p className="mypage-email">{user.email}</p>
           </div>
         </div>
-        <div className="mypage-stats">
-          <div className="mypage-stat">
-            <span className="mypage-stat-num">{mySpots.length}</span>
-            <span className="mypage-stat-label">등록한 스팟</span>
-          </div>
-        </div>
       </div>
 
-      <div className="mypage-section">
-        <div className="mypage-section-header">
-          <h3>내가 등록한 스팟</h3>
-          <button className="btn-register" onClick={() => onNavigate('register')}>+ 새 스팟 등록</button>
-        </div>
-
-        {mySpots.length === 0 ? (
-          <div className="mypage-empty">
-            <div className="empty-circle" />
-            <h3>아직 등록한 스팟이 없어요</h3>
-            <p>나만 아는 촬영 명소를 공유해보세요.</p>
-            <button className="btn-primary" onClick={() => onNavigate('register')}>첫 스팟 등록하기</button>
-          </div>
-        ) : (
-          <div className="mypage-grid">
-            {mySpots.map(spot => (
-              <SpotCard
-                key={spot.id}
-                spot={spot}
-                onClick={() => onSelectSpot(spot)}
-              />
-            ))}
-          </div>
-        )}
+      <div className="mypage-menu">
+        <button className="mypage-menu-item" onClick={() => onNavigate('mymap')}>
+          <span className="mypage-menu-icon">🗺️</span>
+          <span className="mypage-menu-label">내 스팟 관리</span>
+          <span className="mypage-menu-arrow">›</span>
+        </button>
+        <button className="mypage-menu-item" onClick={() => onNavigate('register')}>
+          <span className="mypage-menu-icon">📍</span>
+          <span className="mypage-menu-label">새 스팟 등록</span>
+          <span className="mypage-menu-arrow">›</span>
+        </button>
       </div>
 
       <div className="mypage-footer">

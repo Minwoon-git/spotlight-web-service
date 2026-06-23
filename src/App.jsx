@@ -55,17 +55,17 @@ function AppInner() {
       {view === 'mymap' && (
         <MyMapView
           spots={spots}
+          mySpots={mySpots}
           savedSpots={savedSpots}
           onSelectSpot={setSelectedSpot}
           onUnsave={handleSaveToggle}
           onAuthOpen={() => setAuthOpen(true)}
+          onNavigate={setView}
         />
       )}
 
       {view === 'mypage' && (
         <MyPage
-          mySpots={mySpots}
-          onSelectSpot={setSelectedSpot}
           onAuthOpen={() => setAuthOpen(true)}
           onNavigate={setView}
         />
