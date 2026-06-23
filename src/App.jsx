@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSpots } from './hooks/useSpots'
 import { useSavedSpots } from './hooks/useSavedSpots'
+import { useLikedSpots } from './hooks/useLikedSpots'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import BottomTabBar from './components/BottomTabBar'
@@ -18,6 +19,7 @@ function AppInner() {
   const { user } = useAuth() ?? {}
   const { spots, mySpots, totalCount, addSpot, addContribution, getContributions } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
+  const { likedSpots, handleLikeToggle } = useLikedSpots(user)
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
@@ -82,9 +84,12 @@ function AppInner() {
 
       {selectedSpot && (
         <SpotDetailModal
+          key={selectedSpot.id}
           spot={selectedSpot}
           isSaved={savedSpots.includes(selectedSpot.id)}
           onSave={() => handleSaveToggle(selectedSpot.id)}
+          isLiked={likedSpots.includes(selectedSpot.id)}
+          onLike={() => handleLikeToggle(selectedSpot)}
           onClose={() => setSelectedSpot(null)}
           contributions={getContributions(selectedSpot.id)}
           onAddContribution={(photo) => addContribution(selectedSpot.id, photo)}

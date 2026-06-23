@@ -328,10 +328,46 @@
 
 .modal-stats {
   display: flex;
+  align-items: center;
   gap: 20px;
   font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.like-btn:hover {
+  border-color: #f43f5e;
+  color: #f43f5e;
+}
+
+.like-btn:active {
+  transform: scale(0.95);
+}
+
+.like-btn.liked {
+  border-color: #f43f5e;
+  background: rgba(244, 63, 94, 0.08);
+  color: #f43f5e;
+}
+
+.like-btn .like-icon {
+  font-size: 15px;
+  line-height: 1;
 }
 
 /* ── Mobile App UI ── */

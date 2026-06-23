@@ -20,12 +20,26 @@ function compressImage(file, maxWidth = 1920, quality = 0.85) {
   })
 }
 
-export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contributions = [], onAddContribution, onAuthOpen }) {
+export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike, onClose, contributions = [], onAddContribution, onAuthOpen }) {
   const { user } = useAuth() ?? {}
   const [activePhoto, setActivePhoto] = useState(0)
   const [activeSource, setActiveSource] = useState('original')
   const [uploading, setUploading] = useState(false)
+  const [liked, setLiked] = useState(isLiked)
+  const [likeCount, setLikeCount] = useState(() => {
+    const base = spot.likes ?? 0
+    // Firestore 스팟의 likes에는 내 좋아요가 이미 반영돼 있고, mock 스팟은 미반영
+    return typeof spot.id === 'string' ? base : base + (isLiked ? 1 : 0)
+  })
   const fileRef = useRef(null)
+
+  const handleLikeClick = () => {
+    if (!user) { onAuthOpen(); return }
+    const next = !liked
+    setLiked(next)
+    setLikeCount(c => c + (next ? 1 : -1))
+    onLike()
+  }
 
   const allOriginal = spot.photos
   const allCommunity = contributions
@@ -158,7 +172,14 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
 
         <div className="modal-footer">
           <div className="modal-stats">
-            <span>좋아요 {(spot.likes ?? 0).toLocaleString()}</span>
+            <button
+              className={`like-btn ${liked ? 'liked' : ''}`}
+              onClick={handleLikeClick}
+              aria-pressed={liked}
+            >
+              <span className="like-icon">{liked ? '❤️' : '🤍'}</span>
+              좋아요 {likeCount.toLocaleString()}
+            </button>
             <span>저장 {(spot.saves ?? 0).toLocaleString()}</span>
             <span>커뮤니티 사진 {allCommunity.length}장</span>
           </div>
