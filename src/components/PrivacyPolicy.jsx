@@ -128,7 +128,7 @@ export default function PrivacyPolicy({ onBack }) {
               </tr>
               <tr>
                 <td>이메일</td>
-                <td>jerry@milvus.co.kr</td>
+                <td>vvpp1593@gmail.com</td>
               </tr>
             </tbody>
           </table>
