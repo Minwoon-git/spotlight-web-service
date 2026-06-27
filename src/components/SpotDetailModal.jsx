@@ -1,4 +1,10 @@
 import { useState, useRef } from 'react'
+
+const extractTime = (str) => {
+  if (!str) return ''
+  const match = str.match(/\d{1,2}:\d{2}~\d{1,2}:\d{2}/)
+  return match ? match[0] : str
+}
 import { useAuth } from '../contexts/AuthContext'
 import './SpotDetailModal.css'
 
@@ -155,7 +161,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
         <div className="modal-info">
           <div className="info-row">
             <span className="info-label">최적 촬영 시간</span>
-            <span className="info-value">{spot.bestTime}</span>
+            <span className="info-value">{extractTime(spot.bestTime)}</span>
           </div>
           <div className="info-row">
             <span className="info-label">등록자</span>
