@@ -380,6 +380,10 @@
   padding-right: 36px;
 }
 
+.time-select.placeholder {
+  color: var(--text-muted);
+}
+
 .time-select:focus {
   border-color: var(--accent);
   background-color: white;
