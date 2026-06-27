@@ -414,12 +414,22 @@ export default function RegisterView({ addSpot, onNavigate }) {
                 </div>
                 <div className="form-group">
                   <label>최적 촬영 시간</label>
-                  <input
-                    type="text"
-                    placeholder="예: 일출 직후 (06:00~07:30), 안개 낀 날 아침"
+                  <select
                     value={form.bestTime}
                     onChange={e => setForm(f => ({ ...f, bestTime: e.target.value }))}
-                  />
+                    className="time-select"
+                  >
+                    <option value="">시간대 선택</option>
+                    <option value="새벽 (04:00~06:00)">새벽 (04:00~06:00)</option>
+                    <option value="일출 (06:00~07:30)">일출 (06:00~07:30)</option>
+                    <option value="오전 (07:30~12:00)">오전 (07:30~12:00)</option>
+                    <option value="점심 (12:00~14:00)">점심 (12:00~14:00)</option>
+                    <option value="오후 (14:00~17:00)">오후 (14:00~17:00)</option>
+                    <option value="일몰 (17:00~19:30)">일몰 (17:00~19:30)</option>
+                    <option value="저녁 (19:30~21:00)">저녁 (19:30~21:00)</option>
+                    <option value="야간 (21:00~24:00)">야간 (21:00~24:00)</option>
+                    <option value="시간 무관">시간 무관</option>
+                  </select>
                 </div>
                 <div className="form-group">
                   <label>태그</label>
