@@ -537,6 +537,25 @@
   border-left: 1px solid var(--border);
 }
 
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-link {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-link:hover { color: var(--accent); }
+
 .footer-copy {
   font-size: 13px;
   color: var(--text-muted);

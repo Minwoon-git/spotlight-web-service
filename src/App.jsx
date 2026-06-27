@@ -13,6 +13,7 @@ import RegisterView from './components/RegisterView'
 import SpotDetailModal from './components/SpotDetailModal'
 import AuthModal from './components/AuthModal'
 import AuthRequired from './components/AuthRequired'
+import PrivacyPolicy from './components/PrivacyPolicy'
 import './App.css'
 
 function AppInner() {
@@ -98,6 +99,8 @@ function AppInner() {
           onAuthOpen={() => setAuthOpen(true)}
         />
       )}
+
+      {view === 'privacy' && <PrivacyPolicy onBack={() => setView('home')} />}
 
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
     </div>
