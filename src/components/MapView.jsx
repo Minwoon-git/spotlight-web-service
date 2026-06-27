@@ -13,26 +13,9 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768)
   const [previewSpot, setPreviewSpot] = useState(null)
 
-  const [activeTime, setActiveTime] = useState('전체')
   const [sortOrder, setSortOrder] = useState('인기순')
 
   const categoryFilters = ['전체', '일출', '일몰', '야경', '자연', '도심']
-  const timeFilters = ['전체', '새벽', '오전', '오후', '저녁', '야간']
-
-  const TIME_RANGES = {
-    '새벽': [4, 7.5],
-    '오전': [7.5, 12],
-    '오후': [12, 17],
-    '저녁': [17, 21],
-    '야간': [21, 24],
-  }
-
-  const parseStartHour = (bestTime) => {
-    if (!bestTime) return null
-    const match = bestTime.match(/^(\d{1,2}):(\d{2})/)
-    if (!match) return null
-    return parseInt(match[1]) + parseInt(match[2]) / 60
-  }
 
   const filteredSpots = spots
     .filter(spot => {
@@ -45,18 +28,10 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
         spot.name.includes(searchQuery) ||
         spot.address.includes(searchQuery) ||
         spot.tags.some(t => t.includes(searchQuery))
-      const matchTime = (() => {
-        if (activeTime === '전체') return true
-        const range = TIME_RANGES[activeTime]
-        const h = parseStartHour(spot.bestTime)
-        if (h === null) return false
-        return h >= range[0] && h < range[1]
-      })()
-      return matchCategory && matchSearch && matchTime
+      return matchCategory && matchSearch
     })
     .sort((a, b) => {
       if (sortOrder === '인기순') return (b.likes ?? 0) - (a.likes ?? 0)
-      // 최신순: Firestore timestamp or string date
       const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt ?? 0)
       const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt ?? 0)
       return dateB - dateA
@@ -200,30 +175,14 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
             )}
           </div>
 
-          <div className="filter-section">
-            <span className="filter-label">카테고리</span>
-            <div className="filter-chips">
-              {categoryFilters.map(f => (
-                <button
-                  key={f}
-                  className={`filter-chip ${activeFilter === f ? 'active' : ''}`}
-                  onClick={() => setActiveFilter(f)}
-                >{f}</button>
-              ))}
-            </div>
-          </div>
-
-          <div className="filter-section">
-            <span className="filter-label">시간대</span>
-            <div className="filter-chips">
-              {timeFilters.map(f => (
-                <button
-                  key={f}
-                  className={`filter-chip ${activeTime === f ? 'active' : ''}`}
-                  onClick={() => setActiveTime(f)}
-                >{f}</button>
-              ))}
-            </div>
+          <div className="filter-chips">
+            {categoryFilters.map(f => (
+              <button
+                key={f}
+                className={`filter-chip ${activeFilter === f ? 'active' : ''}`}
+                onClick={() => setActiveFilter(f)}
+              >{f}</button>
+            ))}
           </div>
 
           <div className="sidebar-count">
