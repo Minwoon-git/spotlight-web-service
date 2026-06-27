@@ -251,8 +251,16 @@ function compressImage(file, maxWidth = 1920, quality = 0.85) {
   })
 }
 
-export default function RegisterView({ addSpot, onNavigate }) {
-  const [form, setForm] = useState({
+export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavigate }) {
+  const isEdit = !!editingSpot
+  const [form, setForm] = useState(() => isEdit ? {
+    name: editingSpot.name ?? '',
+    description: editingSpot.description ?? '',
+    bestTime: editingSpot.bestTime ?? '',
+    tags: editingSpot.tags ?? [],
+    photos: [],
+    location: { lat: editingSpot.lat, lng: editingSpot.lng, address: editingSpot.address },
+  } : {
     name: '', description: '', bestTime: '',
     tags: [], photos: [], location: null,
   })
@@ -295,15 +303,18 @@ export default function RegisterView({ addSpot, onNavigate }) {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    let photoUrls = [FALLBACK_PHOTO]
+    let photoUrls
     if (form.photos.length > 0) {
       try {
         const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
         photoUrls = results.filter(Boolean)
       } catch {}
     }
+    if (!photoUrls || photoUrls.length === 0) {
+      photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
+    }
 
-    addSpot({
+    const data = {
       name: form.name,
       address: form.location.address,
       lat: form.location.lat,
@@ -312,7 +323,13 @@ export default function RegisterView({ addSpot, onNavigate }) {
       photos: photoUrls,
       description: form.description,
       bestTime: form.bestTime,
-    })
+    }
+
+    if (isEdit) {
+      await updateSpot(editingSpot.id, data)
+    } else {
+      addSpot(data)
+    }
 
     setSubmitted(true)
   }
@@ -322,15 +339,17 @@ export default function RegisterView({ addSpot, onNavigate }) {
       <div className="register-page">
         <div className="register-success">
           <div className="success-icon" />
-          <h2>스팟이 등록되었어요!</h2>
-          <p>지도에 바로 추가되었습니다.<br />소중한 명소를 공유해 주셔서 감사합니다.</p>
+          <h2>{isEdit ? '스팟이 수정되었어요!' : '스팟이 등록되었어요!'}</h2>
+          <p>{isEdit ? '변경 내용이 저장되었습니다.' : '지도에 바로 추가되었습니다.\n소중한 명소를 공유해 주셔서 감사합니다.'}</p>
           <div className="success-actions">
-            <button className="btn-outline" onClick={() => {
-              setSubmitted(false)
-              setForm({ name:'', description:'', bestTime:'', tags:[], photos:[], location:null })
-              setErrors({})
-            }}>추가 등록하기</button>
-            <button className="btn-filled" onClick={() => onNavigate('explore')}>지도에서 보기</button>
+            {!isEdit && (
+              <button className="btn-outline" onClick={() => {
+                setSubmitted(false)
+                setForm({ name:'', description:'', bestTime:'', tags:[], photos:[], location:null })
+                setErrors({})
+              }}>추가 등록하기</button>
+            )}
+            <button className="btn-filled" onClick={() => onNavigate('mymap')}>내 스팟 보기</button>
           </div>
         </div>
       </div>
@@ -341,8 +360,8 @@ export default function RegisterView({ addSpot, onNavigate }) {
     <div className="register-page">
       <div className="register-container">
         <div className="register-page-header">
-          <h1>스팟 등록</h1>
-          <p>나만 알던 촬영 명소를 지도에 추가해 모두와 공유하세요.</p>
+          <h1>{isEdit ? '스팟 수정' : '스팟 등록'}</h1>
+          <p>{isEdit ? '등록한 스팟 정보를 수정하세요.' : '나만 알던 촬영 명소를 지도에 추가해 모두와 공유하세요.'}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -457,7 +476,7 @@ export default function RegisterView({ addSpot, onNavigate }) {
             </div>
 
             <button type="submit" className="btn-submit">
-              스팟 등록하기
+              {isEdit ? '수정 완료' : '스팟 등록하기'}
             </button>
           </div>
         </form>

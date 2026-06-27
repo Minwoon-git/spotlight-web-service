@@ -125,18 +125,37 @@
   position: relative;
 }
 
-.btn-delete-spot {
-  width: 100%;
+.myspot-actions {
+  display: flex;
+  gap: 8px;
   margin-top: 8px;
+}
+
+.btn-edit-spot,
+.btn-delete-spot {
+  flex: 1;
   padding: 8px;
-  background: none;
-  border: 1px solid #FCA5A5;
   border-radius: var(--radius);
-  color: #EF4444;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+}
+
+.btn-edit-spot {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-edit-spot:hover {
+  background: var(--surface-hover);
+}
+
+.btn-delete-spot {
+  background: none;
+  border: 1px solid #FCA5A5;
+  color: #EF4444;
 }
 
 .btn-delete-spot:hover {

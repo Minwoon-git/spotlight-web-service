@@ -18,26 +18,37 @@ import './App.css'
 
 function AppInner() {
   const { user } = useAuth() ?? {}
-  const { spots, mySpots, totalCount, userCount, addSpot, deleteSpot, addContribution, getContributions } = useSpots(user)
+  const { spots, mySpots, totalCount, userCount, addSpot, updateSpot, deleteSpot, addContribution, getContributions } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const { likedSpots, handleLikeToggle } = useLikedSpots(user)
   const [view, setView] = useState('home')
   const [selectedSpot, setSelectedSpot] = useState(null)
+  const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
+
+  const handleEdit = (spot) => {
+    setEditingSpot(spot)
+    setView('register')
+  }
+
+  const handleNavigate = (v) => {
+    if (v !== 'register') setEditingSpot(null)
+    setView(v)
+  }
 
   return (
     <div className="app">
-      <Navbar view={view} onNavigate={setView} onAuthOpen={() => setAuthOpen(true)} />
-      <BottomTabBar view={view} onNavigate={setView} />
+      <Navbar view={view} onNavigate={handleNavigate} onAuthOpen={() => setAuthOpen(true)} />
+      <BottomTabBar view={view} onNavigate={handleNavigate} />
 
       {view === 'home' && (
         <HeroSection
           spots={spots}
           totalCount={totalCount}
           userCount={userCount}
-          onExplore={() => setView('explore')}
-          onRegister={() => setView('register')}
-          onNavigate={setView}
+          onExplore={() => handleNavigate('explore')}
+          onRegister={() => handleNavigate('register')}
+          onNavigate={handleNavigate}
           onAuthOpen={() => setAuthOpen(true)}
           onSelectSpot={setSelectedSpot}
         />
@@ -48,7 +59,7 @@ function AppInner() {
           spots={spots}
           onSelectSpot={setSelectedSpot}
           savedSpots={savedSpots}
-          onRegister={() => setView('register')}
+          onRegister={() => handleNavigate('register')}
           user={user}
           onAuthOpen={() => setAuthOpen(true)}
         />
@@ -62,21 +73,22 @@ function AppInner() {
           onSelectSpot={setSelectedSpot}
           onUnsave={handleSaveToggle}
           onDelete={deleteSpot}
+          onEdit={handleEdit}
           onAuthOpen={() => setAuthOpen(true)}
-          onNavigate={setView}
+          onNavigate={handleNavigate}
         />
       )}
 
       {view === 'mypage' && (
         <MyPage
           onAuthOpen={() => setAuthOpen(true)}
-          onNavigate={setView}
+          onNavigate={handleNavigate}
         />
       )}
 
       {view === 'register' && (
         user
-          ? <RegisterView addSpot={addSpot} onNavigate={setView} />
+          ? <RegisterView addSpot={addSpot} updateSpot={updateSpot} editingSpot={editingSpot} onNavigate={handleNavigate} />
           : <AuthRequired
               icon="📍"
               title="로그인이 필요해요"
