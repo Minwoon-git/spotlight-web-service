@@ -288,6 +288,30 @@
   gap: 24px;
 }
 
+/* ── 자동 순환 캐러셀 ── */
+.carousel-outer {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+}
+
+.carousel-track {
+  display: flex;
+  gap: 20px;
+  animation: carousel-scroll 40s linear infinite;
+  width: max-content;
+}
+
+.carousel-item {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+@keyframes carousel-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ── Highlights ── */
 .highlights-section {
   background: var(--white);
@@ -760,6 +784,8 @@
     flex-direction: column;
     gap: 12px;
   }
+  .carousel-item { width: 220px; }
+  .carousel-track { animation-duration: 28s; }
 
   /* 하이라이트 카드 가로 스크롤 */
   .highlights-section { padding: 28px 0; }
