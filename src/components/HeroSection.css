@@ -128,80 +128,6 @@
   flex-wrap: wrap;
 }
 
-/* ── Hero 내 캐러셀 ── */
-.hero-carousel-outer {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  margin-top: 40px;
-}
-
-.hero-carousel-track {
-  display: flex;
-  gap: 16px;
-  animation: carousel-scroll 36s linear infinite;
-  width: max-content;
-}
-
-.hero-carousel-item {
-  width: 200px;
-  height: 140px;
-  border-radius: 12px;
-  overflow: hidden;
-  flex-shrink: 0;
-  position: relative;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.12);
-  transition: transform 0.3s, border-color 0.3s;
-}
-
-.hero-carousel-item:hover {
-  transform: translateY(-4px) scale(1.03);
-  border-color: rgba(255,255,255,0.35);
-}
-
-.hero-carousel-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.hero-carousel-item:hover img {
-  transform: scale(1.08);
-}
-
-.hero-carousel-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px 10px 10px;
-  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.hero-carousel-name {
-  font-size: 12px;
-  font-weight: 700;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 130px;
-}
-
-.hero-carousel-likes {
-  font-size: 11px;
-  color: rgba(255,255,255,0.75);
-  flex-shrink: 0;
-}
-
 /* Stats bar */
 .hero-stats {
   position: absolute;
@@ -360,30 +286,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
-}
-
-/* ── 자동 순환 캐러셀 ── */
-.carousel-outer {
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-}
-
-.carousel-track {
-  display: flex;
-  gap: 20px;
-  animation: carousel-scroll 40s linear infinite;
-  width: max-content;
-}
-
-.carousel-item {
-  width: 280px;
-  flex-shrink: 0;
-}
-
-@keyframes carousel-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
 }
 
 /* ── Highlights ── */
@@ -858,8 +760,6 @@
     flex-direction: column;
     gap: 12px;
   }
-  .carousel-item { width: 220px; }
-  .carousel-track { animation-duration: 28s; }
 
   /* 하이라이트 카드 가로 스크롤 */
   .highlights-section { padding: 28px 0; }
