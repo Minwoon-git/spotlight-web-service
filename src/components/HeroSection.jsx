@@ -80,6 +80,25 @@ export default function HeroSection({ spots, totalCount, userCount, onExplore, o
           </div>
         </div>
 
+        {/* 히어로 안 캐러셀 */}
+        <div
+          className="hero-carousel-outer"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div className="hero-carousel-track" ref={trackRef}>
+            {[...top10, ...top10].map((spot, i) => (
+              <div key={`hero-${spot.id}-${i}`} className="hero-carousel-item" onClick={() => onSelectSpot(spot)}>
+                <img src={spot.photos[0]} alt={spot.name} />
+                <div className="hero-carousel-info">
+                  <span className="hero-carousel-name">{spot.name}</span>
+                  <span className="hero-carousel-likes">♥ {spot.likes ?? 0}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="hero-stats">
           <div className="stat">
             <span className="stat-num">{spotCount}+</span>
@@ -96,11 +115,6 @@ export default function HeroSection({ spots, totalCount, userCount, onExplore, o
             <span className="stat-label">사용자</span>
           </div>
         </div>
-
-        <button className="scroll-indicator" onClick={scrollToFeatured}>
-          <span>스크롤</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
       </section>
 
       {/* ── 모바일 전용: 빠른 탐색 태그 ── */}
@@ -113,37 +127,7 @@ export default function HeroSection({ spots, totalCount, userCount, onExplore, o
         </div>
       </section>
 
-      {/* ── Featured ── */}
-      <section className="featured-section" ref={scrollRef}>
-        <div className="reveal">
-          <div className="section-header">
-            <div>
-              <div className="section-eyebrow">인기 스팟</div>
-              <h2 className="section-title">많은 사랑을 받은 명소</h2>
-              <p className="section-desc desktop-only">지금 가장 주목받는 촬영 포인트를 확인해보세요</p>
-            </div>
-            <button className="btn-more" onClick={onExplore}>
-              전체 보기
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </div>
-
-          {/* 자동 순환 캐러셀 */}
-          <div
-            className="carousel-outer"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-          >
-            <div className="carousel-track" ref={trackRef}>
-              {[...top10, ...top10].map((spot, i) => (
-                <div key={`${spot.id}-${i}`} className="carousel-item">
-                  <SpotCard spot={spot} onClick={() => onSelectSpot(spot)} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── Featured (데스크탑 숨김 — 히어로에 통합됨) ── */}
 
       {/* ── 모바일 전용: 지역별 탐색 ── */}
       <section className="region-section mobile-only">
