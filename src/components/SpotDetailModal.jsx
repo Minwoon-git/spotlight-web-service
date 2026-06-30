@@ -6,6 +6,7 @@ const extractTime = (str) => {
   return match ? match[0] : str
 }
 import { useAuth } from '../contexts/AuthContext'
+import ConfirmModal from './ConfirmModal'
 import './SpotDetailModal.css'
 
 // 단독 문서(spots/{id}/contributions/{id})에 저장되므로 1MB 한도 안에서 여유 있게 잡는다.
@@ -53,11 +54,17 @@ function formatContributionDate(createdAt) {
   return createdAt
 }
 
-export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike, onClose, contributions = [], onAddContribution, onAuthOpen }) {
+export default function SpotDetailModal({
+  spot, isSaved, onSave, isLiked, onLike, onClose, contributions = [], onAddContribution, onAuthOpen,
+  isAdmin = false, onDeleteSpot, onDeleteContribution,
+}) {
   const { user } = useAuth() ?? {}
   const [activePhoto, setActivePhoto] = useState(0)
   const [activeSource, setActiveSource] = useState('original')
   const [uploading, setUploading] = useState(false)
+  const [deleteSpotConfirm, setDeleteSpotConfirm] = useState(false)
+  const [deletePhotoConfirm, setDeletePhotoConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [liked, setLiked] = useState(isLiked)
   const [likeCount, setLikeCount] = useState(() => {
     const base = spot.likes ?? 0
@@ -82,6 +89,33 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
 
   const currentPhotos = activeSource === 'original' ? allOriginal : allCommunity.map(c => c.photo)
   const currentMeta = activeSource === 'community' ? allCommunity : null
+
+  const handleDeleteSpot = async () => {
+    setDeleting(true)
+    try {
+      await onDeleteSpot()
+    } catch (err) {
+      console.error('스팟 삭제 실패:', err)
+    } finally {
+      setDeleting(false)
+      setDeleteSpotConfirm(false)
+    }
+  }
+
+  const handleDeletePhoto = async () => {
+    const target = currentMeta?.[activePhoto]
+    if (!target) return
+    setDeleting(true)
+    try {
+      await onDeleteContribution(target.id)
+      setActivePhoto(p => Math.max(0, p - 1))
+    } catch (err) {
+      console.error('방문자 사진 삭제 실패:', err)
+    } finally {
+      setDeleting(false)
+      setDeletePhotoConfirm(false)
+    }
+  }
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0]
@@ -116,6 +150,11 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
             <p className="modal-addr">{spot.address}</p>
           </div>
           <div className="modal-header-actions">
+            {isAdmin && (
+              <button className="admin-delete-spot-btn" onClick={() => setDeleteSpotConfirm(true)}>
+                스팟 삭제
+              </button>
+            )}
             <button className={`save-action ${isSaved ? 'saved' : ''}`} onClick={onSave}>
               {isSaved ? '저장됨' : '저장'}
             </button>
@@ -159,6 +198,12 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
                   <div className="gallery-meta-badge">
                     {currentMeta[activePhoto].author} · {formatContributionDate(currentMeta[activePhoto].createdAt)}
                   </div>
+                )}
+                {activeSource === 'community' && currentMeta[activePhoto] &&
+                  (isAdmin || (user && currentMeta[activePhoto].authorId === user.uid)) && (
+                  <button className="admin-delete-photo-btn" onClick={() => setDeletePhotoConfirm(true)}>
+                    사진 삭제
+                  </button>
                 )}
               </div>
               {currentPhotos.length > 1 && (
@@ -244,6 +289,28 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
         </div>
 
       </div>
+
+      {deleteSpotConfirm && (
+        <ConfirmModal
+          title="스팟 삭제"
+          message={`"${spot.name}"을(를) 삭제할까요?\n등록된 사진과 방문자 사진이 모두 함께 삭제되며, 되돌릴 수 없어요.`}
+          confirmLabel={deleting ? '삭제 중...' : '삭제'}
+          danger
+          onCancel={() => setDeleteSpotConfirm(false)}
+          onConfirm={handleDeleteSpot}
+        />
+      )}
+
+      {deletePhotoConfirm && (
+        <ConfirmModal
+          title="방문자 사진 삭제"
+          message="이 사진을 삭제할까요? 되돌릴 수 없어요."
+          confirmLabel={deleting ? '삭제 중...' : '삭제'}
+          danger
+          onCancel={() => setDeletePhotoConfirm(false)}
+          onConfirm={handleDeletePhoto}
+        />
+      )}
     </div>
   )
 }

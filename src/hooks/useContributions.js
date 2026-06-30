@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 
 export function useContributions(spotId, user) {
@@ -25,5 +25,10 @@ export function useContributions(spotId, user) {
     })
   }
 
-  return { contributions, addContribution }
+  const deleteContribution = async (contributionId) => {
+    if (!spotId || typeof spotId !== 'string') return
+    await deleteDoc(doc(db, 'spots', spotId, 'contributions', contributionId))
+  }
+
+  return { contributions, addContribution, deleteContribution }
 }

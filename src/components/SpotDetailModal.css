@@ -92,6 +92,20 @@
   color: white;
 }
 
+.admin-delete-spot-btn {
+  background: none;
+  border: 1.5px solid #FCA5A5;
+  color: #EF4444;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.admin-delete-spot-btn:hover { background: #FEF2F2; }
+
 .close-btn {
   width: 32px;
   height: 32px;
@@ -239,6 +253,22 @@
 }
 
 .gallery-main { position: relative; }
+
+.admin-delete-photo-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(239,68,68,0.85);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.admin-delete-photo-btn:hover { background: #DC2626; }
 
 .gallery-empty {
   height: 260px;

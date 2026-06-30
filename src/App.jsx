@@ -17,6 +17,7 @@ import AuthModal from './components/AuthModal'
 import AuthRequired from './components/AuthRequired'
 import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
+import { isAdmin } from './utils/admin'
 import './App.css'
 
 // URL → view 이름 매핑 (Navbar/BottomTabBar 호환)
@@ -36,7 +37,8 @@ function AppInner() {
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const { likedSpots, handleLikeToggle } = useLikedSpots(user)
   const [selectedSpot, setSelectedSpot] = useState(null)
-  const { contributions, addContribution } = useContributions(selectedSpot?.id, user)
+  const { contributions, addContribution, deleteContribution } = useContributions(selectedSpot?.id, user)
+  const admin = isAdmin(user)
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
 
@@ -141,6 +143,9 @@ function AppInner() {
           contributions={contributions}
           onAddContribution={addContribution}
           onAuthOpen={() => setAuthOpen(true)}
+          isAdmin={admin}
+          onDeleteSpot={async () => { await deleteSpot(selectedSpot.id); setSelectedSpot(null) }}
+          onDeleteContribution={deleteContribution}
         />
       )}
 
