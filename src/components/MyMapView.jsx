@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import SpotCard from './SpotCard'
 import AuthRequired from './AuthRequired'
+import ConfirmModal from './ConfirmModal'
 import './MyMapView.css'
 
 export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, onUnsave, onDelete, onEdit, onAuthOpen, onNavigate }) {
   const { user } = useAuth() ?? {}
   const [tab, setTab] = useState('saved')
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const saved = spots.filter(s => savedSpots.includes(s.id))
 
   if (!user) {
@@ -107,7 +109,7 @@ export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, on
                       className="btn-delete-spot"
                       onClick={e => {
                         e.stopPropagation()
-                        if (window.confirm(`"${spot.name}"을 삭제할까요?`)) onDelete(spot.id)
+                        setDeleteTarget(spot)
                       }}
                     >삭제</button>
                   </div>
@@ -117,6 +119,20 @@ export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, on
           )
         )}
       </div>
+
+      {deleteTarget && (
+        <ConfirmModal
+          title="스팟 삭제"
+          message={`"${deleteTarget.name}"을(를) 삭제할까요?\n삭제하면 되돌릴 수 없어요.`}
+          confirmLabel="삭제"
+          danger
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            onDelete(deleteTarget.id)
+            setDeleteTarget(null)
+          }}
+        />
+      )}
     </div>
   )
 }
