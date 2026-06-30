@@ -10,6 +10,7 @@ export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, on
   const [tab, setTab] = useState('saved')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const saved = spots.filter(s => savedSpots.includes(s.id))
+  const initial = (user?.displayName || user?.email)?.[0]?.toUpperCase()
 
   if (!user) {
     return (
@@ -26,7 +27,10 @@ export default function MyMapView({ spots, mySpots, savedSpots, onSelectSpot, on
     <div className="mymap-page">
       <div className="mymap-header">
         <div className="mymap-profile">
-          <div className="avatar">나</div>
+          {user.photoURL
+            ? <img src={user.photoURL} alt="" className="avatar" onError={e => { e.target.style.display = 'none' }} />
+            : <div className="avatar">{initial}</div>
+          }
           <div>
             <h2 className="profile-name">내 스팟</h2>
             <p className="profile-sub">저장하거나 직접 등록한 명소를 관리하세요</p>
