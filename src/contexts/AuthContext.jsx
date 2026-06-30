@@ -33,6 +33,13 @@ export function AuthProvider({ children }) {
         const isNewUser = !snapshot.exists()
         const needsStatCount = isNewUser || !snapshot.data()?.countedInStats
 
+        // Firebase Auth의 photoURL은 2048자 제한이 있어 업로드한 사진(data URL)을
+        // 담을 수 없으므로, Firestore 전용 필드(customPhotoURL)에 저장해 우선 표시한다.
+        const customPhotoURL = snapshot.data()?.customPhotoURL
+        if (customPhotoURL) {
+          setUser(prev => prev ? { ...prev, photoURL: customPhotoURL } : prev)
+        }
+
         await setDoc(userRef, {
           displayName: u.displayName ?? null,
           email: u.email ?? null,
@@ -75,7 +82,11 @@ export function AuthProvider({ children }) {
   const refreshUser = async () => {
     if (!auth.currentUser) return
     await auth.currentUser.reload()
-    setUser({ ...auth.currentUser })
+    // 업로드한 사진(data URL)은 Auth 객체에 없으므로 reload 후에도 유지한다.
+    setUser(prev => ({
+      ...auth.currentUser,
+      photoURL: prev?.photoURL?.startsWith('data:') ? prev.photoURL : auth.currentUser.photoURL,
+    }))
   }
 
   const logout = () => signOut(auth)
@@ -92,8 +103,8 @@ export function AuthProvider({ children }) {
 
   const updatePhoto = async (photoDataUrl) => {
     if (!auth.currentUser) return
-    await updateProfile(auth.currentUser, { photoURL: photoDataUrl })
-    await setDoc(doc(db, 'users', auth.currentUser.uid), { photoURL: photoDataUrl }, { merge: true })
+    // Auth photoURL은 2048자 제한이 있어 data URL을 담을 수 없으므로 Firestore에만 저장한다.
+    await setDoc(doc(db, 'users', auth.currentUser.uid), { customPhotoURL: photoDataUrl }, { merge: true })
     setUser(u => ({ ...u, photoURL: photoDataUrl }))
   }
 
