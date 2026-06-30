@@ -137,7 +137,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
           >
             방문자 사진 <span className="tab-count">{allCommunity.length}</span>
           </button>
-          {activeSource === 'original' && (
+          {(activeSource === 'original' || allCommunity.length > 0) && (
             user ? (
               <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
                 {uploading ? '업로드 중...' : '+ 내 사진 추가'}
