@@ -474,7 +474,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                 setErrors({})
               },
             }] : []),
-            { label: '내 스팟 보기', primary: true, onClick: () => onNavigate('mymap') },
+            { label: '확인', primary: true, onClick: () => onNavigate('explore') },
           ]}
         />
       )}
