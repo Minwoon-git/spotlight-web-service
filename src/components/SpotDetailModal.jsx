@@ -8,22 +8,49 @@ const extractTime = (str) => {
 import { useAuth } from '../contexts/AuthContext'
 import './SpotDetailModal.css'
 
-function compressImage(file, maxWidth = 1920, quality = 0.85) {
-  return new Promise((resolve) => {
+// 단독 문서(spots/{id}/contributions/{id})에 저장되므로 1MB 한도 안에서 여유 있게 잡는다.
+const PHOTO_BYTE_BUDGET = 700_000
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      let { width, height } = img
-      if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth }
-      const canvas = document.createElement('canvas')
-      canvas.width = width; canvas.height = height
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-      resolve(canvas.toDataURL('image/jpeg', quality))
-    }
-    img.onerror = () => resolve(null)
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img) }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지를 불러올 수 없어요')) }
     img.src = url
   })
+}
+
+function drawToDataURL(img, width, quality) {
+  const height = Math.round(img.height * width / img.width)
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+  return canvas.toDataURL('image/jpeg', quality)
+}
+
+async function compressImage(file, maxBytes = PHOTO_BYTE_BUDGET) {
+  const img = await loadImage(file)
+  const widths = [1920, 1280, 960, 720]
+  const qualities = [0.85, 0.7, 0.55]
+
+  let best = null
+  for (const width of widths) {
+    const targetWidth = Math.min(width, img.width)
+    for (const quality of qualities) {
+      const dataUrl = drawToDataURL(img, targetWidth, quality)
+      best = dataUrl
+      if (dataUrl.length <= maxBytes) return dataUrl
+    }
+  }
+  return best
+}
+
+function formatContributionDate(createdAt) {
+  if (!createdAt) return ''
+  if (createdAt.toDate) return createdAt.toDate().toLocaleDateString('ko-KR')
+  return createdAt
 }
 
 export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike, onClose, contributions = [], onAddContribution, onAuthOpen }) {
@@ -60,14 +87,19 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
-    const compressed = await compressImage(file)
-    if (compressed) {
-      onAddContribution(compressed)
-      setActiveSource('community')
-      setActivePhoto(allCommunity.length) // 방금 추가한 사진으로 이동
+    try {
+      const compressed = await compressImage(file)
+      if (compressed) {
+        await onAddContribution(compressed)
+        setActiveSource('community')
+        setActivePhoto(allCommunity.length) // 방금 추가한 사진으로 이동
+      }
+    } catch (err) {
+      console.error('방문자 사진 업로드 실패:', err)
+    } finally {
+      setUploading(false)
+      e.target.value = ''
     }
-    setUploading(false)
-    e.target.value = ''
   }
 
   return (
@@ -123,7 +155,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
                 <img src={currentPhotos[activePhoto]} alt={spot.name} />
                 {activeSource === 'community' && currentMeta[activePhoto] && (
                   <div className="gallery-meta-badge">
-                    {currentMeta[activePhoto].author} · {currentMeta[activePhoto].createdAt}
+                    {currentMeta[activePhoto].author} · {formatContributionDate(currentMeta[activePhoto].createdAt)}
                   </div>
                 )}
               </div>

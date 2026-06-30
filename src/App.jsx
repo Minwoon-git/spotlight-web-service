@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { useSpots } from './hooks/useSpots'
 import { useSavedSpots } from './hooks/useSavedSpots'
 import { useLikedSpots } from './hooks/useLikedSpots'
+import { useContributions } from './hooks/useContributions'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import BottomTabBar from './components/BottomTabBar'
@@ -29,10 +30,11 @@ const PATH_TO_VIEW = {
 
 function AppInner() {
   const { user } = useAuth() ?? {}
-  const { spots, mySpots, totalCount, userCount, addSpot, updateSpot, deleteSpot, addContribution, getContributions } = useSpots(user)
+  const { spots, mySpots, totalCount, userCount, addSpot, updateSpot, deleteSpot } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const { likedSpots, handleLikeToggle } = useLikedSpots(user)
   const [selectedSpot, setSelectedSpot] = useState(null)
+  const { contributions, addContribution } = useContributions(selectedSpot?.id, user)
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
 
@@ -133,8 +135,8 @@ function AppInner() {
           isLiked={likedSpots.includes(selectedSpot.id)}
           onLike={() => handleLikeToggle(selectedSpot)}
           onClose={() => setSelectedSpot(null)}
-          contributions={getContributions(selectedSpot.id)}
-          onAddContribution={(photo) => addContribution(selectedSpot.id, photo)}
+          contributions={contributions}
+          onAddContribution={addContribution}
           onAuthOpen={() => setAuthOpen(true)}
         />
       )}

@@ -10,7 +10,6 @@ export function useSpots(user) {
   const [firestoreSpots, setFirestoreSpots] = useState([])
   const [totalCount, setTotalCount] = useState(mockSpots.length)
   const [userCount, setUserCount] = useState(0)
-  const [contributions, setContributions] = useState({})
 
   useEffect(() => {
     getCountFromServer(collection(db, 'spots')).then(snap => {
@@ -56,21 +55,6 @@ export function useSpots(user) {
     return { id: docRef.id, ...newSpot }
   }
 
-  const addContribution = (spotId, photo) => {
-    const entry = {
-      id: Date.now(),
-      photo,
-      author: user?.displayName || '익명',
-      createdAt: new Date().toISOString().split('T')[0],
-    }
-    setContributions(prev => ({
-      ...prev,
-      [spotId]: [...(prev[spotId] || []), entry],
-    }))
-  }
-
-  const getContributions = (spotId) => contributions[spotId] || []
-
   const deleteSpot = async (spotId) => {
     if (typeof spotId !== 'string') return
     await deleteDoc(doc(db, 'spots', spotId))
@@ -92,5 +76,5 @@ export function useSpots(user) {
 
   const mySpots = user ? spots.filter(s => s.authorId === user.uid) : []
 
-  return { spots, mySpots, totalCount, userCount, addSpot, updateSpot, deleteSpot, addContribution, getContributions }
+  return { spots, mySpots, totalCount, userCount, addSpot, updateSpot, deleteSpot }
 }
