@@ -140,7 +140,7 @@ function AppInner() {
       {selectedSpot && (
         <SpotDetailModal
           key={selectedSpot.id}
-          spot={selectedSpot}
+          spot={spots.find(s => s.id === selectedSpot.id) ?? selectedSpot}
           isSaved={savedSpots.includes(selectedSpot.id)}
           onSave={() => handleSaveToggle(selectedSpot.id)}
           isLiked={likedSpots.includes(selectedSpot.id)}
