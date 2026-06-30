@@ -57,8 +57,18 @@ export function AuthProvider({ children }) {
 
   const logout = () => signOut(auth)
 
+  const updateNickname = async (nickname) => {
+    if (!auth.currentUser) return
+    const name = nickname.trim()
+    if (!name) return
+
+    await updateProfile(auth.currentUser, { displayName: name })
+    await setDoc(doc(db, 'users', auth.currentUser.uid), { displayName: name }, { merge: true })
+    setUser(u => ({ ...u, displayName: name }))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loginWithGoogle, loginWithEmail, signupWithEmail, logout }}>
+    <AuthContext.Provider value={{ user, loginWithGoogle, loginWithEmail, signupWithEmail, logout, updateNickname }}>
       {children}
     </AuthContext.Provider>
   )
