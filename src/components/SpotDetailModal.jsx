@@ -137,13 +137,15 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
           >
             방문자 사진 <span className="tab-count">{allCommunity.length}</span>
           </button>
-          {user ? (
-            <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
-              {uploading ? '업로드 중...' : '+ 내 사진 추가'}
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} hidden />
-            </label>
-          ) : (
-            <button className="btn-upload-photo" onClick={onAuthOpen}>+ 내 사진 추가</button>
+          {activeSource === 'original' && (
+            user ? (
+              <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
+                {uploading ? '업로드 중...' : '+ 내 사진 추가'}
+                <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} hidden />
+              </label>
+            ) : (
+              <button className="btn-upload-photo" onClick={onAuthOpen}>+ 내 사진 추가</button>
+            )
           )}
         </div>
 
