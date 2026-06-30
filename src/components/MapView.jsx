@@ -7,6 +7,7 @@ const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
 export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, user, onAuthOpen }) {
   const mapRef = useRef(null)
   const mapInstance = useRef(null)
+  const markersRef = useRef([])
   const [mapReady, setMapReady] = useState(false)
   const [activeFilter, setActiveFilter] = useState('전체')
   const [searchQuery, setSearchQuery] = useState('')
@@ -113,9 +114,23 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
     event.addListener(map, 'dragend', saveMapState)
     event.addListener(map, 'zoom_changed', saveMapState)
 
+    event.addListener(map, 'click', () => setPreviewSpot(null))
+
+    setMapReady(true)
+  }
+
+  useEffect(() => {
+    const map = mapInstance.current
+    if (!map || !window.kakao?.maps) return
+    const { LatLng, Marker, InfoWindow, event } = window.kakao.maps
+
+    markersRef.current.forEach(marker => marker.setMap(null))
+    markersRef.current = []
+
     spots.forEach(spot => {
       const pos = new LatLng(spot.lat, spot.lng)
       const marker = new Marker({ position: pos, map })
+      markersRef.current.push(marker)
 
       const infoContent = `
         <div style="padding:6px 10px;font-size:12px;font-weight:600;
@@ -128,11 +143,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
       event.addListener(marker, 'mouseout', () => infoWindow.close())
       event.addListener(marker, 'click', () => setPreviewSpot(spot))
     })
-
-    event.addListener(map, 'click', () => setPreviewSpot(null))
-
-    setMapReady(true)
-  }
+  }, [spots, mapReady])
 
   return (
     <div className="map-view">
