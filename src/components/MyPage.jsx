@@ -3,12 +3,35 @@ import { useAuth } from '../contexts/AuthContext'
 import { isEmailVerified } from '../utils/auth'
 import './MyPage.css'
 
+// 아바타용이라 작게 압축 (Firebase Auth photoURL에 data URL 그대로 저장)
+function compressAvatar(file, maxSize = 240, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height))
+      const width = Math.round(img.width * scale)
+      const height = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL('image/jpeg', quality))
+    }
+    img.onerror = () => reject(new Error('이미지를 불러올 수 없어요'))
+    img.src = url
+  })
+}
+
 export default function MyPage({ onAuthOpen, onNavigate }) {
-  const { user, logout, updateNickname, resendVerification, refreshUser } = useAuth() ?? {}
+  const { user, logout, updateNickname, updatePhoto, resendVerification, refreshUser } = useAuth() ?? {}
   const [editing, setEditing] = useState(false)
   const [nicknameInput, setNicknameInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
   const [verifyStatus, setVerifyStatus] = useState('')
   const [verifyLoading, setVerifyLoading] = useState(false)
 
@@ -53,6 +76,22 @@ export default function MyPage({ onAuthOpen, onNavigate }) {
     }
   }
 
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoUploading(true); setPhotoError('')
+    try {
+      const dataUrl = await compressAvatar(file)
+      await updatePhoto(dataUrl)
+    } catch (err) {
+      console.error('프로필 사진 변경 실패:', err)
+      setPhotoError('변경에 실패했어요. 다시 시도해주세요.')
+    } finally {
+      setPhotoUploading(false)
+      e.target.value = ''
+    }
+  }
+
   const handleResendVerification = async () => {
     setVerifyLoading(true); setVerifyStatus('')
     try {
@@ -91,11 +130,16 @@ export default function MyPage({ onAuthOpen, onNavigate }) {
 
       <div className="mypage-header">
         <div className="mypage-profile">
-          {user.photoURL
-            ? <img src={user.photoURL} alt="" className="mypage-avatar" onError={e => { e.target.style.display = 'none' }} />
-            : <div className="mypage-avatar-placeholder">{initial}</div>
-          }
+          <label className={`mypage-avatar-wrap ${photoUploading ? 'loading' : ''}`}>
+            {user.photoURL
+              ? <img src={user.photoURL} alt="" className="mypage-avatar" onError={e => { e.target.style.display = 'none' }} />
+              : <div className="mypage-avatar-placeholder">{initial}</div>
+            }
+            <span className="mypage-avatar-edit">{photoUploading ? '...' : '✏️'}</span>
+            <input type="file" accept="image/*" onChange={handlePhotoChange} hidden disabled={photoUploading} />
+          </label>
           <div className="mypage-info">
+            {photoError && <p className="nickname-error">⚠ {photoError}</p>}
             {editing ? (
               <div className="nickname-edit">
                 <input

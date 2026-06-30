@@ -90,9 +90,16 @@ export function AuthProvider({ children }) {
     setUser(u => ({ ...u, displayName: name }))
   }
 
+  const updatePhoto = async (photoDataUrl) => {
+    if (!auth.currentUser) return
+    await updateProfile(auth.currentUser, { photoURL: photoDataUrl })
+    await setDoc(doc(db, 'users', auth.currentUser.uid), { photoURL: photoDataUrl }, { merge: true })
+    setUser(u => ({ ...u, photoURL: photoDataUrl }))
+  }
+
   return (
     <AuthContext.Provider value={{
-      user, loginWithGoogle, loginWithEmail, signupWithEmail, logout, updateNickname,
+      user, loginWithGoogle, loginWithEmail, signupWithEmail, logout, updateNickname, updatePhoto,
       resendVerification, refreshUser,
     }}>
       {children}
