@@ -15,9 +15,11 @@ import RegisterView from './components/RegisterView'
 import SpotDetailModal from './components/SpotDetailModal'
 import AuthModal from './components/AuthModal'
 import AuthRequired from './components/AuthRequired'
+import EmailVerifyRequired from './components/EmailVerifyRequired'
 import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
 import { isAdmin } from './utils/admin'
+import { isEmailVerified } from './utils/auth'
 import './App.css'
 
 // URL → view 이름 매핑 (Navbar/BottomTabBar 호환)
@@ -113,14 +115,16 @@ function AppInner() {
         } />
 
         <Route path="/register" element={
-          user
-            ? <RegisterView addSpot={addSpot} updateSpot={updateSpot} editingSpot={editingSpot} onNavigate={handleNavigate} />
-            : <AuthRequired
+          !user
+            ? <AuthRequired
                 icon="📍"
                 title="로그인이 필요해요"
                 description="스팟을 등록하려면 로그인하세요."
                 onAuthOpen={() => setAuthOpen(true)}
               />
+            : isEmailVerified(user)
+              ? <RegisterView addSpot={addSpot} updateSpot={updateSpot} editingSpot={editingSpot} onNavigate={handleNavigate} />
+              : <EmailVerifyRequired />
         } />
 
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => handleNavigate('home')} />} />

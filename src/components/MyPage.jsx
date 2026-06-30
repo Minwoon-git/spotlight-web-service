@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { isEmailVerified } from '../utils/auth'
 import './MyPage.css'
 
 export default function MyPage({ onAuthOpen, onNavigate }) {
-  const { user, logout, updateNickname } = useAuth() ?? {}
+  const { user, logout, updateNickname, resendVerification, refreshUser } = useAuth() ?? {}
   const [editing, setEditing] = useState(false)
   const [nicknameInput, setNicknameInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [verifyStatus, setVerifyStatus] = useState('')
+  const [verifyLoading, setVerifyLoading] = useState(false)
 
   if (!user) {
     return (
@@ -50,8 +53,42 @@ export default function MyPage({ onAuthOpen, onNavigate }) {
     }
   }
 
+  const handleResendVerification = async () => {
+    setVerifyLoading(true); setVerifyStatus('')
+    try {
+      await resendVerification()
+      setVerifyStatus('인증 메일을 다시 보냈어요.')
+    } catch {
+      setVerifyStatus('전송에 실패했어요. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  const handleCheckVerification = async () => {
+    setVerifyLoading(true); setVerifyStatus('')
+    try {
+      await refreshUser()
+    } catch {
+      setVerifyStatus('확인에 실패했어요. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
   return (
     <div className="mypage">
+      {!isEmailVerified(user) && (
+        <div className="verify-banner">
+          <span>📧 이메일 인증이 완료되지 않았어요. 인증해야 스팟을 등록할 수 있어요.</span>
+          {verifyStatus && <span className="verify-banner-status">{verifyStatus}</span>}
+          <div className="verify-banner-actions">
+            <button onClick={handleCheckVerification} disabled={verifyLoading}>인증 완료했어요</button>
+            <button onClick={handleResendVerification} disabled={verifyLoading}>메일 재전송</button>
+          </div>
+        </div>
+      )}
+
       <div className="mypage-header">
         <div className="mypage-profile">
           {user.photoURL

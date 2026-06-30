@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification,
   signOut,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc, serverTimestamp, increment } from 'firebase/firestore'
@@ -57,7 +58,19 @@ export function AuthProvider({ children }) {
         termsAgreedAt: serverTimestamp(),
         privacyAgreedAt: serverTimestamp(),
       }, { merge: true })
+      await sendEmailVerification(user)
     })
+
+  const resendVerification = () => {
+    if (!auth.currentUser) return
+    return sendEmailVerification(auth.currentUser)
+  }
+
+  const refreshUser = async () => {
+    if (!auth.currentUser) return
+    await auth.currentUser.reload()
+    setUser({ ...auth.currentUser })
+  }
 
   const logout = () => signOut(auth)
 
@@ -72,7 +85,10 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loginWithGoogle, loginWithEmail, signupWithEmail, logout, updateNickname }}>
+    <AuthContext.Provider value={{
+      user, loginWithGoogle, loginWithEmail, signupWithEmail, logout, updateNickname,
+      resendVerification, refreshUser,
+    }}>
       {children}
     </AuthContext.Provider>
   )
