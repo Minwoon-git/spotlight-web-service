@@ -267,6 +267,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
   })
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const addPhotos = (files) => {
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
@@ -304,35 +305,43 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    let photoUrls
-    if (form.photos.length > 0) {
-      try {
-        const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
-        photoUrls = results.filter(Boolean)
-      } catch {}
-    }
-    if (!photoUrls || photoUrls.length === 0) {
-      photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
-    }
+    setSubmitting(true)
+    try {
+      let photoUrls
+      if (form.photos.length > 0) {
+        try {
+          const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
+          photoUrls = results.filter(Boolean)
+        } catch {}
+      }
+      if (!photoUrls || photoUrls.length === 0) {
+        photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
+      }
 
-    const data = {
-      name: form.name,
-      address: form.location.address,
-      lat: form.location.lat,
-      lng: form.location.lng,
-      tags: form.tags,
-      photos: photoUrls,
-      description: form.description,
-      bestTime: form.bestTime,
-    }
+      const data = {
+        name: form.name,
+        address: form.location.address,
+        lat: form.location.lat,
+        lng: form.location.lng,
+        tags: form.tags,
+        photos: photoUrls,
+        description: form.description,
+        bestTime: form.bestTime,
+      }
 
-    if (isEdit) {
-      await updateSpot(editingSpot.id, data)
-    } else {
-      addSpot(data)
-    }
+      if (isEdit) {
+        await updateSpot(editingSpot.id, data)
+      } else {
+        await addSpot(data)
+      }
 
-    setSubmitted(true)
+      setSubmitted(true)
+    } catch (err) {
+      console.error('스팟 저장 실패:', err)
+      setErrors(v => ({ ...v, submit: '저장 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.' }))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -454,8 +463,10 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
               {errors.location && <span className="error-msg">⚠ {errors.location}</span>}
             </div>
 
-            <button type="submit" className="btn-submit">
-              {isEdit ? '수정 완료' : '스팟 등록하기'}
+            {errors.submit && <span className="error-msg">⚠ {errors.submit}</span>}
+
+            <button type="submit" className="btn-submit" disabled={submitting}>
+              {submitting ? '저장 중...' : (isEdit ? '수정 완료' : '스팟 등록하기')}
             </button>
           </div>
         </form>

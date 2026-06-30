@@ -42,7 +42,7 @@ function AppInner() {
   const view = PATH_TO_VIEW[location.pathname] ?? 'home'
 
   const handleNavigate = (v) => {
-    if (v !== 'register') setEditingSpot(null)
+    setEditingSpot(null)
     const pathMap = {
       home: '/main', explore: '/explore', mymap: '/mymap',
       register: '/register', mypage: '/mypage', privacy: '/privacy',
