@@ -137,6 +137,41 @@
   cursor: pointer;
 }
 
+.mypage-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.mypage-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.mypage-menu-item:hover { background: var(--border-light); }
+
+.mypage-menu-icon { font-size: 20px; }
+
+.mypage-menu-label { flex: 1; }
+
+.mypage-menu-arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
 .mypage-footer {
   margin-top: 48px;
   padding-top: 24px;

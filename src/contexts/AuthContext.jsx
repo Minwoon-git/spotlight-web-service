@@ -23,14 +23,21 @@ export function AuthProvider({ children }) {
       try {
         const userRef = doc(db, 'users', u.uid)
         const snapshot = await getDoc(userRef)
+        const isNewUser = !snapshot.exists()
+        const needsStatCount = isNewUser || !snapshot.data()?.countedInStats
 
         await setDoc(userRef, {
           displayName: u.displayName ?? null,
           email: u.email ?? null,
           lastLoginAt: serverTimestamp(),
           loginCount: increment(1),
-          ...(snapshot.exists() ? {} : { createdAt: serverTimestamp() }),
+          countedInStats: true,
+          ...(isNewUser ? { createdAt: serverTimestamp() } : {}),
         }, { merge: true })
+
+        if (needsStatCount) {
+          await setDoc(doc(db, 'stats', 'global'), { userCount: increment(1) }, { merge: true })
+        }
       } catch (e) {
         console.error('[AuthContext] 접속 기록 저장 실패:', e)
       }

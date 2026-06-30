@@ -1,4 +1,10 @@
 import { useState, useRef } from 'react'
+
+const extractTime = (str) => {
+  if (!str) return ''
+  const match = str.match(/\d{1,2}:\d{2}~\d{1,2}:\d{2}/)
+  return match ? match[0] : str
+}
 import { useAuth } from '../contexts/AuthContext'
 import './SpotDetailModal.css'
 
@@ -20,12 +26,29 @@ function compressImage(file, maxWidth = 1920, quality = 0.85) {
   })
 }
 
-export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contributions = [], onAddContribution, onAuthOpen }) {
+export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike, onClose, contributions = [], onAddContribution, onAuthOpen }) {
   const { user } = useAuth() ?? {}
   const [activePhoto, setActivePhoto] = useState(0)
   const [activeSource, setActiveSource] = useState('original')
   const [uploading, setUploading] = useState(false)
+  const [liked, setLiked] = useState(isLiked)
+  const [likeCount, setLikeCount] = useState(() => {
+    const base = spot.likes ?? 0
+    if (typeof spot.id === 'string') {
+      // Firestore 스팟: likes 카운트가 isLiked를 반영 못한 경우 보정
+      return isLiked ? Math.max(base, 1) : base
+    }
+    return base + (isLiked ? 1 : 0)
+  })
   const fileRef = useRef(null)
+
+  const handleLikeClick = () => {
+    if (!user) { onAuthOpen(); return }
+    const next = !liked
+    setLiked(next)
+    setLikeCount(c => Math.max(0, c + (next ? 1 : -1)))
+    onLike()
+  }
 
   const allOriginal = spot.photos
   const allCommunity = contributions
@@ -80,7 +103,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
             className={`photo-tab ${activeSource === 'community' ? 'active' : ''}`}
             onClick={() => { setActiveSource('community'); setActivePhoto(0) }}
           >
-            커뮤니티 사진 <span className="tab-count">{allCommunity.length}</span>
+            방문자 사진 <span className="tab-count">{allCommunity.length}</span>
           </button>
           {user ? (
             <label className={`btn-upload-photo ${uploading ? 'loading' : ''}`}>
@@ -120,7 +143,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
             </>
           ) : (
             <div className="gallery-empty">
-              <p>아직 커뮤니티 사진이 없어요</p>
+              <p>아직 방문자 사진이 없어요</p>
               <p>이 장소에서 찍은 사진을 올려보세요!</p>
               {user ? (
               <label className="btn-upload-empty">
@@ -138,7 +161,7 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
         <div className="modal-info">
           <div className="info-row">
             <span className="info-label">최적 촬영 시간</span>
-            <span className="info-value">{spot.bestTime}</span>
+            <span className="info-value">{extractTime(spot.bestTime)}</span>
           </div>
           <div className="info-row">
             <span className="info-label">등록자</span>
@@ -158,9 +181,16 @@ export default function SpotDetailModal({ spot, isSaved, onSave, onClose, contri
 
         <div className="modal-footer">
           <div className="modal-stats">
-            <span>좋아요 {(spot.likes ?? 0).toLocaleString()}</span>
+            <button
+              className={`like-btn ${liked ? 'liked' : ''}`}
+              onClick={handleLikeClick}
+              aria-pressed={liked}
+            >
+              <span className="like-icon">{liked ? '❤️' : '🤍'}</span>
+              좋아요 {likeCount.toLocaleString()}
+            </button>
             <span>저장 {(spot.saves ?? 0).toLocaleString()}</span>
-            <span>커뮤니티 사진 {allCommunity.length}장</span>
+            <span>방문자 사진 {allCommunity.length}장</span>
           </div>
         </div>
 

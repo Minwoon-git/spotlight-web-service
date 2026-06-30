@@ -168,6 +168,28 @@
   font-weight: 500;
 }
 
+.sort-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.sort-tab {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  background: none;
+  transition: all 0.15s;
+}
+
+.sort-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
 .btn-register-small {
   background: var(--accent-light);
   color: var(--accent);

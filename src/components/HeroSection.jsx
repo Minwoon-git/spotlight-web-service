@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import SpotCard from './SpotCard'
 import MobileHeader from './MobileHeader'
 import './HeroSection.css'
@@ -28,13 +28,22 @@ const REGIONS = [
   { name: '경주', emoji: '🏛️' },
 ]
 
-export default function HeroSection({ spots, totalCount, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
-  const featured = [...spots].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, 3)
+export default function HeroSection({ spots, totalCount, userCount, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
+  const top10 = [...spots].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, 10)
   const spotCount = totalCount ?? spots.length
   const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
   const scrollRef = useRef(null)
+  const trackRef = useRef(null)
+  const [isPaused, setIsPaused] = useState(false)
 
   useScrollReveal()
+
+  // 무한 순환 애니메이션 — CSS animation 방식
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    track.style.animationPlayState = isPaused ? 'paused' : 'running'
+  }, [isPaused])
 
   const scrollToFeatured = () => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -83,7 +92,7 @@ export default function HeroSection({ spots, totalCount, onExplore, onRegister, 
           </div>
           <div className="stat-divider" />
           <div className="stat">
-            <span className="stat-num">1</span>
+            <span className="stat-num">{userCount}</span>
             <span className="stat-label">사용자</span>
           </div>
         </div>
@@ -118,12 +127,20 @@ export default function HeroSection({ spots, totalCount, onExplore, onRegister, 
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
             </button>
           </div>
-          <div className="spot-grid">
-            {featured.map((spot, i) => (
-              <div key={spot.id} className="card-reveal" style={{ animationDelay: `${i * 0.1}s` }}>
-                <SpotCard spot={spot} onClick={() => onSelectSpot(spot)} />
-              </div>
-            ))}
+
+          {/* 자동 순환 캐러셀 */}
+          <div
+            className="carousel-outer"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <div className="carousel-track" ref={trackRef}>
+              {[...top10, ...top10].map((spot, i) => (
+                <div key={`${spot.id}-${i}`} className="carousel-item">
+                  <SpotCard spot={spot} onClick={() => onSelectSpot(spot)} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -217,7 +234,10 @@ export default function HeroSection({ spots, totalCount, onExplore, onRegister, 
             <span className="footer-logo">SpotLight</span>
             <span className="footer-tagline">숨은 명소를 함께 발견해요</span>
           </div>
-          <span className="footer-copy">© 2026 SpotLight. All rights reserved.</span>
+          <div className="footer-right">
+            <button className="footer-link" onClick={() => onNavigate('privacy')}>개인정보 처리방침</button>
+            <span className="footer-copy">© 2026 SpotLight. All rights reserved.</span>
+          </div>
         </div>
       </footer>
     </div>

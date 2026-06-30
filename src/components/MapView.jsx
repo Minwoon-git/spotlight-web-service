@@ -14,20 +14,29 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768)
   const [previewSpot, setPreviewSpot] = useState(null)
 
-  const filters = ['전체', '일출', '일몰', '야경', '자연', '도심']
+  const [sortOrder, setSortOrder] = useState('인기순')
 
-  const filteredSpots = spots.filter(spot => {
-    const matchFilter =
-      activeFilter === '전체' ||
-      spot.tags.some(t => t.toLowerCase().includes(activeFilter.toLowerCase())) ||
-      spot.name.includes(activeFilter)
-    const matchSearch =
-      !searchQuery ||
-      spot.name.includes(searchQuery) ||
-      spot.address.includes(searchQuery) ||
-      spot.tags.some(t => t.includes(searchQuery))
-    return matchFilter && matchSearch
-  })
+  const categoryFilters = ['전체', '일출', '일몰', '야경', '자연', '도심']
+
+  const filteredSpots = spots
+    .filter(spot => {
+      const matchCategory =
+        activeFilter === '전체' ||
+        spot.tags.some(t => t.toLowerCase().includes(activeFilter.toLowerCase())) ||
+        spot.name.includes(activeFilter)
+      const matchSearch =
+        !searchQuery ||
+        spot.name.includes(searchQuery) ||
+        spot.address.includes(searchQuery) ||
+        spot.tags.some(t => t.includes(searchQuery))
+      return matchCategory && matchSearch
+    })
+    .sort((a, b) => {
+      if (sortOrder === '인기순') return (b.likes ?? 0) - (a.likes ?? 0)
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt ?? 0)
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt ?? 0)
+      return dateB - dateA
+    })
 
   useEffect(() => {
     if (!mapInstance.current || window.innerWidth > 768) return
@@ -178,22 +187,26 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
           </div>
 
           <div className="filter-chips">
-            {filters.map(f => (
+            {categoryFilters.map(f => (
               <button
                 key={f}
                 className={`filter-chip ${activeFilter === f ? 'active' : ''}`}
                 onClick={() => setActiveFilter(f)}
-              >
-                {f}
-              </button>
+              >{f}</button>
             ))}
           </div>
 
           <div className="sidebar-count">
             <span>{filteredSpots.length}개의 스팟</span>
-            <button className="btn-register-small" onClick={onRegister}>
-              + 스팟 등록
-            </button>
+            <div className="sort-tabs">
+              {['인기순', '최신순'].map(s => (
+                <button
+                  key={s}
+                  className={`sort-tab ${sortOrder === s ? 'active' : ''}`}
+                  onClick={() => setSortOrder(s)}
+                >{s}</button>
+              ))}
+            </div>
           </div>
         </div>
 

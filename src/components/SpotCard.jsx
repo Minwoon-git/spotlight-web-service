@@ -1,5 +1,11 @@
 import './SpotCard.css'
 
+const extractTime = (str) => {
+  if (!str) return ''
+  const match = str.match(/\d{1,2}:\d{2}~\d{1,2}:\d{2}/)
+  return match ? match[0] : str
+}
+
 export default function SpotCard({ spot, onClick, isSaved, onSave, compact }) {
   return (
     <div className={`spot-card ${compact ? 'compact' : ''}`} onClick={onClick}>
@@ -28,8 +34,8 @@ export default function SpotCard({ spot, onClick, isSaved, onSave, compact }) {
         <h3 className="spot-name">{spot.name}</h3>
         <p className="spot-addr">{spot.address}</p>
         <div className="spot-meta">
-          <span className="spot-likes">좋아요 {(spot.likes ?? 0).toLocaleString()}</span>
-          <span className="spot-besttime">{spot.bestTime}</span>
+          <span className="spot-likes">좋아요 {Math.max(0, spot.likes ?? 0).toLocaleString()}</span>
+          {extractTime(spot.bestTime) && <span className="spot-besttime">{extractTime(spot.bestTime)}</span>}
         </div>
       </div>
     </div>

@@ -1,0 +1,40 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="#1e293b" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="#1e293b" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="#1e293b" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="#1e293b" stroke-width="1"/>
+  <ellipse cx="820" cy="320" rx="280" ry="220" fill="#3b82f6" opacity="0.08"/>
+  <ellipse cx="900" cy="280" rx="180" ry="150" fill="#6366f1" opacity="0.1"/>
+  <circle cx="750" cy="200" r="5" fill="#3b82f6" opacity="0.5"/>
+  <circle cx="820" cy="300" r="7" fill="#3b82f6" opacity="0.8"/>
+  <circle cx="950" cy="250" r="5" fill="#6366f1" opacity="0.5"/>
+  <circle cx="1020" cy="350" r="6" fill="#3b82f6" opacity="0.6"/>
+  <circle cx="870" cy="420" r="4" fill="#818cf8" opacity="0.5"/>
+  <circle cx="700" cy="380" r="5" fill="#3b82f6" opacity="0.4"/>
+  <circle cx="1060" cy="200" r="4" fill="#6366f1" opacity="0.4"/>
+  <circle cx="780" cy="460" r="3" fill="#3b82f6" opacity="0.4"/>
+  <circle cx="990" cy="430" r="4" fill="#818cf8" opacity="0.3"/>
+  <line x1="750" y1="200" x2="820" y2="300" stroke="#3b82f6" stroke-width="0.8" opacity="0.3"/>
+  <line x1="820" y1="300" x2="950" y2="250" stroke="#3b82f6" stroke-width="0.8" opacity="0.3"/>
+  <line x1="950" y1="250" x2="1020" y2="350" stroke="#6366f1" stroke-width="0.8" opacity="0.3"/>
+  <line x1="820" y1="300" x2="870" y2="420" stroke="#3b82f6" stroke-width="0.8" opacity="0.2"/>
+  <circle cx="820" cy="260" r="28" fill="#2563eb" opacity="0.2"/>
+  <circle cx="820" cy="260" r="18" fill="#3b82f6"/>
+  <path d="M820 251 C815 251 811 255 811 260 C811 266 820 276 820 276 C820 276 829 266 829 260 C829 255 825 251 820 251Z" fill="white"/>
+  <circle cx="820" cy="260" r="4" fill="#3b82f6"/>
+  <circle cx="140" cy="200" r="6" fill="#3b82f6"/>
+  <text x="160" y="208" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700" fill="#3b82f6" letter-spacing="1">SpotLight</text>
+  <rect x="140" y="240" width="480" height="2" fill="#1e3a5f" rx="1"/>
+  <text x="140" y="310" font-family="system-ui, -apple-system, sans-serif" font-size="58" font-weight="800" fill="#f8fafc" letter-spacing="-1">숨은 사진 명소를</text>
+  <text x="140" y="380" font-family="system-ui, -apple-system, sans-serif" font-size="58" font-weight="800" fill="#f8fafc" letter-spacing="-1">지도에 기록하세요</text>
+  <rect x="140" y="392" width="200" height="4" fill="#3b82f6" rx="2"/>
+  <text x="140" y="450" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#94a3b8">나만 알던 포토스팟을 발견하고 공유하는 커뮤니티</text>
+  <rect x="140" y="490" width="120" height="36" rx="18" fill="#1e3a5f"/>
+  <text x="200" y="513" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#60a5fa" text-anchor="middle"># 일출 명소</text>
+  <rect x="272" y="490" width="130" height="36" rx="18" fill="#1e293b"/>
+  <text x="337" y="513" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#818cf8" text-anchor="middle"># 야경 포토스팟</text>
+  <rect x="414" y="490" width="110" height="36" rx="18" fill="#1e293b"/>
+  <text x="469" y="513" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#94a3b8" text-anchor="middle"># 출사 명소</text>
+  <text x="140" y="590" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="400" fill="#475569">spotlight-web-service.vercel.app</text>
+</svg>

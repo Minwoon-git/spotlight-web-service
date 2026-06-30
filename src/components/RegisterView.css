@@ -29,11 +29,20 @@
   color: var(--text-secondary);
 }
 
-/* ── 세로 단일 레이아웃 ── */
-.register-layout {
+/* ── 상단 반반 ── */
+.register-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+
+/* ── 하단 전체 너비 ── */
+.register-bottom {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 /* ── 사진 영역 ── */
@@ -43,6 +52,14 @@
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.register-left .photo-drop {
+  flex: 1;
+  aspect-ratio: unset;
+  min-height: 200px;
 }
 
 .section-label {
@@ -75,7 +92,7 @@
   background: var(--bg);
   transition: border-color 0.2s, box-shadow 0.2s;
   position: relative;
-  aspect-ratio: 16 / 7;
+  aspect-ratio: 4 / 3;
 }
 
 .photo-drop:hover {
@@ -287,7 +304,11 @@
 .register-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+}
+
+.register-right-section {
+  flex: 1;
+  height: 100%;
 }
 
 .form-section {
@@ -341,6 +362,34 @@
 
 .form-group input::placeholder,
 .form-group textarea::placeholder { color: var(--text-muted); }
+
+.time-select {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.time-select.placeholder {
+  color: var(--text-muted);
+}
+
+.time-select:focus {
+  border-color: var(--accent);
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
 
 .error-msg {
   font-size: 12px;
@@ -698,6 +747,7 @@
   .register-page-header h1 { font-size: 20px; }
   .register-page-header p { font-size: 13px; }
 
+  .register-top { grid-template-columns: 1fr; margin-bottom: 16px; }
   .register-left { padding: 16px; }
   .photo-drop { aspect-ratio: 16 / 9; }
   .photo-thumb-grid { grid-template-columns: repeat(4, 1fr); }

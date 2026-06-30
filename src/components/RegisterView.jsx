@@ -251,8 +251,16 @@ function compressImage(file, maxWidth = 1920, quality = 0.85) {
   })
 }
 
-export default function RegisterView({ addSpot, onNavigate }) {
-  const [form, setForm] = useState({
+export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavigate }) {
+  const isEdit = !!editingSpot
+  const [form, setForm] = useState(() => isEdit ? {
+    name: editingSpot.name ?? '',
+    description: editingSpot.description ?? '',
+    bestTime: editingSpot.bestTime ?? '',
+    tags: editingSpot.tags ?? [],
+    photos: [],
+    location: { lat: editingSpot.lat, lng: editingSpot.lng, address: editingSpot.address },
+  } : {
     name: '', description: '', bestTime: '',
     tags: [], photos: [], location: null,
   })
@@ -295,15 +303,18 @@ export default function RegisterView({ addSpot, onNavigate }) {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    let photoUrls = [FALLBACK_PHOTO]
+    let photoUrls
     if (form.photos.length > 0) {
       try {
         const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
         photoUrls = results.filter(Boolean)
       } catch {}
     }
+    if (!photoUrls || photoUrls.length === 0) {
+      photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
+    }
 
-    addSpot({
+    const data = {
       name: form.name,
       address: form.location.address,
       lat: form.location.lat,
@@ -312,7 +323,13 @@ export default function RegisterView({ addSpot, onNavigate }) {
       photos: photoUrls,
       description: form.description,
       bestTime: form.bestTime,
-    })
+    }
+
+    if (isEdit) {
+      await updateSpot(editingSpot.id, data)
+    } else {
+      addSpot(data)
+    }
 
     setSubmitted(true)
   }
@@ -322,15 +339,17 @@ export default function RegisterView({ addSpot, onNavigate }) {
       <div className="register-page">
         <div className="register-success">
           <div className="success-icon" />
-          <h2>스팟이 등록되었어요!</h2>
-          <p>지도에 바로 추가되었습니다.<br />소중한 명소를 공유해 주셔서 감사합니다.</p>
+          <h2>{isEdit ? '스팟이 수정되었어요!' : '스팟이 등록되었어요!'}</h2>
+          <p>{isEdit ? '변경 내용이 저장되었습니다.' : '지도에 바로 추가되었습니다.\n소중한 명소를 공유해 주셔서 감사합니다.'}</p>
           <div className="success-actions">
-            <button className="btn-outline" onClick={() => {
-              setSubmitted(false)
-              setForm({ name:'', description:'', bestTime:'', tags:[], photos:[], location:null })
-              setErrors({})
-            }}>추가 등록하기</button>
-            <button className="btn-filled" onClick={() => onNavigate('explore')}>지도에서 보기</button>
+            {!isEdit && (
+              <button className="btn-outline" onClick={() => {
+                setSubmitted(false)
+                setForm({ name:'', description:'', bestTime:'', tags:[], photos:[], location:null })
+                setErrors({})
+              }}>추가 등록하기</button>
+            )}
+            <button className="btn-filled" onClick={() => onNavigate('mymap')}>내 스팟 보기</button>
           </div>
         </div>
       </div>
@@ -341,125 +360,123 @@ export default function RegisterView({ addSpot, onNavigate }) {
     <div className="register-page">
       <div className="register-container">
         <div className="register-page-header">
-          <h1>스팟 등록</h1>
-          <p>나만 알던 촬영 명소를 지도에 추가해 모두와 공유하세요.</p>
+          <h1>{isEdit ? '스팟 수정' : '스팟 등록'}</h1>
+          <p>{isEdit ? '등록한 스팟 정보를 수정하세요.' : '나만 알던 촬영 명소를 지도에 추가해 모두와 공유하세요.'}</p>
         </div>
 
-        <form className="register-layout" onSubmit={handleSubmit}>
-          {/* ── 사진 ── */}
-          <div className="register-left">
-            <p className="section-label">
-              사진
-              {form.photos.length > 0 && (
-                <span className="photo-count">{form.photos.length} / 5</span>
-              )}
-            </p>
-
-            {/* 대표 사진 큰 영역 */}
-            {form.photos.length === 0 ? (
-              <label
-                className="photo-drop"
-                onDragOver={e => e.preventDefault()}
-                onDrop={handleDrop}
-              >
-                <div className="photo-empty">
-                  <div className="photo-empty-icon" />
-                  <p className="photo-empty-title">사진 업로드</p>
-                  <p className="photo-empty-hint">클릭하거나 드래그해서 추가<br/>최대 5장 · JPG · PNG · WEBP</p>
-                </div>
-                <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
-              </label>
-            ) : (
-              <div className="photo-main-wrap">
-                <img src={form.photos[0].preview} alt="main" className="photo-main" />
-                <div className="photo-main-badge">대표</div>
-              </div>
-            )}
-
-            {/* 썸네일 그리드 */}
-            {form.photos.length > 0 && (
-              <div className="photo-thumb-grid">
-                {form.photos.map((p, i) => (
-                  <div key={i} className={`photo-thumb-item ${i === 0 ? 'is-main' : ''}`}>
-                    <img src={p.preview} alt={`photo-${i}`} />
-                    <div className="thumb-actions">
-                      {i !== 0 && (
-                        <button type="button" className="thumb-btn" onClick={() => moveFirst(i)} title="대표로 설정">
-                          대표
-                        </button>
-                      )}
-                      <button type="button" className="thumb-remove" onClick={() => removePhoto(i)}>✕</button>
-                    </div>
-                  </div>
-                ))}
-                {form.photos.length < 5 && (
-                  <label className="photo-thumb-add">
-                    <span>+</span>
-                    <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
-                  </label>
+        <form onSubmit={handleSubmit}>
+          {/* ── 상단: 사진 | 기본정보 반반 ── */}
+          <div className="register-top">
+            <div className="register-left">
+              <p className="section-label">
+                사진
+                {form.photos.length > 0 && (
+                  <span className="photo-count">{form.photos.length} / 5</span>
                 )}
-              </div>
-            )}
-          </div>
+              </p>
 
-          {/* ── 오른쪽: 정보 ── */}
-          <div className="register-right">
+              {form.photos.length === 0 ? (
+                <label
+                  className="photo-drop"
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={handleDrop}
+                >
+                  <div className="photo-empty">
+                    <div className="photo-empty-icon" />
+                    <p className="photo-empty-title">사진 업로드</p>
+                    <p className="photo-empty-hint">클릭하거나 드래그해서 추가<br/>최대 5장 · JPG · PNG · WEBP</p>
+                  </div>
+                  <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
+                </label>
+              ) : (
+                <div className="photo-main-wrap">
+                  <img src={form.photos[0].preview} alt="main" className="photo-main" />
+                  <div className="photo-main-badge">대표</div>
+                </div>
+              )}
 
-            {/* 기본 정보 */}
-            <div className="form-section">
-              <p className="section-label">기본 정보</p>
-              <div className="form-group">
-                <label>스팟 이름 <span className="required">*</span></label>
-                <input
-                  type="text"
-                  placeholder="예: 북한산 소나무 숲 전망대"
-                  value={form.name}
-                  onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(v => ({ ...v, name: '' })) }}
-                />
-                {errors.name && <span className="error-msg">⚠ {errors.name}</span>}
-              </div>
-              <div className="form-group">
-                <label>최적 촬영 시간</label>
-                <input
-                  type="text"
-                  placeholder="예: 일출 직후 (06:00~07:30), 안개 낀 날 아침"
-                  value={form.bestTime}
-                  onChange={e => setForm(f => ({ ...f, bestTime: e.target.value }))}
-                />
-              </div>
+              {form.photos.length > 0 && (
+                <div className="photo-thumb-grid">
+                  {form.photos.map((p, i) => (
+                    <div key={i} className={`photo-thumb-item ${i === 0 ? 'is-main' : ''}`}>
+                      <img src={p.preview} alt={`photo-${i}`} />
+                      <div className="thumb-actions">
+                        {i !== 0 && (
+                          <button type="button" className="thumb-btn" onClick={() => moveFirst(i)}>대표</button>
+                        )}
+                        <button type="button" className="thumb-remove" onClick={() => removePhoto(i)}>✕</button>
+                      </div>
+                    </div>
+                  ))}
+                  {form.photos.length < 5 && (
+                    <label className="photo-thumb-add">
+                      <span>+</span>
+                      <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* 위치 */}
+            <div className="register-right">
+              <div className="form-section register-right-section">
+                <p className="section-label">기본 정보</p>
+                <div className="form-group">
+                  <label>스팟 이름 <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    placeholder="예: 북한산 소나무 숲 전망대"
+                    value={form.name}
+                    onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(v => ({ ...v, name: '' })) }}
+                  />
+                  {errors.name && <span className="error-msg">⚠ {errors.name}</span>}
+                </div>
+                <div className="form-group">
+                  <label>최적 촬영 시간</label>
+                  <select
+                    value={form.bestTime}
+                    onChange={e => setForm(f => ({ ...f, bestTime: e.target.value }))}
+                    className={`time-select ${!form.bestTime ? 'placeholder' : ''}`}
+                  >
+                    <option value="">시간대 선택</option>
+                    <option value="04:00~06:00">04:00~06:00</option>
+                    <option value="06:00~07:30">06:00~07:30</option>
+                    <option value="07:30~12:00">07:30~12:00</option>
+                    <option value="12:00~14:00">12:00~14:00</option>
+                    <option value="14:00~17:00">14:00~17:00</option>
+                    <option value="17:00~19:30">17:00~19:30</option>
+                    <option value="19:30~21:00">19:30~21:00</option>
+                    <option value="21:00~24:00">21:00~24:00</option>
+                    <option value="시간 무관">시간 무관</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>태그</label>
+                  <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
+                </div>
+                <div className="form-group">
+                  <label>스팟 소개</label>
+                  <textarea
+                    placeholder="이 장소의 특징, 촬영 팁, 방문 시 주의사항 등을 자유롭게 적어주세요."
+                    value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    rows={5}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── 하단: 위치 + 등록 버튼 ── */}
+          <div className="register-bottom">
             <div className="form-section">
               <p className="section-label">위치 <span className="required">*</span></p>
               <LocationPicker onSelect={loc => { setForm(f => ({ ...f, location: loc })); setErrors(v => ({ ...v, location: '' })) }} />
               {errors.location && <span className="error-msg">⚠ {errors.location}</span>}
             </div>
 
-            {/* 태그 */}
-            <div className="form-section">
-              <p className="section-label">태그</p>
-              <TagInput
-                tags={form.tags}
-                onChange={tags => setForm(f => ({ ...f, tags }))}
-              />
-            </div>
-
-            {/* 소개 */}
-            <div className="form-section">
-              <p className="section-label">스팟 소개</p>
-              <div className="form-group">
-                <textarea
-                  placeholder="이 장소의 특징, 촬영 팁, 방문 시 주의사항 등을 자유롭게 적어주세요."
-                  value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  rows={4}
-                />
-              </div>
-            </div>
-
             <button type="submit" className="btn-submit">
-              스팟 등록하기
+              {isEdit ? '수정 완료' : '스팟 등록하기'}
             </button>
           </div>
         </form>
