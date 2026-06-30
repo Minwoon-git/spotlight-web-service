@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import SuccessModal from './SuccessModal'
 import './RegisterView.css'
 
 const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
@@ -334,28 +335,6 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     setSubmitted(true)
   }
 
-  if (submitted) {
-    return (
-      <div className="register-page">
-        <div className="register-success">
-          <div className="success-icon" />
-          <h2>{isEdit ? '스팟이 수정되었어요!' : '스팟이 등록되었어요!'}</h2>
-          <p>{isEdit ? '변경 내용이 저장되었습니다.' : '지도에 바로 추가되었습니다.\n소중한 명소를 공유해 주셔서 감사합니다.'}</p>
-          <div className="success-actions">
-            {!isEdit && (
-              <button className="btn-outline" onClick={() => {
-                setSubmitted(false)
-                setForm({ name:'', description:'', bestTime:'', tags:[], photos:[], location:null })
-                setErrors({})
-              }}>추가 등록하기</button>
-            )}
-            <button className="btn-filled" onClick={() => onNavigate('mymap')}>내 스팟 보기</button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="register-page">
       <div className="register-container">
@@ -481,6 +460,24 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
           </div>
         </form>
       </div>
+
+      {submitted && (
+        <SuccessModal
+          title={isEdit ? '스팟이 수정되었어요!' : '스팟이 등록되었어요!'}
+          message={isEdit ? '변경 내용이 저장되었습니다.' : '지도에 바로 추가되었습니다.\n소중한 명소를 공유해 주셔서 감사합니다.'}
+          actions={[
+            ...(!isEdit ? [{
+              label: '추가 등록하기',
+              onClick: () => {
+                setSubmitted(false)
+                setForm({ name: '', description: '', bestTime: '', tags: [], photos: [], location: null })
+                setErrors({})
+              },
+            }] : []),
+            { label: '내 스팟 보기', primary: true, onClick: () => onNavigate('mymap') },
+          ]}
+        />
+      )}
     </div>
   )
 }
