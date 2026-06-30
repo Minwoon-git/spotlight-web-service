@@ -16,6 +16,7 @@ import SpotDetailModal from './components/SpotDetailModal'
 import AuthModal from './components/AuthModal'
 import AuthRequired from './components/AuthRequired'
 import PrivacyPolicy from './components/PrivacyPolicy'
+import TermsOfService from './components/TermsOfService'
 import './App.css'
 
 // URL → view 이름 매핑 (Navbar/BottomTabBar 호환)
@@ -26,6 +27,7 @@ const PATH_TO_VIEW = {
   '/register': 'register',
   '/mypage': 'mypage',
   '/privacy': 'privacy',
+  '/terms': 'terms',
 }
 
 function AppInner() {
@@ -47,7 +49,7 @@ function AppInner() {
     setEditingSpot(null)
     const pathMap = {
       home: '/main', explore: '/explore', mymap: '/mymap',
-      register: '/register', mypage: '/mypage', privacy: '/privacy',
+      register: '/register', mypage: '/mypage', privacy: '/privacy', terms: '/terms',
     }
     navigate(pathMap[v] ?? '/main')
   }
@@ -120,6 +122,7 @@ function AppInner() {
         } />
 
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => handleNavigate('home')} />} />
+        <Route path="/terms" element={<TermsOfService onBack={() => handleNavigate('home')} />} />
 
         {/* 루트 및 미매칭 → /main 리다이렉트 */}
         <Route path="/" element={<Navigate to="/main" replace />} />

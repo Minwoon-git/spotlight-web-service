@@ -7,7 +7,7 @@ export default function PrivacyPolicy({ onBack }) {
         <button className="privacy-back" onClick={onBack}>← 돌아가기</button>
 
         <h1 className="privacy-title">개인정보 처리방침</h1>
-        <p className="privacy-updated">최종 업데이트: 2026년 6월 24일</p>
+        <p className="privacy-updated">최종 업데이트: 2026년 6월 30일</p>
 
         <p className="privacy-intro">
           SpotLight(이하 "서비스")는 이용자의 개인정보를 중요하게 생각하며,
@@ -109,7 +109,7 @@ export default function PrivacyPolicy({ onBack }) {
             <li>개인정보 열람 요청</li>
             <li>개인정보 수정·삭제 요청</li>
             <li>개인정보 처리 정지 요청</li>
-            <li>회원 탈퇴 (서비스 내 탈퇴 기능 또는 이메일 요청)</li>
+            <li>회원 탈퇴 (아래 개인정보 관리 책임자에게 이메일로 요청)</li>
           </ul>
           <p>권리 행사는 아래 개인정보 관리 책임자에게 이메일로 요청하실 수 있습니다.</p>
         </section>
