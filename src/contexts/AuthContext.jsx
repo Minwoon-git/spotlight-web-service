@@ -13,6 +13,12 @@ import { auth, googleProvider, db } from '../firebase'
 
 const AuthContext = createContext(null)
 
+// 이메일 인증 링크를 Firebase 기본 페이지 대신 우리 앱(/auth/action)에서 처리하도록 지정
+const verificationActionCodeSettings = {
+  url: `${window.location.origin}/auth/action`,
+  handleCodeInApp: true,
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined)
 
@@ -58,12 +64,12 @@ export function AuthProvider({ children }) {
         termsAgreedAt: serverTimestamp(),
         privacyAgreedAt: serverTimestamp(),
       }, { merge: true })
-      await sendEmailVerification(user)
+      await sendEmailVerification(user, verificationActionCodeSettings)
     })
 
   const resendVerification = () => {
     if (!auth.currentUser) return
-    return sendEmailVerification(auth.currentUser)
+    return sendEmailVerification(auth.currentUser, verificationActionCodeSettings)
   }
 
   const refreshUser = async () => {

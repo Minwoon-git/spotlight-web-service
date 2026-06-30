@@ -16,6 +16,7 @@ import SpotDetailModal from './components/SpotDetailModal'
 import AuthModal from './components/AuthModal'
 import AuthRequired from './components/AuthRequired'
 import EmailVerifyRequired from './components/EmailVerifyRequired'
+import EmailActionHandler from './components/EmailActionHandler'
 import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
 import { isAdmin } from './utils/admin'
@@ -129,6 +130,7 @@ function AppInner() {
 
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => handleNavigate('home')} />} />
         <Route path="/terms" element={<TermsOfService onBack={() => handleNavigate('home')} />} />
+        <Route path="/auth/action" element={<EmailActionHandler onBack={() => handleNavigate('home')} />} />
 
         {/* 루트 및 미매칭 → /main 리다이렉트 */}
         <Route path="/" element={<Navigate to="/main" replace />} />
