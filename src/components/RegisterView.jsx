@@ -1,7 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { storage } from '../firebase'
-import { useAuth } from '../contexts/AuthContext'
 import SuccessModal from './SuccessModal'
 import './RegisterView.css'
 
@@ -233,37 +230,48 @@ function LocationPicker({ onSelect }) {
 /* ── 메인 등록 페이지 ── */
 const FALLBACK_PHOTO = 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&auto=format'
 
-function compressImage(file, maxWidth = 1920, quality = 0.85) {
-  return new Promise((resolve) => {
+// Firestore 문서 1MB 제한 안에 여러 장이 들어가도록 사진당 base64 용량 상한을 둔다.
+const MAX_PHOTOS = 4
+const PHOTO_BYTE_BUDGET = 180_000 // base64 인코딩 후 기준
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      let { width, height } = img
-      if (width > maxWidth) {
-        height = Math.round(height * maxWidth / width)
-        width = maxWidth
-      }
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-      canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality)
-    }
-    img.onerror = () => resolve(null)
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img) }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지를 불러올 수 없어요')) }
     img.src = url
   })
 }
 
-async function uploadPhoto(blob, uid) {
-  const path = `spots/${uid || 'anon'}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`
-  const fileRef = storageRef(storage, path)
-  await uploadBytes(fileRef, blob, { contentType: 'image/jpeg' })
-  return getDownloadURL(fileRef)
+function drawToDataURL(img, width, quality) {
+  const height = Math.round(img.height * width / img.width)
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+  return canvas.toDataURL('image/jpeg', quality)
+}
+
+// 목표 용량(PHOTO_BYTE_BUDGET) 아래로 내려갈 때까지 해상도/품질을 단계적으로 낮춘다.
+async function compressImage(file, maxBytes = PHOTO_BYTE_BUDGET) {
+  const img = await loadImage(file)
+  const widths = [1280, 960, 720, 480]
+  const qualities = [0.75, 0.6, 0.45]
+
+  let best = null
+  for (const width of widths) {
+    const targetWidth = Math.min(width, img.width)
+    for (const quality of qualities) {
+      const dataUrl = drawToDataURL(img, targetWidth, quality)
+      best = dataUrl
+      if (dataUrl.length <= maxBytes) return dataUrl
+    }
+  }
+  return best
 }
 
 export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavigate }) {
-  const { user } = useAuth() ?? {}
   const isEdit = !!editingSpot
   const [form, setForm] = useState(() => isEdit ? {
     name: editingSpot.name ?? '',
@@ -284,7 +292,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
     if (!imageFiles.length) return
     const previews = imageFiles.map(f => ({ file: f, preview: URL.createObjectURL(f) }))
-    setForm(f => ({ ...f, photos: [...f.photos, ...previews].slice(0, 5) }))
+    setForm(f => ({ ...f, photos: [...f.photos, ...previews].slice(0, MAX_PHOTOS) }))
   }
 
   const handlePhotoInput = (e) => addPhotos(e.target.files)
@@ -320,8 +328,10 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     try {
       let photoUrls
       if (form.photos.length > 0) {
-        const blobs = (await Promise.all(form.photos.map(p => compressImage(p.file)))).filter(Boolean)
-        photoUrls = (await Promise.all(blobs.map(b => uploadPhoto(b, user?.uid)))).filter(Boolean)
+        try {
+          const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
+          photoUrls = results.filter(Boolean)
+        } catch {}
       }
       if (!photoUrls || photoUrls.length === 0) {
         photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
@@ -368,7 +378,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
               <p className="section-label">
                 사진
                 {form.photos.length > 0 && (
-                  <span className="photo-count">{form.photos.length} / 5</span>
+                  <span className="photo-count">{form.photos.length} / {MAX_PHOTOS}</span>
                 )}
               </p>
 
@@ -381,7 +391,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                   <div className="photo-empty">
                     <div className="photo-empty-icon" />
                     <p className="photo-empty-title">사진 업로드</p>
-                    <p className="photo-empty-hint">클릭하거나 드래그해서 추가<br/>최대 5장 · JPG · PNG · WEBP</p>
+                    <p className="photo-empty-hint">클릭하거나 드래그해서 추가<br/>최대 {MAX_PHOTOS}장 · JPG · PNG · WEBP</p>
                   </div>
                   <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
                 </label>
@@ -405,7 +415,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                       </div>
                     </div>
                   ))}
-                  {form.photos.length < 5 && (
+                  {form.photos.length < MAX_PHOTOS && (
                     <label className="photo-thumb-add">
                       <span>+</span>
                       <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
