@@ -51,9 +51,13 @@ export function AuthProvider({ children }) {
     signInWithEmailAndPassword(auth, email, password)
 
   const signupWithEmail = (email, password, displayName) =>
-    createUserWithEmailAndPassword(auth, email, password).then(({ user }) =>
-      updateProfile(user, { displayName })
-    )
+    createUserWithEmailAndPassword(auth, email, password).then(async ({ user }) => {
+      await updateProfile(user, { displayName })
+      await setDoc(doc(db, 'users', user.uid), {
+        termsAgreedAt: serverTimestamp(),
+        privacyAgreedAt: serverTimestamp(),
+      }, { merge: true })
+    })
 
   const logout = () => signOut(auth)
 

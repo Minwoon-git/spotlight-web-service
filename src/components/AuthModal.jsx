@@ -7,7 +7,10 @@ export default function AuthModal({ onClose }) {
   const [tab, setTab] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [name, setName] = useState('')
+  const [agreeTerms, setAgreeTerms] = useState(false)
+  const [agreePrivacy, setAgreePrivacy] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -19,7 +22,14 @@ export default function AuthModal({ onClose }) {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setError(''); setLoading(true)
+    e.preventDefault(); setError('')
+
+    if (tab === 'signup') {
+      if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않아요.'); return }
+      if (!agreeTerms || !agreePrivacy) { setError('이용약관과 개인정보 처리방침에 동의해주세요.'); return }
+    }
+
+    setLoading(true)
     try {
       if (tab === 'login') await loginWithEmail(email, password)
       else await signupWithEmail(email, password, name)
@@ -68,9 +78,9 @@ export default function AuthModal({ onClose }) {
         <form onSubmit={handleSubmit} className="auth-form">
           {tab === 'signup' && (
             <div className="auth-field">
-              <label>이름</label>
-              <input type="text" placeholder="이름을 입력하세요" value={name}
-                onChange={e => setName(e.target.value)} required />
+              <label>닉네임</label>
+              <input type="text" placeholder="다른 사용자에게 보일 닉네임을 입력하세요" value={name}
+                onChange={e => setName(e.target.value)} maxLength={20} required />
             </div>
           )}
           <div className="auth-field">
@@ -83,6 +93,29 @@ export default function AuthModal({ onClose }) {
             <input type="password" placeholder={tab === 'signup' ? '6자 이상 입력하세요' : '비밀번호를 입력하세요'}
               value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
+          {tab === 'signup' && (
+            <div className="auth-field">
+              <label>비밀번호 확인</label>
+              <input type="password" placeholder="비밀번호를 다시 입력하세요"
+                value={passwordConfirm} onChange={e => setPasswordConfirm(e.target.value)} required />
+            </div>
+          )}
+          {tab === 'signup' && (
+            <div className="auth-agree">
+              <label className="auth-checkbox">
+                <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} />
+                <span>
+                  <a href="/terms" target="_blank" rel="noopener noreferrer">이용약관</a>에 동의합니다 (필수)
+                </span>
+              </label>
+              <label className="auth-checkbox">
+                <input type="checkbox" checked={agreePrivacy} onChange={e => setAgreePrivacy(e.target.checked)} />
+                <span>
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer">개인정보 처리방침</a>에 동의합니다 (필수)
+                </span>
+              </label>
+            </div>
+          )}
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading ? '처리 중...' : tab === 'login' ? '로그인' : '회원가입'}

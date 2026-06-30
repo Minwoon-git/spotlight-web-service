@@ -146,6 +146,35 @@
 .auth-field input:focus { border-color: var(--accent); }
 .auth-field input::placeholder { color: var(--text-muted); }
 
+.auth-agree {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: -4px;
+}
+
+.auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.auth-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.auth-checkbox a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 .auth-error {
   font-size: 13px;
   color: #EF4444;
