@@ -193,20 +193,35 @@ export default function SpotDetailModal({ spot, isSaved, onSave, isLiked, onLike
 
         {/* 스팟 정보 */}
         <div className="modal-info">
-          <div className="info-row">
-            <span className="info-label">최적 촬영 시간</span>
-            <span className="info-value">{extractTime(spot.bestTime)}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">등록자</span>
-            <span className="info-value">{spot.author}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">등록일</span>
-            <span className="info-value">
-              {spot.createdAt?.toDate ? spot.createdAt.toDate().toLocaleDateString('ko-KR') : spot.createdAt}
-            </span>
-          </div>
+          {activeSource === 'original' ? (
+            <>
+              <div className="info-row">
+                <span className="info-label">최적 촬영 시간</span>
+                <span className="info-value">{extractTime(spot.bestTime)}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">등록자</span>
+                <span className="info-value">{spot.author}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">등록일</span>
+                <span className="info-value">
+                  {spot.createdAt?.toDate ? spot.createdAt.toDate().toLocaleDateString('ko-KR') : spot.createdAt}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="info-row">
+                <span className="info-label">업로더</span>
+                <span className="info-value">{currentMeta?.[activePhoto]?.author ?? '-'}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">업로드일</span>
+                <span className="info-value">{formatContributionDate(currentMeta?.[activePhoto]?.createdAt) || '-'}</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="modal-desc">
