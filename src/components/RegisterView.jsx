@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '../firebase'
+import { useAuth } from '../contexts/AuthContext'
 import SuccessModal from './SuccessModal'
 import './RegisterView.css'
 
@@ -245,14 +248,22 @@ function compressImage(file, maxWidth = 1920, quality = 0.85) {
       canvas.width = width
       canvas.height = height
       canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-      resolve(canvas.toDataURL('image/jpeg', quality))
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality)
     }
     img.onerror = () => resolve(null)
     img.src = url
   })
 }
 
+async function uploadPhoto(blob, uid) {
+  const path = `spots/${uid || 'anon'}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`
+  const fileRef = storageRef(storage, path)
+  await uploadBytes(fileRef, blob, { contentType: 'image/jpeg' })
+  return getDownloadURL(fileRef)
+}
+
 export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavigate }) {
+  const { user } = useAuth() ?? {}
   const isEdit = !!editingSpot
   const [form, setForm] = useState(() => isEdit ? {
     name: editingSpot.name ?? '',
@@ -309,10 +320,8 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     try {
       let photoUrls
       if (form.photos.length > 0) {
-        try {
-          const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
-          photoUrls = results.filter(Boolean)
-        } catch {}
+        const blobs = (await Promise.all(form.photos.map(p => compressImage(p.file)))).filter(Boolean)
+        photoUrls = (await Promise.all(blobs.map(b => uploadPhoto(b, user?.uid)))).filter(Boolean)
       }
       if (!photoUrls || photoUrls.length === 0) {
         photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
