@@ -246,7 +246,13 @@ export default function SpotDetailModal({
               </div>
               <div className="info-row">
                 <span className="info-label">등록자</span>
-                <span className="info-value">{spot.author}</span>
+                <span className="info-value info-value-author">
+                  {spot.authorPhoto
+                    ? <img src={spot.authorPhoto} alt="" className="author-avatar" />
+                    : <span className="author-avatar-placeholder">{spot.author?.[0]?.toUpperCase()}</span>
+                  }
+                  {spot.author}
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">등록일</span>
@@ -259,7 +265,14 @@ export default function SpotDetailModal({
             <>
               <div className="info-row">
                 <span className="info-label">업로더</span>
-                <span className="info-value">{currentMeta?.[activePhoto]?.author ?? '-'}</span>
+                <span className="info-value info-value-author">
+                  {currentMeta?.[activePhoto] ? (
+                    currentMeta[activePhoto].authorPhoto
+                      ? <img src={currentMeta[activePhoto].authorPhoto} alt="" className="author-avatar" />
+                      : <span className="author-avatar-placeholder">{currentMeta[activePhoto].author?.[0]?.toUpperCase()}</span>
+                  ) : null}
+                  {currentMeta?.[activePhoto]?.author ?? '-'}
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">업로드일</span>

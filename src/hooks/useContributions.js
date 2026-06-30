@@ -21,6 +21,7 @@ export function useContributions(spotId, user) {
       photo,
       author: user?.displayName || user?.email?.split('@')[0] || '익명',
       authorId: user?.uid || null,
+      authorPhoto: user?.photoURL || null,
       createdAt: serverTimestamp(),
     })
   }

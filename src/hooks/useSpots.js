@@ -48,6 +48,7 @@ export function useSpots(user) {
       saves: 0,
       author: user?.displayName || user?.email?.split('@')[0] || '익명',
       authorId: user?.uid || null,
+      authorPhoto: user?.photoURL || null,
       createdAt: serverTimestamp(),
       isUserAdded: true,
     }
