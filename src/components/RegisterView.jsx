@@ -10,7 +10,7 @@ const TAG_SUGGESTIONS = [
   '#도심', '#골목', '#파노라마',
 ]
 
-const SEASON_OPTIONS = ['봄', '여름', '가을', '겨울']
+const SEASON_OPTIONS = ['봄', '여름', '가을', '겨울', '사계절']
 
 /* ── 태그 입력 컴포넌트 ── */
 function TagInput({ tags, onChange }) {
@@ -279,13 +279,13 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     name: editingSpot.name ?? '',
     description: editingSpot.description ?? '',
     bestTime: editingSpot.bestTime ?? '',
-    seasons: editingSpot.seasons ?? [],
+    season: editingSpot.season ?? '',
     tags: editingSpot.tags ?? [],
     photos: [],
     location: { lat: editingSpot.lat, lng: editingSpot.lng, address: editingSpot.address },
   } : {
     name: '', description: '', bestTime: '',
-    seasons: [], tags: [], photos: [], location: null,
+    season: '', tags: [], photos: [], location: null,
   })
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
@@ -346,7 +346,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
         lat: form.location.lat,
         lng: form.location.lng,
         tags: form.tags,
-        seasons: form.seasons,
+        season: form.season,
         photos: photoUrls,
         description: form.description,
         bestTime: form.bestTime,
@@ -462,28 +462,19 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>태그</label>
-                  <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
+                  <label>추천 계절</label>
+                  <select
+                    value={form.season}
+                    onChange={e => setForm(f => ({ ...f, season: e.target.value }))}
+                    className={`time-select ${!form.season ? 'placeholder' : ''}`}
+                  >
+                    <option value="">계절 선택</option>
+                    {SEASON_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
                 </div>
                 <div className="form-group">
-                  <label>추천 계절</label>
-                  <div className="season-checks">
-                    {SEASON_OPTIONS.map(s => (
-                      <label key={s} className="season-check-item">
-                        <input
-                          type="checkbox"
-                          checked={form.seasons.includes(s)}
-                          onChange={e => {
-                            const next = e.target.checked
-                              ? [...form.seasons, s]
-                              : form.seasons.filter(v => v !== s)
-                            setForm(f => ({ ...f, seasons: next }))
-                          }}
-                        />
-                        {s}
-                      </label>
-                    ))}
-                  </div>
+                  <label>태그</label>
+                  <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
                 </div>
                 <div className="form-group">
                   <label>스팟 소개</label>

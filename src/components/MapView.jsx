@@ -17,29 +17,17 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
   const [seasonFilter, setSeasonFilter] = useState('전체')
   const [timeFilter, setTimeFilter] = useState('전체')
 
-  const TIME_SLOTS = ['전체', '새벽', '오전', '오후', '일몰', '야경']
-  const SEASON_OPTIONS = ['전체', '봄', '여름', '가을', '겨울']
-
-  const getTimeSlot = (bestTime) => {
-    if (!bestTime || bestTime === '시간 무관') return null
-    const m = bestTime.match(/^(\d{2}):(\d{2})/)
-    if (!m) return null
-    const h = parseInt(m[1]) + parseInt(m[2]) / 60
-    if (h < 7) return '새벽'
-    if (h < 12) return '오전'
-    if (h < 17) return '오후'
-    if (h < 19.5) return '일몰'
-    return '야경'
-  }
+  const TIME_SLOTS = ['전체', '04:00~06:00', '06:00~07:30', '07:30~12:00', '12:00~14:00', '14:00~17:00', '17:00~19:30', '19:30~21:00', '21:00~24:00', '시간 무관']
+  const SEASON_OPTIONS = ['전체', '봄', '여름', '가을', '겨울', '사계절']
 
   const filteredSpots = spots
     .filter(spot => {
       const matchSeason =
         seasonFilter === '전체' ||
-        (spot.seasons ?? []).includes(seasonFilter)
+        spot.season === seasonFilter
       const matchTime =
         timeFilter === '전체' ||
-        getTimeSlot(spot.bestTime) === timeFilter
+        spot.bestTime === timeFilter
       const matchSearch =
         !searchQuery ||
         spot.name.includes(searchQuery) ||
