@@ -7,8 +7,10 @@ const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
 const TAG_SUGGESTIONS = [
   '#일출', '#일몰', '#야경', '#새벽', '#안개',
   '#자연', '#숲', '#산', '#강', '#바다', '#호수',
-  '#도심', '#골목', '#전통', '#파노라마', '#황금빛',
+  '#도심', '#골목', '#파노라마',
 ]
+
+const SEASON_OPTIONS = ['봄', '여름', '가을', '겨울']
 
 /* ── 태그 입력 컴포넌트 ── */
 function TagInput({ tags, onChange }) {
@@ -277,12 +279,13 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     name: editingSpot.name ?? '',
     description: editingSpot.description ?? '',
     bestTime: editingSpot.bestTime ?? '',
+    seasons: editingSpot.seasons ?? [],
     tags: editingSpot.tags ?? [],
     photos: [],
     location: { lat: editingSpot.lat, lng: editingSpot.lng, address: editingSpot.address },
   } : {
     name: '', description: '', bestTime: '',
-    tags: [], photos: [], location: null,
+    seasons: [], tags: [], photos: [], location: null,
   })
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
@@ -343,6 +346,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
         lat: form.location.lat,
         lng: form.location.lng,
         tags: form.tags,
+        seasons: form.seasons,
         photos: photoUrls,
         description: form.description,
         bestTime: form.bestTime,
@@ -462,6 +466,26 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                   <TagInput tags={form.tags} onChange={tags => setForm(f => ({ ...f, tags }))} />
                 </div>
                 <div className="form-group">
+                  <label>추천 계절</label>
+                  <div className="season-checks">
+                    {SEASON_OPTIONS.map(s => (
+                      <label key={s} className="season-check-item">
+                        <input
+                          type="checkbox"
+                          checked={form.seasons.includes(s)}
+                          onChange={e => {
+                            const next = e.target.checked
+                              ? [...form.seasons, s]
+                              : form.seasons.filter(v => v !== s)
+                            setForm(f => ({ ...f, seasons: next }))
+                          }}
+                        />
+                        {s}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="form-group">
                   <label>스팟 소개</label>
                   <textarea
                     placeholder="이 장소의 특징, 촬영 팁, 방문 시 주의사항 등을 자유롭게 적어주세요."
@@ -500,7 +524,7 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
               label: '추가 등록하기',
               onClick: () => {
                 setSubmitted(false)
-                setForm({ name: '', description: '', bestTime: '', tags: [], photos: [], location: null })
+                setForm({ name: '', description: '', bestTime: '', seasons: [], tags: [], photos: [], location: null })
                 setErrors({})
               },
             }] : []),

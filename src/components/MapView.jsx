@@ -9,27 +9,43 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
   const mapInstance = useRef(null)
   const markersRef = useRef([])
   const [mapReady, setMapReady] = useState(false)
-  const [activeFilter, setActiveFilter] = useState('전체')
   const [searchQuery, setSearchQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768)
   const [previewSpot, setPreviewSpot] = useState(null)
 
   const [sortOrder, setSortOrder] = useState('인기순')
+  const [seasonFilter, setSeasonFilter] = useState('전체')
+  const [timeFilter, setTimeFilter] = useState('전체')
 
-  const categoryFilters = ['전체', '일출', '일몰', '야경', '자연', '도심']
+  const TIME_SLOTS = ['전체', '새벽', '오전', '오후', '일몰', '야경']
+  const SEASON_OPTIONS = ['전체', '봄', '여름', '가을', '겨울']
+
+  const getTimeSlot = (bestTime) => {
+    if (!bestTime || bestTime === '시간 무관') return null
+    const m = bestTime.match(/^(\d{2}):(\d{2})/)
+    if (!m) return null
+    const h = parseInt(m[1]) + parseInt(m[2]) / 60
+    if (h < 7) return '새벽'
+    if (h < 12) return '오전'
+    if (h < 17) return '오후'
+    if (h < 19.5) return '일몰'
+    return '야경'
+  }
 
   const filteredSpots = spots
     .filter(spot => {
-      const matchCategory =
-        activeFilter === '전체' ||
-        spot.tags.some(t => t.toLowerCase().includes(activeFilter.toLowerCase())) ||
-        spot.name.includes(activeFilter)
+      const matchSeason =
+        seasonFilter === '전체' ||
+        (spot.seasons ?? []).includes(seasonFilter)
+      const matchTime =
+        timeFilter === '전체' ||
+        getTimeSlot(spot.bestTime) === timeFilter
       const matchSearch =
         !searchQuery ||
         spot.name.includes(searchQuery) ||
         spot.address.includes(searchQuery) ||
-        spot.tags.some(t => t.includes(searchQuery))
-      return matchCategory && matchSearch
+        (spot.tags ?? []).some(t => t.includes(searchQuery))
+      return matchSeason && matchTime && matchSearch
     })
     .sort((a, b) => {
       if (sortOrder === '인기순') return (b.likes ?? 0) - (a.likes ?? 0)
@@ -53,7 +69,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
       const isMobile = window.innerWidth <= 768
       const sheetOffset = isMobile && sidebarOpen ? Math.round(window.innerHeight * 0.46 / 2) : 0
 
-      if (!searchQuery && activeFilter === '전체') {
+      if (!searchQuery && seasonFilter === '전체' && timeFilter === '전체') {
         const defaultLat = isMobile && sidebarOpen ? 37.52 : 37.5665
         map.setCenter(new LatLng(defaultLat, 126.9780))
         map.setLevel(9)
@@ -71,7 +87,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
       }
     }, 500)
     return () => clearTimeout(timer)
-  }, [searchQuery, activeFilter, filteredSpots, sidebarOpen])
+  }, [searchQuery, seasonFilter, timeFilter, filteredSpots, sidebarOpen])
 
   useEffect(() => {
     if (!KAKAO_KEY) return
@@ -186,14 +202,27 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
             )}
           </div>
 
-          <div className="filter-chips">
-            {categoryFilters.map(f => (
-              <button
-                key={f}
-                className={`filter-chip ${activeFilter === f ? 'active' : ''}`}
-                onClick={() => setActiveFilter(f)}
-              >{f}</button>
-            ))}
+          <div className="filter-dropdowns">
+            <div className="filter-dropdown-wrap">
+              <label className="filter-dropdown-label">계절</label>
+              <select
+                className={`filter-dropdown ${seasonFilter !== '전체' ? 'active' : ''}`}
+                value={seasonFilter}
+                onChange={e => setSeasonFilter(e.target.value)}
+              >
+                {SEASON_OPTIONS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="filter-dropdown-wrap">
+              <label className="filter-dropdown-label">시간대</label>
+              <select
+                className={`filter-dropdown ${timeFilter !== '전체' ? 'active' : ''}`}
+                value={timeFilter}
+                onChange={e => setTimeFilter(e.target.value)}
+              >
+                {TIME_SLOTS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
 
           <div className="sidebar-count">
