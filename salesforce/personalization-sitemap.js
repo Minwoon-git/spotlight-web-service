@@ -19,13 +19,13 @@ SalesforceInteractions.init().then(function () {
   // 앱의 라우팅 구조(App.jsx의 PATH_TO_VIEW)와 1:1로 맞춘 pageType 목록
   var sitemapConfig = {
     pageTypes: [
-      { name: 'Home', interaction: { name: 'Home' }, isMatch: function () { return window.location.pathname === '/main'; } },
-      { name: 'Explore', interaction: { name: 'Explore' }, isMatch: function () { return window.location.pathname === '/explore'; } },
-      { name: 'MyMap', interaction: { name: 'MyMap' }, isMatch: function () { return window.location.pathname === '/mymap'; } },
-      { name: 'Register', interaction: { name: 'Register' }, isMatch: function () { return window.location.pathname === '/register'; } },
-      { name: 'MyPage', interaction: { name: 'MyPage' }, isMatch: function () { return window.location.pathname === '/mypage'; } },
-      { name: 'Privacy', interaction: { name: 'Privacy' }, isMatch: function () { return window.location.pathname === '/privacy'; } },
-      { name: 'Terms', interaction: { name: 'Terms' }, isMatch: function () { return window.location.pathname === '/terms'; } },
+      { name: 'Home', interaction: { name: '메인 페이지 방문' }, isMatch: function () { return window.location.pathname === '/main'; } },
+      { name: 'Explore', interaction: { name: '탐색 페이지 방문' }, isMatch: function () { return window.location.pathname === '/explore'; } },
+      { name: 'MyMap', interaction: { name: '내 지도 페이지 방문' }, isMatch: function () { return window.location.pathname === '/mymap'; } },
+      { name: 'Register', interaction: { name: '스팟 등록 페이지 방문' }, isMatch: function () { return window.location.pathname === '/register'; } },
+      { name: 'MyPage', interaction: { name: '마이 페이지 방문' }, isMatch: function () { return window.location.pathname === '/mypage'; } },
+      { name: 'Privacy', interaction: { name: '개인정보 처리방침 페이지 방문' }, isMatch: function () { return window.location.pathname === '/privacy'; } },
+      { name: 'Terms', interaction: { name: '이용약관 페이지 방문' }, isMatch: function () { return window.location.pathname === '/terms'; } },
     ],
     pageTypeDefault: {
       name: 'Other',

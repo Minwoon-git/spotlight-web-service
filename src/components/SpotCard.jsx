@@ -8,7 +8,12 @@ const extractTime = (str) => {
 
 export default function SpotCard({ spot, onClick, isSaved, onSave, compact }) {
   return (
-    <div className={`spot-card ${compact ? 'compact' : ''}`} onClick={onClick}>
+    <div
+      className={`spot-card ${compact ? 'compact' : ''}`}
+      onClick={onClick}
+      data-spot-id={spot.id}
+      data-spot-name={spot.name}
+    >
       <div className="spot-card-img-wrap">
         <img
           src={spot.photos[0]}

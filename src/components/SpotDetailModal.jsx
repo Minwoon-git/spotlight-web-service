@@ -138,7 +138,12 @@ export default function SpotDetailModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-panel" onClick={e => e.stopPropagation()}>
+      <div
+        className="modal-panel"
+        onClick={e => e.stopPropagation()}
+        data-spot-id={spot.id}
+        data-spot-name={spot.name}
+      >
 
         {/* 헤더 */}
         <div className="modal-header">

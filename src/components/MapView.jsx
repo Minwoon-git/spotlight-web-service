@@ -285,7 +285,12 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
 
         {/* 마커 클릭 프리뷰 카드 */}
         {previewSpot && (
-          <div className="map-preview-card" onClick={e => e.stopPropagation()}>
+          <div
+            className="map-preview-card"
+            onClick={e => e.stopPropagation()}
+            data-spot-id={previewSpot.id}
+            data-spot-name={previewSpot.name}
+          >
             <div className="preview-img">
               <img src={previewSpot.photos[0]} alt={previewSpot.name} />
             </div>

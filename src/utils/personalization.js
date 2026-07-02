@@ -36,23 +36,10 @@ function sendSpotInteraction(name, spot) {
   })
 }
 
-// 참고: 예약된 ViewCatalogObject 인터랙션은 Personalization 콘솔에 "Spot" Dimension이
-// 등록되어 있어야 통과한다(현재 미등록 → 400). 등록 전까지는 다른 액션과 동일하게
-// 커스텀 인터랙션 이름으로 보낸다. 콘솔에 Dimension이 등록되면 ViewCatalogObject로 교체 가능.
-export function trackSpotView(spot) {
-  sendSpotInteraction('View Spot', spot)
-}
-
-export function trackSpotSave(spot, saved) {
-  sendSpotInteraction(saved ? 'Save Spot' : 'Unsave Spot', spot)
-}
-
-export function trackSpotLike(spot, liked) {
-  sendSpotInteraction(liked ? 'Like Spot' : 'Unlike Spot', spot)
-}
-
+// 상세보기/저장/좋아요는 콘솔 sitemap의 listeners로 이전했다 (data-spot-id 기반 DOM 추출).
+// 등록만 비동기(Firestore 저장 완료 후 ID 생성)라 DOM 리스너로 잡을 수 없어 앱 코드에 남겨둔다.
 export function trackSpotRegister(spot) {
-  sendSpotInteraction('Register Spot', spot)
+  sendSpotInteraction('스팟 등록', spot)
 }
 
 // react-router는 탭 이동 시 풀 페이지 로드가 없어서, 콘솔에 등록된 sitemap의

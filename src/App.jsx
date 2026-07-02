@@ -21,7 +21,7 @@ import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
-import { trackSpotView, trackSpotSave, trackSpotLike, trackSpotRegister, reinitSitemap } from './utils/personalization'
+import { trackSpotRegister, reinitSitemap } from './utils/personalization'
 import './App.css'
 
 // URL → view 이름 매핑 (Navbar/BottomTabBar 호환)
@@ -76,27 +76,6 @@ function AppInner() {
     navigate('/register')
   }
 
-  const handleSelectSpot = (spot) => {
-    trackSpotView(spot)
-    setSelectedSpot(spot)
-  }
-
-  const handleSaveSpot = (spot) => {
-    trackSpotSave(spot, !savedSpots.includes(spot.id))
-    handleSaveToggle(spot.id)
-  }
-
-  const handleUnsaveSpot = (spotId) => {
-    const spot = spots.find(s => s.id === spotId)
-    if (spot) trackSpotSave(spot, false)
-    handleSaveToggle(spotId)
-  }
-
-  const handleLikeSpot = (spot) => {
-    trackSpotLike(spot, !likedSpots.includes(spot.id))
-    handleLikeToggle(spot)
-  }
-
   const handleAddSpot = async (data) => {
     const newSpot = await addSpot(data)
     trackSpotRegister(newSpot)
@@ -118,14 +97,14 @@ function AppInner() {
             onRegister={() => handleNavigate('register')}
             onNavigate={handleNavigate}
             onAuthOpen={() => setAuthOpen(true)}
-            onSelectSpot={handleSelectSpot}
+            onSelectSpot={setSelectedSpot}
           />
         } />
 
         <Route path="/explore" element={
           <MapView
             spots={spots}
-            onSelectSpot={handleSelectSpot}
+            onSelectSpot={setSelectedSpot}
             savedSpots={savedSpots}
             onRegister={() => handleNavigate('register')}
             user={user}
@@ -138,8 +117,8 @@ function AppInner() {
             spots={spots}
             mySpots={mySpots}
             savedSpots={savedSpots}
-            onSelectSpot={handleSelectSpot}
-            onUnsave={handleUnsaveSpot}
+            onSelectSpot={setSelectedSpot}
+            onUnsave={handleSaveToggle}
             onDelete={deleteSpot}
             onEdit={handleEdit}
             onAuthOpen={() => setAuthOpen(true)}
@@ -181,9 +160,9 @@ function AppInner() {
           key={selectedSpot.id}
           spot={spots.find(s => s.id === selectedSpot.id) ?? selectedSpot}
           isSaved={savedSpots.includes(selectedSpot.id)}
-          onSave={() => handleSaveSpot(selectedSpot)}
+          onSave={() => handleSaveToggle(selectedSpot.id)}
           isLiked={likedSpots.includes(selectedSpot.id)}
-          onLike={() => handleLikeSpot(selectedSpot)}
+          onLike={() => handleLikeToggle(selectedSpot)}
           onClose={() => setSelectedSpot(null)}
           contributions={contributions}
           onAddContribution={addContribution}
