@@ -31,7 +31,11 @@ const REGIONS = [
 export default function HeroSection({ spots, totalCount, userCount, onExplore, onRegister, onNavigate, onAuthOpen, onSelectSpot }) {
   const top10 = [...spots].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0)).slice(0, 10)
   const spotCount = totalCount ?? spots.length
-  const regionCount = new Set(spots.map(s => s.address.split(' ')[0])).size
+  const normalizeCity = (address) => {
+    const first = address?.split(' ')[0] ?? ''
+    return first.replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, '')
+  }
+  const regionCount = new Set(spots.map(s => normalizeCity(s.address))).size
   const scrollRef = useRef(null)
   const trackRef = useRef(null)
   const [isPaused, setIsPaused] = useState(false)
