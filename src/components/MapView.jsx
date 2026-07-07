@@ -4,7 +4,7 @@ import './MapView.css'
 
 const KAKAO_KEY = import.meta.env.VITE_KAKAO_MAP_KEY
 
-export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, user, onAuthOpen }) {
+export default function MapView({ spots, onSelectSpot, savedSpots }) {
   const mapRef = useRef(null)
   const mapInstance = useRef(null)
   const markersRef = useRef([])
@@ -242,14 +242,6 @@ export default function MapView({ spots, onSelectSpot, savedSpots, onRegister, u
               <div className="empty-icon" />
               <p>검색 결과가 없어요</p>
               <small>다른 키워드로 검색해보세요</small>
-            </div>
-          )}
-          {!user && (
-            <div className="login-nudge">
-              <div className="login-nudge-icon">🔒</div>
-              <p className="login-nudge-title">더 많은 스팟이 있어요</p>
-              <p className="login-nudge-sub">로그인하면 사용자들이 공유한 숨은 명소를 모두 볼 수 있어요.</p>
-              <button className="login-nudge-btn" onClick={onAuthOpen}>로그인하기</button>
             </div>
           )}
         </div>

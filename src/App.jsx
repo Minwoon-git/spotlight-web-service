@@ -109,9 +109,6 @@ function AppInner() {
             spots={spots}
             onSelectSpot={setSelectedSpot}
             savedSpots={savedSpots}
-            onRegister={() => handleNavigate('register')}
-            user={user}
-            onAuthOpen={() => setAuthOpen(true)}
           />
         } />
 
