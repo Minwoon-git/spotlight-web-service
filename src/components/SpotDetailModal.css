@@ -401,6 +401,15 @@
   padding: 14px 24px;
 }
 
+.detail-page-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.detail-page-link:hover { text-decoration: underline; }
+
 .modal-stats {
   display: flex;
   align-items: center;

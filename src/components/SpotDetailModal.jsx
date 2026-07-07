@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
 
 const extractTime = (str) => {
   if (!str) return ''
@@ -324,6 +325,9 @@ export default function SpotDetailModal({
             <span>저장 {(spot.saves ?? 0).toLocaleString()}</span>
             <span>방문자 사진 {allCommunity.length}장</span>
           </div>
+          <Link className="detail-page-link" to={`/spot/${spot.id}`} onClick={onClose}>
+            상세 페이지에서 보기 →
+          </Link>
         </div>
 
       </div>
