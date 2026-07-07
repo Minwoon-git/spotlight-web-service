@@ -66,6 +66,7 @@ export default function SpotDetailModal({
   const [deletePhotoConfirm, setDeletePhotoConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [liked, setLiked] = useState(isLiked)
+  const [shared, setShared] = useState(false)
   const [likeCount, setLikeCount] = useState(() => {
     const base = spot.likes ?? 0
     if (typeof spot.id === 'string') {
@@ -75,6 +76,22 @@ export default function SpotDetailModal({
     return base + (isLiked ? 1 : 0)
   })
   const fileRef = useRef(null)
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/spot/${spot.id}`
+    const shareData = { title: `${spot.name} — SpotLight`, text: `${spot.name} 촬영 명소`, url }
+    if (navigator.share) {
+      try { await navigator.share(shareData) } catch { /* 사용자가 취소함 */ }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setShared(true)
+      setTimeout(() => setShared(false), 2000)
+    } catch {
+      window.prompt('아래 링크를 복사하세요', url)
+    }
+  }
 
   const handleLikeClick = () => {
     if (!user) { onAuthOpen(); return }
@@ -160,6 +177,9 @@ export default function SpotDetailModal({
                 스팟 삭제
               </button>
             )}
+            <button className="share-action" onClick={handleShare}>
+              {shared ? '복사됨 ✓' : '공유'}
+            </button>
             <button className={`save-action ${isSaved ? 'saved' : ''}`} onClick={onSave}>
               {isSaved ? '저장됨' : '저장'}
             </button>

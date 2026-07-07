@@ -92,6 +92,23 @@
   color: white;
 }
 
+.share-action {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.share-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .admin-delete-spot-btn {
   background: none;
   border: 1.5px solid #FCA5A5;
