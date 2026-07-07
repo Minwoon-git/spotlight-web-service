@@ -239,6 +239,7 @@ export default function HeroSection({ spots, totalCount, userCount, onExplore, o
             <span className="footer-tagline">숨은 명소를 함께 발견해요</span>
           </div>
           <div className="footer-right">
+            <button className="footer-link" onClick={() => onNavigate('about')}>서비스 소개</button>
             <button className="footer-link" onClick={() => onNavigate('terms')}>이용약관</button>
             <button className="footer-link" onClick={() => onNavigate('privacy')}>개인정보 처리방침</button>
             <span className="footer-copy">© 2026 SpotLight. All rights reserved.</span>
