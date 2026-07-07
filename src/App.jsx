@@ -20,6 +20,7 @@ import EmailActionHandler from './components/EmailActionHandler'
 import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
 import AboutView from './components/AboutView'
+import SpotDetailPage from './components/SpotDetailPage'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
 import { trackSpotRegister, reinitSitemap } from './utils/personalization'
@@ -153,6 +154,13 @@ function AppInner() {
             onBack={() => handleNavigate('home')}
             onExplore={() => handleNavigate('explore')}
             onRegister={() => handleNavigate('register')}
+          />
+        } />
+        <Route path="/spot/:id" element={
+          <SpotDetailPage
+            spots={spots}
+            onBack={() => handleNavigate('explore')}
+            onOpenMap={(spot) => { setSelectedSpot(spot); handleNavigate('explore') }}
           />
         } />
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => handleNavigate('home')} />} />
