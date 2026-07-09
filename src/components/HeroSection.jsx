@@ -17,8 +17,6 @@ function useScrollReveal() {
   }, [])
 }
 
-const QUICK_TAGS = ['#궁궐', '#야경', '#새벽', '#카페', '#숲', '#골목', '#한옥', '#도심', '#바다', '#일몰']
-
 const REGIONS = [
   { name: '서울', emoji: '🏙️' },
   { name: '경기', emoji: '🌿' },
@@ -105,16 +103,6 @@ export default function HeroSection({ spots, totalCount, userCount, onExplore, o
           <span>스크롤</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
         </button>
-      </section>
-
-      {/* ── 모바일 전용: 빠른 탐색 태그 ── */}
-      <section className="quick-tags-section mobile-only">
-        <div className="quick-tags-label">빠른 탐색</div>
-        <div className="quick-tags-scroll">
-          {QUICK_TAGS.map(tag => (
-            <button key={tag} className="quick-tag-chip" onClick={onExplore}>{tag}</button>
-          ))}
-        </div>
       </section>
 
       {/* ── Featured ── */}
