@@ -21,18 +21,16 @@ export function useSpots(user) {
   }, [])
 
   useEffect(() => {
-    if (!user) return
+    // 스팟은 공개 콘텐츠 — 로그인 여부와 무관하게 구독한다 (SEO/비로그인 노출용)
     const q = query(collection(db, 'spots'), orderBy('createdAt', 'desc'))
     const unsub = onSnapshot(q, snapshot => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setFirestoreSpots(data)
     })
     return unsub
-  }, [user])
+  }, [])
 
-  const spots = user
-    ? [...mockSpots, ...firestoreSpots]
-    : mockSpots
+  const spots = [...mockSpots, ...firestoreSpots]
 
   const addSpot = async (data) => {
     const newSpot = {

@@ -19,6 +19,8 @@ import EmailVerifyRequired from './components/EmailVerifyRequired'
 import EmailActionHandler from './components/EmailActionHandler'
 import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
+import AboutView from './components/AboutView'
+import SpotDetailPage from './components/SpotDetailPage'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
 import { trackSpotRegister, reinitSitemap } from './utils/personalization'
@@ -33,6 +35,7 @@ const PATH_TO_VIEW = {
   '/mypage': 'mypage',
   '/privacy': 'privacy',
   '/terms': 'terms',
+  '/about': 'about',
 }
 
 function AppInner() {
@@ -66,7 +69,7 @@ function AppInner() {
     setEditingSpot(null)
     const pathMap = {
       home: '/main', explore: '/explore', mymap: '/mymap',
-      register: '/register', mypage: '/mypage', privacy: '/privacy', terms: '/terms',
+      register: '/register', mypage: '/mypage', privacy: '/privacy', terms: '/terms', about: '/about',
     }
     navigate(pathMap[v] ?? '/main')
   }
@@ -106,9 +109,6 @@ function AppInner() {
             spots={spots}
             onSelectSpot={setSelectedSpot}
             savedSpots={savedSpots}
-            onRegister={() => handleNavigate('register')}
-            user={user}
-            onAuthOpen={() => setAuthOpen(true)}
           />
         } />
 
@@ -146,6 +146,20 @@ function AppInner() {
               : <EmailVerifyRequired />
         } />
 
+        <Route path="/about" element={
+          <AboutView
+            onBack={() => handleNavigate('home')}
+            onExplore={() => handleNavigate('explore')}
+            onRegister={() => handleNavigate('register')}
+          />
+        } />
+        <Route path="/spot/:id" element={
+          <SpotDetailPage
+            spots={spots}
+            onBack={() => handleNavigate('explore')}
+            onOpenMap={(spot) => { setSelectedSpot(spot); handleNavigate('explore') }}
+          />
+        } />
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => handleNavigate('home')} />} />
         <Route path="/terms" element={<TermsOfService onBack={() => handleNavigate('home')} />} />
         <Route path="/auth/action" element={<EmailActionHandler onBack={() => handleNavigate('home')} />} />
