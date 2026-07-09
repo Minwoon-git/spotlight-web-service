@@ -24,6 +24,7 @@ import SpotDetailPage from './components/SpotDetailPage'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
 import { trackSpotRegister, reinitSitemap } from './utils/personalization'
+import { useAdSense } from './hooks/useAdSense'
 import './App.css'
 
 // URL → view 이름 매핑 (Navbar/BottomTabBar 호환)
@@ -53,6 +54,18 @@ function AppInner() {
   const location = useLocation()
 
   const view = PATH_TO_VIEW[location.pathname] ?? 'home'
+
+  // 콘텐츠가 있는 화면(지도/명소 목록/글 등)에서만 애드센스를 로드한다.
+  // 로그인 안내, 이메일 인증 안내, 인증 액션 처리 같은 화면은 제외 —
+  // 애드센스 "게시자 콘텐츠가 없는 화면에 광고 게재" 정책 위반을 피하기 위함.
+  const isContentRoute = (() => {
+    const path = location.pathname
+    if (['/', '/main', '/explore', '/privacy', '/terms'].includes(path)) return true
+    if (path === '/mymap' || path === '/mypage') return !!user
+    if (path === '/register') return !!user && isEmailVerified(user)
+    return false
+  })()
+  useAdSense(isContentRoute)
 
   // 최초 로드는 콘솔에 등록된 sitemap이 이미 매칭했으므로, 이후 라우트 변경 시에만
   // reinit()을 호출해 새 경로의 pageType을 다시 매칭시킨다.
@@ -91,6 +104,19 @@ function AppInner() {
       <BottomTabBar view={view} onNavigate={handleNavigate} />
 
       <Routes>
+        <Route path="/" element={
+          <HeroSection
+            spots={spots}
+            totalCount={totalCount}
+            userCount={userCount}
+            onExplore={() => handleNavigate('explore')}
+            onRegister={() => handleNavigate('register')}
+            onNavigate={handleNavigate}
+            onAuthOpen={() => setAuthOpen(true)}
+            onSelectSpot={setSelectedSpot}
+          />
+        } />
+
         <Route path="/main" element={
           <HeroSection
             spots={spots}
@@ -164,8 +190,7 @@ function AppInner() {
         <Route path="/terms" element={<TermsOfService onBack={() => handleNavigate('home')} />} />
         <Route path="/auth/action" element={<EmailActionHandler onBack={() => handleNavigate('home')} />} />
 
-        {/* 루트 및 미매칭 → /main 리다이렉트 */}
-        <Route path="/" element={<Navigate to="/main" replace />} />
+        {/* 미매칭 경로만 /main 리다이렉트 (루트는 위에서 직접 콘텐츠를 렌더링) */}
         <Route path="*" element={<Navigate to="/main" replace />} />
       </Routes>
 
