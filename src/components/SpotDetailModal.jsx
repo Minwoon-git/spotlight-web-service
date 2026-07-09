@@ -270,6 +270,12 @@ export default function SpotDetailModal({
                 <span className="info-label">최적 촬영 시간</span>
                 <span className="info-value">{extractTime(spot.bestTime)}</span>
               </div>
+              {spot.season && (
+                <div className="info-row">
+                  <span className="info-label">추천 계절</span>
+                  <span className="info-value">{spot.season}</span>
+                </div>
+              )}
               <div className="info-row">
                 <span className="info-label">등록자</span>
                 <span className="info-value info-value-author">
