@@ -235,14 +235,7 @@
   }
 
   .spot-likes { font-size: 11px; white-space: nowrap; flex-shrink: 0; }
-  .spot-besttime {
-    font-size: 10px;
-    padding: 2px 6px;
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  .spot-besttime { display: none; }
 
   .save-btn {
     top: 8px;
