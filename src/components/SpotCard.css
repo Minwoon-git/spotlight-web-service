@@ -234,7 +234,7 @@
     justify-content: space-between;
   }
 
-  .spot-likes { font-size: 11px; }
+  .spot-likes { font-size: 11px; white-space: nowrap; flex-shrink: 0; }
   .spot-besttime {
     font-size: 10px;
     padding: 2px 6px;
