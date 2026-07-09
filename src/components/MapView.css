@@ -624,7 +624,7 @@
     left: 0;
     right: 0;
     width: 100% !important;
-    height: 46vh;
+    height: 70vh;
     border-right: none;
     border-top: 1px solid var(--border);
     border-radius: 20px 20px 0 0;
@@ -664,7 +664,7 @@
   .map-preview-card {
     width: calc(100% - 32px);
     top: auto;
-    bottom: calc(46vh + 68px + 16px);
+    bottom: calc(70vh + 68px + 16px);
     left: 50%;
     transform: translateX(-50%);
   }

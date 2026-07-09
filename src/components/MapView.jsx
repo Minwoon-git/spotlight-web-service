@@ -55,7 +55,7 @@ export default function MapView({ spots, onSelectSpot, savedSpots }) {
       if (!map) return
       const { LatLng, LatLngBounds } = window.kakao.maps
       const isMobile = window.innerWidth <= 768
-      const sheetOffset = isMobile && sidebarOpen ? Math.round(window.innerHeight * 0.46 / 2) : 0
+      const sheetOffset = isMobile && sidebarOpen ? Math.round(window.innerHeight * 0.70 / 2) : 0
 
       if (!searchQuery && seasonFilter === '전체' && timeFilter === '전체') {
         const defaultLat = isMobile && sidebarOpen ? 37.52 : 37.5665
