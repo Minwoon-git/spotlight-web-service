@@ -26,8 +26,17 @@
     <meta name="twitter:title" content="SpotLight — 숨은 사진 명소 지도" />
     <meta name="twitter:description" content="나만 아는 촬영 명소를 지도에 기록하고 공유하세요." />
     <meta name="twitter:image" content="https://spotlight-web-service.vercel.app/og-image.svg" />
-    <!-- Salesforce Marketing Cloud Personalization -->
-    <script type="text/javascript" src="//cdn.evgnet.com/beacon/milvuskorea/spotlight/scripts/evergage.min.js"></script>
+    <!-- Salesforce Marketing Cloud Personalization (로컬 개발 환경은 제외해 테스트 트래픽이 실제 데이터에 섞이지 않게 함) -->
+    <script>
+      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        var sfBeacon = document.createElement('script')
+        sfBeacon.src = '//cdn.evgnet.com/beacon/milvuskorea/spotlight/scripts/evergage.min.js'
+        document.head.appendChild(sfBeacon)
+      }
+    </script>
+
+    <!-- Google AdSense: 콘텐츠 없는 화면(로그인 안내 등)에는 로드되지 않도록
+         src/hooks/useAdSense.js 에서 라우트별로 동적으로 로드한다. -->
   </head>
   <body>
     <div id="root"></div>
