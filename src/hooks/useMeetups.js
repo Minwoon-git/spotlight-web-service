@@ -1,0 +1,186 @@
+import { useState, useEffect } from 'react'
+import {
+  collection, addDoc, setDoc, updateDoc, deleteDoc, doc,
+  onSnapshot, query, orderBy, serverTimestamp, increment,
+} from 'firebase/firestore'
+import { db } from '../firebase'
+
+export const MEETUP_TYPES = ['소셜링', '클럽', '원데이클래스']
+
+export const TYPE_INFO = {
+  소셜링: {
+    desc: '하루 함께 출사 나갈 사람을 구해요',
+    hint: '어떤 사진을 찍으러 가는지, 준비물이 있는지 적어주세요.',
+  },
+  클럽: {
+    desc: '정기적으로 함께 활동할 사진 모임이에요',
+    hint: '활동 방식, 모임 분위기, 어떤 분과 함께하고 싶은지 적어주세요.',
+  },
+  원데이클래스: {
+    desc: '작가님께 배우는 하루 강좌예요',
+    hint: '수업 내용, 준비물, 수강 대상을 적어주세요.',
+  },
+}
+
+const hostFields = (user) => ({
+  host: user?.displayName || user?.email?.split('@')[0] || '익명',
+  hostId: user?.uid || null,
+  hostPhoto: user?.photoURL || null,
+})
+
+const toDocData = (data) => ({
+  type: data.type,
+  title: data.title,
+  description: data.description,
+  image: data.image ?? '',
+  region: data.region ?? '',
+  place: data.place ?? '',
+  // 소셜링·원데이클래스는 특정 일시, 클럽은 활동 주기를 쓴다
+  date: data.date ?? '',
+  time: data.time ?? '',
+  schedule: data.schedule ?? '',
+  capacity: Number(data.capacity) || 0, // 0 = 인원 제한 없음
+  fee: data.fee ?? '',
+  instructor: data.instructor ?? '',
+})
+
+export function useMeetups() {
+  const [meetups, setMeetups] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const q = query(collection(db, 'meetups'), orderBy('createdAt', 'desc'))
+    const unsub = onSnapshot(q,
+      snap => { setMeetups(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false) },
+      err => { console.error('모임 불러오기 실패:', err); setLoading(false) },
+    )
+    return unsub
+  }, [])
+
+  const addMeetup = async (data, user) => {
+    const ref = await addDoc(collection(db, 'meetups'), {
+      ...toDocData(data),
+      ...hostFields(user),
+      participantCount: 0,
+      commentCount: 0,
+      createdAt: serverTimestamp(),
+    })
+    return { id: ref.id }
+  }
+
+  const updateMeetup = async (id, data) => {
+    await updateDoc(doc(db, 'meetups', id), toDocData(data))
+  }
+
+  const deleteMeetup = async (id) => {
+    await deleteDoc(doc(db, 'meetups', id))
+  }
+
+  return { meetups, loading, addMeetup, updateMeetup, deleteMeetup }
+}
+
+export function useMeetup(meetupId, user) {
+  const [meetup, setMeetup] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [participants, setParticipants] = useState([])
+  const [comments, setComments] = useState([])
+
+  useEffect(() => {
+    if (!meetupId) return
+    const unsub = onSnapshot(doc(db, 'meetups', meetupId),
+      snap => { setMeetup(snap.exists() ? { id: snap.id, ...snap.data() } : null); setLoading(false) },
+      err => { console.error('모임 불러오기 실패:', err); setLoading(false) },
+    )
+    return unsub
+  }, [meetupId])
+
+  useEffect(() => {
+    if (!meetupId) return
+    const unsub = onSnapshot(collection(db, 'meetups', meetupId, 'participants'),
+      snap => setParticipants(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('참가자 불러오기 실패:', err),
+    )
+    return unsub
+  }, [meetupId])
+
+  useEffect(() => {
+    if (!meetupId) return
+    const q = query(collection(db, 'meetups', meetupId, 'comments'), orderBy('createdAt', 'asc'))
+    const unsub = onSnapshot(q,
+      snap => setComments(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('댓글 불러오기 실패:', err),
+    )
+    return unsub
+  }, [meetupId])
+
+  const isJoined = !!user && participants.some(p => p.id === user.uid)
+  const isFull = !!meetup?.capacity && participants.length >= meetup.capacity
+
+  const join = async () => {
+    if (!user || !meetupId) return
+    await setDoc(doc(db, 'meetups', meetupId, 'participants', user.uid), {
+      name: user.displayName || user.email?.split('@')[0] || '익명',
+      photo: user.photoURL || null,
+      joinedAt: serverTimestamp(),
+    })
+    try {
+      await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(1) })
+    } catch { /* 카운터 실패가 참가 자체를 막지 않게 한다 */ }
+  }
+
+  const leave = async () => {
+    if (!user || !meetupId) return
+    await deleteDoc(doc(db, 'meetups', meetupId, 'participants', user.uid))
+    try {
+      await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(-1) })
+    } catch { /* 위와 동일 */ }
+  }
+
+  const addComment = async (content) => {
+    if (!meetupId || !content.trim()) return
+    await addDoc(collection(db, 'meetups', meetupId, 'comments'), {
+      content: content.trim(),
+      author: user?.displayName || user?.email?.split('@')[0] || '익명',
+      authorId: user?.uid || null,
+      authorPhoto: user?.photoURL || null,
+      createdAt: serverTimestamp(),
+    })
+    try {
+      await updateDoc(doc(db, 'meetups', meetupId), { commentCount: increment(1) })
+    } catch { /* 위와 동일 */ }
+  }
+
+  const deleteComment = async (commentId) => {
+    if (!meetupId) return
+    await deleteDoc(doc(db, 'meetups', meetupId, 'comments', commentId))
+    try {
+      await updateDoc(doc(db, 'meetups', meetupId), { commentCount: increment(-1) })
+    } catch { /* 위와 동일 */ }
+  }
+
+  return { meetup, loading, participants, comments, isJoined, isFull, join, leave, addComment, deleteComment }
+}
+
+export function formatMeetupDate(createdAt) {
+  if (!createdAt) return ''
+  const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt)
+  if (Number.isNaN(d.getTime())) return ''
+  const min = Math.floor((Date.now() - d.getTime()) / 60000)
+  if (min < 1) return '방금'
+  if (min < 60) return `${min}분 전`
+  if (min < 1440) return `${Math.floor(min / 60)}시간 전`
+  const day = Math.floor(min / 1440)
+  if (day < 7) return `${day}일 전`
+  return d.toLocaleDateString('ko-KR')
+}
+
+// 모임 일정 표기: 클럽은 활동 주기, 나머지는 날짜(+시간)
+export function scheduleText(m) {
+  if (m.type === '클럽') return m.schedule || ''
+  if (!m.date) return ''
+  const d = new Date(`${m.date}T00:00:00`)
+  const label = Number.isNaN(d.getTime())
+    ? m.date
+    : d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+  return m.time ? `${label} ${m.time}` : label
+}

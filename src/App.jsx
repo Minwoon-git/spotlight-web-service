@@ -21,10 +21,10 @@ import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
 import AboutView from './components/AboutView'
 import SpotDetailPage from './components/SpotDetailPage'
-import CommunityView from './components/CommunityView'
-import PostDetailView from './components/PostDetailView'
-import PostWriteView from './components/PostWriteView'
-import { usePosts } from './hooks/usePosts'
+import MeetupListView from './components/MeetupListView'
+import MeetupDetailView from './components/MeetupDetailView'
+import MeetupWriteView from './components/MeetupWriteView'
+import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
 import { trackSpotRegister, reinitSitemap } from './utils/personalization'
@@ -41,7 +41,7 @@ const PATH_TO_VIEW = {
   '/privacy': 'privacy',
   '/terms': 'terms',
   '/about': 'about',
-  '/community': 'community',
+  '/meetup': 'meetup',
 }
 
 function AppInner() {
@@ -54,8 +54,8 @@ function AppInner() {
   const admin = isAdmin(user)
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
-  const { posts, loading: postsLoading, addPost, updatePost, deletePost } = usePosts()
-  const [editingPost, setEditingPost] = useState(null)
+  const { meetups, loading: meetupsLoading, addMeetup, updateMeetup, deleteMeetup } = useMeetups()
+  const [editingMeetup, setEditingMeetup] = useState(null)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -68,8 +68,8 @@ function AppInner() {
   const isContentRoute = (() => {
     const path = location.pathname
     if (['/', '/main', '/explore', '/privacy', '/terms', '/about'].includes(path)) return true
-    // 커뮤니티 목록·글 상세는 콘텐츠 화면 (글쓰기 폼은 제외)
-    if (path === '/community' || (path.startsWith('/community/') && path !== '/community/write')) return true
+    // 모임 목록·상세는 콘텐츠 화면 (모임 만들기 폼은 제외)
+    if (path === '/meetup' || (path.startsWith('/meetup/') && path !== '/meetup/write')) return true
     if (path.startsWith('/spot/')) return true
     if (path === '/mymap' || path === '/mypage') return !!user
     if (path === '/register') return !!user && isEmailVerified(user)
@@ -93,7 +93,7 @@ function AppInner() {
     const pathMap = {
       home: '/main', explore: '/explore', mymap: '/mymap',
       register: '/register', mypage: '/mypage', privacy: '/privacy', terms: '/terms', about: '/about',
-      community: '/community',
+      meetup: '/meetup',
     }
     navigate(pathMap[v] ?? '/main')
   }
@@ -197,43 +197,43 @@ function AppInner() {
             onOpenMap={(spot) => { setSelectedSpot(spot); handleNavigate('explore') }}
           />
         } />
-        <Route path="/community" element={
-          <CommunityView
-            posts={posts}
-            loading={postsLoading}
+        <Route path="/meetup" element={
+          <MeetupListView
+            meetups={meetups}
+            loading={meetupsLoading}
             onWrite={() => {
               if (!user) { setAuthOpen(true); return }
-              setEditingPost(null)
-              navigate('/community/write')
+              setEditingMeetup(null)
+              navigate('/meetup/write')
             }}
           />
         } />
 
-        <Route path="/community/write" element={
+        <Route path="/meetup/write" element={
           !user
             ? <AuthRequired
-                icon="💬"
+                icon="🤝"
                 title="로그인이 필요해요"
-                description="글을 쓰려면 로그인하세요."
+                description="모임을 만들려면 로그인하세요."
                 onAuthOpen={() => setAuthOpen(true)}
               />
-            : <PostWriteView
-                editingPost={editingPost}
-                addPost={addPost}
-                updatePost={updatePost}
+            : <MeetupWriteView
+                editingMeetup={editingMeetup}
+                addMeetup={addMeetup}
+                updateMeetup={updateMeetup}
                 user={user}
-                onDone={(postId) => { setEditingPost(null); navigate(`/community/${postId}`) }}
-                onCancel={() => { setEditingPost(null); navigate('/community') }}
+                onDone={(meetupId) => { setEditingMeetup(null); navigate(`/meetup/${meetupId}`) }}
+                onCancel={() => { setEditingMeetup(null); navigate('/meetup') }}
               />
         } />
 
-        <Route path="/community/:id" element={
-          <PostDetailView
+        <Route path="/meetup/:id" element={
+          <MeetupDetailView
             user={user}
             isAdmin={admin}
-            onBack={() => navigate('/community')}
-            onEdit={(post) => { setEditingPost(post); navigate('/community/write') }}
-            onDeletePost={async (postId) => { await deletePost(postId); navigate('/community') }}
+            onBack={() => navigate('/meetup')}
+            onEdit={(m) => { setEditingMeetup(m); navigate('/meetup/write') }}
+            onDeleted={async (meetupId) => { await deleteMeetup(meetupId); navigate('/meetup') }}
             onAuthOpen={() => setAuthOpen(true)}
           />
         } />

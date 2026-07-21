@@ -18,7 +18,7 @@ export default function Navbar({ view, onNavigate, onAuthOpen }) {
 
         <div className="navbar-links">
           <button className={`nav-link ${view === 'explore' ? 'active' : ''}`} onClick={() => navigate('explore')}>탐색</button>
-          <button className={`nav-link ${view === 'community' ? 'active' : ''}`} onClick={() => navigate('community')}>커뮤니티</button>
+          <button className={`nav-link ${view === 'meetup' ? 'active' : ''}`} onClick={() => navigate('meetup')}>모임</button>
           <button className={`nav-link ${view === 'mymap' ? 'active' : ''}`} onClick={() => navigate('mymap')}>내 지도</button>
           <button className={`nav-link ${view === 'register' ? 'active' : ''}`} onClick={() => navigate('register')}>스팟 등록</button>
         </div>
@@ -50,7 +50,7 @@ export default function Navbar({ view, onNavigate, onAuthOpen }) {
       {menuOpen && (
         <div className="mobile-menu">
           <button className={`mobile-nav-link ${view === 'explore' ? 'active' : ''}`} onClick={() => navigate('explore')}>탐색</button>
-          <button className={`mobile-nav-link ${view === 'community' ? 'active' : ''}`} onClick={() => navigate('community')}>커뮤니티</button>
+          <button className={`mobile-nav-link ${view === 'meetup' ? 'active' : ''}`} onClick={() => navigate('meetup')}>모임</button>
           <button className={`mobile-nav-link ${view === 'mymap' ? 'active' : ''}`} onClick={() => navigate('mymap')}>내 지도</button>
           <button className={`mobile-nav-link ${view === 'register' ? 'active' : ''}`} onClick={() => navigate('register')}>스팟 등록</button>
           <button className={`mobile-nav-link ${view === 'mypage' ? 'active' : ''}`} onClick={() => navigate('mypage')}>마이페이지</button>
