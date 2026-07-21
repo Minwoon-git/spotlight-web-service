@@ -32,12 +32,34 @@
   border: 2px solid var(--accent);
   animation: success-modal-pop 0.4s ease;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.success-modal-icon svg {
+  width: 28px;
+  height: 28px;
+  /* 체크가 그려지는 애니메이션 (원이 튀어오른 뒤 이어서 실행) */
+  stroke-dasharray: 32;
+  stroke-dashoffset: 32;
+  animation: success-modal-check 0.35s ease-out 0.25s forwards;
 }
 
 @keyframes success-modal-pop {
   0%   { transform: scale(0.5); opacity: 0; }
   70%  { transform: scale(1.15); }
   100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes success-modal-check {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .success-modal-icon { animation: none; }
+  .success-modal-icon svg { animation: none; stroke-dashoffset: 0; }
 }
 
 .success-modal-title {
