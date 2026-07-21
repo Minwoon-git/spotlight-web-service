@@ -24,13 +24,16 @@ import SpotDetailPage from './components/SpotDetailPage'
 import MeetupListView from './components/MeetupListView'
 import MeetupDetailView from './components/MeetupDetailView'
 import MeetupWriteView from './components/MeetupWriteView'
-import MeetupTypeModal from './components/MeetupTypeModal'
+import ChoiceModal from './components/ChoiceModal'
+import { MEETUP_TYPES, TYPE_INFO } from './hooks/useMeetups'
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
 import { trackSpotRegister, reinitSitemap } from './utils/personalization'
 import { useAdSense } from './hooks/useAdSense'
 import './App.css'
+
+const MEETUP_EMOJI = { 소셜링: '📸', 클럽: '👥', 원데이클래스: '🎓' }
 
 // URL → view 이름 매핑 (Navbar/BottomTabBar 호환)
 const PATH_TO_VIEW = {
@@ -57,7 +60,8 @@ function AppInner() {
   const [authOpen, setAuthOpen] = useState(false)
   const { meetups, loading: meetupsLoading, addMeetup, updateMeetup, deleteMeetup } = useMeetups()
   const [editingMeetup, setEditingMeetup] = useState(null)
-  const [typeModalOpen, setTypeModalOpen] = useState(false)
+  // null | 'create'(무엇을 만들지) | 'meetupType'(모임 유형)
+  const [choiceModal, setChoiceModal] = useState(null)
   const [newMeetupType, setNewMeetupType] = useState('소셜링')
 
   const navigate = useNavigate()
@@ -115,7 +119,14 @@ function AppInner() {
   return (
     <div className="app">
       <Navbar view={view} onNavigate={handleNavigate} onAuthOpen={() => setAuthOpen(true)} />
-      <BottomTabBar view={view} onNavigate={handleNavigate} />
+      <BottomTabBar
+        view={view}
+        onNavigate={handleNavigate}
+        onCreate={() => {
+          if (!user) { setAuthOpen(true); return }
+          setChoiceModal('create')
+        }}
+      />
 
       <Routes>
         <Route path="/" element={
@@ -207,7 +218,7 @@ function AppInner() {
             onWrite={() => {
               if (!user) { setAuthOpen(true); return }
               setEditingMeetup(null)
-              setTypeModalOpen(true)
+              setChoiceModal('meetupType')
             }}
           />
         } />
@@ -268,14 +279,36 @@ function AppInner() {
         />
       )}
 
-      {typeModalOpen && (
-        <MeetupTypeModal
-          onSelect={(type) => {
-            setNewMeetupType(type)
-            setTypeModalOpen(false)
-            navigate('/meetup/write')
-          }}
-          onClose={() => setTypeModalOpen(false)}
+      {choiceModal === 'create' && (
+        <ChoiceModal
+          title="무엇을 만들까요?"
+          onClose={() => setChoiceModal(null)}
+          options={[
+            {
+              emoji: '📍', label: '스팟 등록', desc: '나만 알던 촬영 명소를 지도에 추가해요',
+              onSelect: () => { setChoiceModal(null); handleNavigate('register') },
+            },
+            {
+              emoji: '🤝', label: '모임 만들기', desc: '함께 사진 찍을 사람을 모아요',
+              onSelect: () => { setEditingMeetup(null); setChoiceModal('meetupType') },
+            },
+          ]}
+        />
+      )}
+
+      {choiceModal === 'meetupType' && (
+        <ChoiceModal
+          title="어떤 모임을 만들까요?"
+          subtitle="유형에 따라 입력하는 정보가 달라져요."
+          onClose={() => setChoiceModal(null)}
+          options={MEETUP_TYPES.map(type => ({
+            emoji: MEETUP_EMOJI[type], label: type, desc: TYPE_INFO[type].desc,
+            onSelect: () => {
+              setNewMeetupType(type)
+              setChoiceModal(null)
+              navigate('/meetup/write')
+            },
+          }))}
         />
       )}
 

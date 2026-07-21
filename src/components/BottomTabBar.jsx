@@ -21,8 +21,8 @@ const tabs = [
     ),
   },
   {
-    id: 'register',
-    label: '등록',
+    id: 'create',
+    label: '만들기',
     icon: (active) => (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
         <circle cx="12" cy="12" r="10"/>
@@ -52,14 +52,18 @@ const tabs = [
   },
 ]
 
-export default function BottomTabBar({ view, onNavigate }) {
+export default function BottomTabBar({ view, onNavigate, onCreate }) {
   return (
     <nav className="bottom-tab-bar">
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          className={`tab-item ${view === tab.id ? 'active' : ''}`}
-          onClick={() => onNavigate(tab.id)}
+          className={`tab-item ${
+            view === tab.id || (tab.id === 'create' && (view === 'register' || view === 'meetup'))
+              ? 'active' : ''
+          }`}
+          // 만들기 탭은 바로 이동하지 않고 무엇을 만들지 먼저 고른다
+          onClick={() => (tab.id === 'create' ? onCreate() : onNavigate(tab.id))}
         >
           <span className="tab-icon">{tab.icon(view === tab.id)}</span>
           <span className="tab-label">{tab.label}</span>
