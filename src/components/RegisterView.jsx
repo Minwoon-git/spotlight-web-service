@@ -281,7 +281,8 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
     bestTime: editingSpot.bestTime ?? '',
     season: editingSpot.season ?? '',
     tags: editingSpot.tags ?? [],
-    photos: [],
+    // 기존 사진은 업로드된 URL 그대로 미리 채운다 (file 없음 = 기존 사진)
+    photos: (editingSpot.photos ?? []).map(url => ({ url, preview: url })),
     location: { lat: editingSpot.lat, lng: editingSpot.lng, address: editingSpot.address },
   } : {
     name: '', description: '', bestTime: '',
@@ -332,12 +333,15 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
       let photoUrls
       if (form.photos.length > 0) {
         try {
-          const results = await Promise.all(form.photos.map(p => compressImage(p.file)))
+          // 새로 올린 사진만 압축하고, 기존 사진은 URL을 그대로 유지한다
+          const results = await Promise.all(
+            form.photos.map(p => p.file ? compressImage(p.file) : p.url)
+          )
           photoUrls = results.filter(Boolean)
         } catch {}
       }
       if (!photoUrls || photoUrls.length === 0) {
-        photoUrls = isEdit ? (editingSpot.photos ?? [FALLBACK_PHOTO]) : [FALLBACK_PHOTO]
+        photoUrls = [FALLBACK_PHOTO]
       }
 
       const data = {
