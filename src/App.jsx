@@ -21,6 +21,10 @@ import PrivacyPolicy from './components/PrivacyPolicy'
 import TermsOfService from './components/TermsOfService'
 import AboutView from './components/AboutView'
 import SpotDetailPage from './components/SpotDetailPage'
+import CommunityView from './components/CommunityView'
+import PostDetailView from './components/PostDetailView'
+import PostWriteView from './components/PostWriteView'
+import { usePosts } from './hooks/usePosts'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
 import { trackSpotRegister, reinitSitemap } from './utils/personalization'
@@ -37,6 +41,7 @@ const PATH_TO_VIEW = {
   '/privacy': 'privacy',
   '/terms': 'terms',
   '/about': 'about',
+  '/community': 'community',
 }
 
 function AppInner() {
@@ -49,6 +54,8 @@ function AppInner() {
   const admin = isAdmin(user)
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
+  const { posts, loading: postsLoading, addPost, updatePost, deletePost } = usePosts()
+  const [editingPost, setEditingPost] = useState(null)
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -60,7 +67,10 @@ function AppInner() {
   // 애드센스 "게시자 콘텐츠가 없는 화면에 광고 게재" 정책 위반을 피하기 위함.
   const isContentRoute = (() => {
     const path = location.pathname
-    if (['/', '/main', '/explore', '/privacy', '/terms'].includes(path)) return true
+    if (['/', '/main', '/explore', '/privacy', '/terms', '/about'].includes(path)) return true
+    // 커뮤니티 목록·글 상세는 콘텐츠 화면 (글쓰기 폼은 제외)
+    if (path === '/community' || (path.startsWith('/community/') && path !== '/community/write')) return true
+    if (path.startsWith('/spot/')) return true
     if (path === '/mymap' || path === '/mypage') return !!user
     if (path === '/register') return !!user && isEmailVerified(user)
     return false
@@ -83,6 +93,7 @@ function AppInner() {
     const pathMap = {
       home: '/main', explore: '/explore', mymap: '/mymap',
       register: '/register', mypage: '/mypage', privacy: '/privacy', terms: '/terms', about: '/about',
+      community: '/community',
     }
     navigate(pathMap[v] ?? '/main')
   }
@@ -186,6 +197,47 @@ function AppInner() {
             onOpenMap={(spot) => { setSelectedSpot(spot); handleNavigate('explore') }}
           />
         } />
+        <Route path="/community" element={
+          <CommunityView
+            posts={posts}
+            loading={postsLoading}
+            onWrite={() => {
+              if (!user) { setAuthOpen(true); return }
+              setEditingPost(null)
+              navigate('/community/write')
+            }}
+          />
+        } />
+
+        <Route path="/community/write" element={
+          !user
+            ? <AuthRequired
+                icon="💬"
+                title="로그인이 필요해요"
+                description="글을 쓰려면 로그인하세요."
+                onAuthOpen={() => setAuthOpen(true)}
+              />
+            : <PostWriteView
+                editingPost={editingPost}
+                addPost={addPost}
+                updatePost={updatePost}
+                user={user}
+                onDone={(postId) => { setEditingPost(null); navigate(`/community/${postId}`) }}
+                onCancel={() => { setEditingPost(null); navigate('/community') }}
+              />
+        } />
+
+        <Route path="/community/:id" element={
+          <PostDetailView
+            user={user}
+            isAdmin={admin}
+            onBack={() => navigate('/community')}
+            onEdit={(post) => { setEditingPost(post); navigate('/community/write') }}
+            onDeletePost={async (postId) => { await deletePost(postId); navigate('/community') }}
+            onAuthOpen={() => setAuthOpen(true)}
+          />
+        } />
+
         <Route path="/privacy" element={<PrivacyPolicy onBack={() => handleNavigate('home')} />} />
         <Route path="/terms" element={<TermsOfService onBack={() => handleNavigate('home')} />} />
         <Route path="/auth/action" element={<EmailActionHandler onBack={() => handleNavigate('home')} />} />
