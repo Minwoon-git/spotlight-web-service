@@ -11,14 +11,21 @@ export const TYPE_INFO = {
   소셜링: {
     desc: '하루 함께 출사 나갈 사람을 구해요',
     hint: '어떤 사진을 찍으러 가는지, 준비물이 있는지 적어주세요.',
+    // 유형마다 참여의 성격이 달라 호칭을 나눈다
+    member: '참여자', join: '참여하기', leave: '참여 취소하기',
+    closed: '모집이 마감됐어요', hostRole: '호스트',
   },
   클럽: {
     desc: '정기적으로 함께 활동할 사진 모임이에요',
     hint: '활동 방식, 모임 분위기, 어떤 분과 함께하고 싶은지 적어주세요.',
+    member: '멤버', join: '가입하기', leave: '탈퇴하기',
+    closed: '정원이 찼어요', hostRole: '모임장',
   },
   원데이클래스: {
     desc: '작가님께 배우는 하루 강좌예요',
     hint: '수업 내용, 준비물, 수강 대상을 적어주세요.',
+    member: '수강생', join: '수강 신청하기', leave: '신청 취소하기',
+    closed: '신청이 마감됐어요', hostRole: '개설자',
   },
 }
 
@@ -61,10 +68,22 @@ export function useMeetups() {
     const ref = await addDoc(collection(db, 'meetups'), {
       ...toDocData(data),
       ...hostFields(user),
-      participantCount: 0,
+      participantCount: 1, // 주최자가 첫 참여자
       commentCount: 0,
       createdAt: serverTimestamp(),
     })
+    // 주최자를 참여자 명단에 넣어 인원수와 목록이 실제와 맞게 한다
+    if (user?.uid) {
+      try {
+        await setDoc(doc(db, 'meetups', ref.id, 'participants', user.uid), {
+          name: user.displayName || user.email?.split('@')[0] || '익명',
+          photo: user.photoURL || null,
+          joinedAt: serverTimestamp(),
+        })
+      } catch (err) {
+        console.error('주최자 참여자 등록 실패:', err)
+      }
+    }
     return { id: ref.id }
   }
 

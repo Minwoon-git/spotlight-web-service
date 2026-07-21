@@ -79,7 +79,7 @@ export default function MeetupListView({ meetups, loading, onWrite }) {
                         <span className="meetup-count">
                           {m.capacity
                             ? `${m.participantCount ?? 0}/${m.capacity}명`
-                            : `${m.participantCount ?? 0}명 참여`}
+                            : `${TYPE_INFO[m.type]?.member ?? '참여자'} ${m.participantCount ?? 0}명`}
                         </span>
                       </div>
                     </div>

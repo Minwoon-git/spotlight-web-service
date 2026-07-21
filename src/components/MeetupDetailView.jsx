@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMeetup, formatMeetupDate, scheduleText } from '../hooks/useMeetups'
+import { useMeetup, formatMeetupDate, scheduleText, TYPE_INFO } from '../hooks/useMeetups'
 import ConfirmModal from './ConfirmModal'
 import './MeetupDetailView.css'
 
@@ -18,6 +18,7 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
 
   const isHost = !!user && meetup?.hostId === user.uid
   const canDelete = isHost || isAdmin
+  const words = TYPE_INFO[meetup?.type] ?? TYPE_INFO.소셜링
 
   const handleJoin = async () => {
     if (!user) { onAuthOpen(); return }
@@ -115,11 +116,11 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
           {meetup.instructor && <div><dt>강사</dt><dd>{meetup.instructor}</dd></div>}
           {meetup.fee && <div><dt>수강료</dt><dd>{meetup.fee}</dd></div>}
           <div>
-            <dt>참여 인원</dt>
+            <dt>{words.member}</dt>
             <dd>
               {participants.length}명
               {meetup.capacity ? ` / 정원 ${meetup.capacity}명` : ' (제한 없음)'}
-              {isFull && <span className="md-full">모집 마감</span>}
+              {isFull && <span className="md-full">{words.closed}</span>}
             </dd>
           </div>
         </dl>
@@ -134,17 +135,17 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
               disabled={joinDisabled}
             >
               {joining ? '처리 중…'
-                : isJoined ? '참여 취소하기'
-                : isFull ? '모집이 마감됐어요'
-                : '참여하기'}
+                : isJoined ? words.leave
+                : isFull ? words.closed
+                : words.join}
             </button>
           </div>
         )}
 
         <section className="md-section">
-          <h2 className="md-section-title">참여자 {participants.length}</h2>
+          <h2 className="md-section-title">{words.member} {participants.length}</h2>
           {participants.length === 0 ? (
-            <p className="md-empty-line">아직 참여자가 없어요. 첫 참여자가 되어보세요!</p>
+            <p className="md-empty-line">아직 {words.member}가 없어요.</p>
           ) : (
             <ul className="md-participants">
               {participants.map(p => (
@@ -154,6 +155,7 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
                     : <span className="md-avatar-placeholder">{p.name?.[0]?.toUpperCase()}</span>
                   }
                   {p.name}
+                  {p.id === meetup.hostId && <span className="md-host-tag">{words.hostRole}</span>}
                 </li>
               ))}
             </ul>
@@ -203,13 +205,13 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
 
       {confirm && (
         <ConfirmModal
-          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? '참여 취소' : '문의 삭제'}
+          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? words.leave : '문의 삭제'}
           message={
-            confirm === 'delete' ? '이 모임을 삭제할까요? 참여자와 문의도 함께 사라지며 되돌릴 수 없어요.'
-              : confirm === 'leave' ? '이 모임 참여를 취소할까요?'
+            confirm === 'delete' ? `이 모임을 삭제할까요? ${words.member}와 문의도 함께 사라지며 되돌릴 수 없어요.`
+              : confirm === 'leave' ? `정말 ${words.leave.replace('하기', '')}할까요?`
               : '이 문의를 삭제할까요? 되돌릴 수 없어요.'
           }
-          confirmLabel={confirm === 'leave' ? '참여 취소' : '삭제'}
+          confirmLabel={confirm === 'leave' ? words.leave.replace('하기', '') : '삭제'}
           danger
           onCancel={() => setConfirm(null)}
           onConfirm={handleConfirm}

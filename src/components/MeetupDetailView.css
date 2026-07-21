@@ -183,6 +183,16 @@
 
 .md-empty-line { color: var(--text-secondary); font-size: 14px; margin: 0; }
 
+.md-host-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #fff;
+  margin-left: 2px;
+}
+
 .md-participants {
   list-style: none;
   margin: 0;
