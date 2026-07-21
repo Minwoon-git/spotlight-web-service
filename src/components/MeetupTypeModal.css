@@ -1,0 +1,118 @@
+.mt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.mt-panel {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 460px;
+  padding: 26px 24px 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  animation: mt-pop 0.22s ease;
+}
+
+@keyframes mt-pop {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.mt-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.mt-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 5px;
+}
+
+.mt-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.mt-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.mt-close:hover { color: var(--text); }
+
+.mt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mt-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--white);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.mt-option:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-2px);
+}
+
+.mt-emoji { font-size: 26px; flex-shrink: 0; }
+
+.mt-option-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+.mt-option-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mt-option-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.mt-arrow {
+  flex-shrink: 0;
+  font-size: 20px;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+.mt-option:hover .mt-arrow { color: var(--accent); }
+
+@media (max-width: 600px) {
+  .mt-panel { padding: 22px 18px 20px; }
+  .mt-title { font-size: 18px; }
+  .mt-option { padding: 14px 15px; gap: 12px; }
+  .mt-emoji { font-size: 23px; }
+}

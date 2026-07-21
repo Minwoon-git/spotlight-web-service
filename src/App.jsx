@@ -24,6 +24,7 @@ import SpotDetailPage from './components/SpotDetailPage'
 import MeetupListView from './components/MeetupListView'
 import MeetupDetailView from './components/MeetupDetailView'
 import MeetupWriteView from './components/MeetupWriteView'
+import MeetupTypeModal from './components/MeetupTypeModal'
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
@@ -56,6 +57,8 @@ function AppInner() {
   const [authOpen, setAuthOpen] = useState(false)
   const { meetups, loading: meetupsLoading, addMeetup, updateMeetup, deleteMeetup } = useMeetups()
   const [editingMeetup, setEditingMeetup] = useState(null)
+  const [typeModalOpen, setTypeModalOpen] = useState(false)
+  const [newMeetupType, setNewMeetupType] = useState('소셜링')
 
   const navigate = useNavigate()
   const location = useLocation()
@@ -204,7 +207,7 @@ function AppInner() {
             onWrite={() => {
               if (!user) { setAuthOpen(true); return }
               setEditingMeetup(null)
-              navigate('/meetup/write')
+              setTypeModalOpen(true)
             }}
           />
         } />
@@ -219,6 +222,7 @@ function AppInner() {
               />
             : <MeetupWriteView
                 editingMeetup={editingMeetup}
+                initialType={newMeetupType}
                 addMeetup={addMeetup}
                 updateMeetup={updateMeetup}
                 user={user}
@@ -261,6 +265,17 @@ function AppInner() {
           isAdmin={admin}
           onDeleteSpot={async () => { await deleteSpot(selectedSpot.id); setSelectedSpot(null) }}
           onDeleteContribution={deleteContribution}
+        />
+      )}
+
+      {typeModalOpen && (
+        <MeetupTypeModal
+          onSelect={(type) => {
+            setNewMeetupType(type)
+            setTypeModalOpen(false)
+            navigate('/meetup/write')
+          }}
+          onClose={() => setTypeModalOpen(false)}
         />
       )}
 

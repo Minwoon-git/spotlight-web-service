@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { MEETUP_TYPES, TYPE_INFO } from '../hooks/useMeetups'
+import { TYPE_INFO } from '../hooks/useMeetups'
 import { compressImage } from '../utils/image'
 import './MeetupWriteView.css'
 
-export default function MeetupWriteView({ editingMeetup, addMeetup, updateMeetup, user, onDone, onCancel }) {
+export default function MeetupWriteView({
+  editingMeetup, initialType = '소셜링', addMeetup, updateMeetup, user, onDone, onCancel,
+}) {
   const isEdit = !!editingMeetup
   const [form, setForm] = useState(() => ({
-    type: editingMeetup?.type ?? '소셜링',
+    // 유형은 만들기 전 팝업에서 고르고, 수정 시에는 기존 유형을 유지한다
+    type: editingMeetup?.type ?? initialType,
     title: editingMeetup?.title ?? '',
     description: editingMeetup?.description ?? '',
     image: editingMeetup?.image ?? '',
@@ -75,21 +78,9 @@ export default function MeetupWriteView({ editingMeetup, addMeetup, updateMeetup
         <h1 className="mw-title">{isEdit ? '모임 수정' : '모임 만들기'}</h1>
 
         <form onSubmit={handleSubmit} className="mw-form">
-          <div className="mw-field">
-            <span className="mw-label">모임 유형</span>
-            <div className="mw-types">
-              {MEETUP_TYPES.map(t => (
-                <button
-                  type="button"
-                  key={t}
-                  className={`mw-type ${form.type === t ? 'active' : ''}`}
-                  onClick={() => set('type', t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-            <p className="mw-hint">{TYPE_INFO[form.type].desc}</p>
+          <div className="mw-type-banner">
+            <span className="mw-type-chip">{form.type}</span>
+            <span className="mw-type-desc">{TYPE_INFO[form.type].desc}</span>
           </div>
 
           <div className="mw-field">

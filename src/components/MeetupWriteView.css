@@ -34,21 +34,28 @@
 
 .mw-row { display: flex; gap: 14px; }
 
-.mw-types { display: flex; gap: 8px; flex-wrap: wrap; }
-
-.mw-type {
-  padding: 8px 18px;
-  border-radius: var(--radius-full);
-  border: 1.5px solid var(--border);
-  background: var(--white);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
+/* 유형은 팝업에서 이미 고른 상태 — 폼에서는 확인용으로만 보여준다 */
+.mw-type-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--accent-light);
 }
-.mw-type:hover { border-color: var(--accent); color: var(--accent); }
-.mw-type.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.mw-type-chip {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #fff;
+}
+
+.mw-type-desc { font-size: 13px; color: var(--text-secondary); }
 
 .mw-image-drop {
   display: flex;
