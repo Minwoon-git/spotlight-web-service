@@ -48,6 +48,28 @@
 
 .md-owner-actions { display: flex; gap: 8px; }
 
+.md-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.md-save-btn svg { width: 14px; height: 14px; }
+.md-save-btn:hover { border-color: #F43F5E; color: #F43F5E; }
+.md-save-btn.saved {
+  border-color: #F43F5E;
+  color: #F43F5E;
+  background: #FFF1F2;
+}
+
 .md-act {
   background: var(--white);
   border: 1.5px solid var(--border);

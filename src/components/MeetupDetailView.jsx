@@ -4,7 +4,9 @@ import { useMeetup, formatMeetupDate, scheduleText, TYPE_INFO } from '../hooks/u
 import ConfirmModal from './ConfirmModal'
 import './MeetupDetailView.css'
 
-export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDeleted, onAuthOpen }) {
+export default function MeetupDetailView({
+  user, isAdmin, savedMeetups = [], onToggleSave, onBack, onEdit, onDeleted, onAuthOpen,
+}) {
   const { id } = useParams()
   const {
     meetup, loading, participants, comments,
@@ -19,6 +21,7 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
   const isHost = !!user && meetup?.hostId === user.uid
   const canDelete = isHost || isAdmin
   const words = TYPE_INFO[meetup?.type] ?? TYPE_INFO.소셜링
+  const isSaved = !!meetup && savedMeetups.includes(meetup.id)
 
   const handleJoin = async () => {
     if (!user) { onAuthOpen(); return }
@@ -85,12 +88,20 @@ export default function MeetupDetailView({ user, isAdmin, onBack, onEdit, onDele
 
         <div className="md-head">
           <span className={`meetup-badge type-${meetup.type}`}>{meetup.type}</span>
-          {canDelete && (
-            <div className="md-owner-actions">
-              {isHost && <button className="md-act" onClick={() => onEdit(meetup)}>수정</button>}
-              <button className="md-act danger" onClick={() => setConfirm('delete')}>삭제</button>
-            </div>
-          )}
+          <div className="md-owner-actions">
+            <button
+              className={`md-save-btn ${isSaved ? 'saved' : ''}`}
+              onClick={() => (user ? onToggleSave(meetup.id) : onAuthOpen())}
+              aria-pressed={isSaved}
+            >
+              <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/>
+              </svg>
+              {isSaved ? '찜함' : '찜하기'}
+            </button>
+            {isHost && <button className="md-act" onClick={() => onEdit(meetup)}>수정</button>}
+            {canDelete && <button className="md-act danger" onClick={() => setConfirm('delete')}>삭제</button>}
+          </div>
         </div>
 
         <h1 className="md-title">{meetup.title}</h1>

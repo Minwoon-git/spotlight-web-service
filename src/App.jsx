@@ -252,6 +252,8 @@ function AppInner() {
           <MeetupDetailView
             user={user}
             isAdmin={admin}
+            savedMeetups={savedMeetups}
+            onToggleSave={toggleMeetupSave}
             onBack={() => navigate('/meetup')}
             onEdit={(m) => { setEditingMeetup(m); navigate('/meetup/write') }}
             onDeleted={async (meetupId) => { await deleteMeetup(meetupId); navigate('/meetup') }}
