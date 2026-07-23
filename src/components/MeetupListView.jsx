@@ -15,9 +15,7 @@ export default function MeetupListView({ meetups, loading, onWrite }) {
         <header className="meetup-header">
           <div>
             <h1 className="meetup-title">모임</h1>
-            <p className="meetup-sub">
-              같이 사진 찍으러 갈 사람을 구하고, 정기 모임에 참여하고, 작가님의 클래스를 들어보세요.
-            </p>
+            <p className="meetup-sub">사진으로 연결되는 사람들</p>
           </div>
           <button className="meetup-write-btn" onClick={onWrite}>모임 만들기</button>
         </header>
