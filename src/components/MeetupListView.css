@@ -45,6 +45,75 @@
 }
 .meetup-write-btn:hover { opacity: 0.9; }
 
+/* 둘러보기 / 내 모임 — 카테고리 탭과 성격이 달라 위에 따로 둔다 */
+.meetup-scope {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-full);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.meetup-scope-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.meetup-scope-btn:hover { color: var(--text); }
+.meetup-scope-btn.active {
+  background: var(--white);
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.meetup-scope-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #fff;
+}
+
+.meetup-section { margin-bottom: 34px; }
+
+.meetup-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.meetup-section-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+}
+
+.meetup-section-empty {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 20px 0;
+}
+
 .meetup-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 
 .meetup-tab {

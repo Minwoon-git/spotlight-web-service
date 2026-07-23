@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import {
   collection, addDoc, setDoc, updateDoc, deleteDoc, doc,
   onSnapshot, query, orderBy, serverTimestamp, increment,
+  arrayUnion, arrayRemove,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
@@ -101,6 +102,22 @@ export function useMeetups() {
   return { meetups, loading, addMeetup, updateMeetup, deleteMeetup }
 }
 
+// 내가 참여 중인 모임 id 목록 (주최한 모임은 별도로 구분하므로 여기 포함하지 않는다)
+export function useJoinedMeetups(user) {
+  const [joinedMeetups, setJoinedMeetups] = useState([])
+
+  useEffect(() => {
+    if (!user) { setJoinedMeetups([]); return }
+    const unsub = onSnapshot(doc(db, 'users', user.uid),
+      snap => setJoinedMeetups(snap.exists() ? (snap.data().joinedMeetups ?? []) : []),
+      err => console.error('참여 모임 불러오기 실패:', err),
+    )
+    return unsub
+  }, [user])
+
+  return joinedMeetups
+}
+
 export function useMeetup(meetupId, user) {
   const [meetup, setMeetup] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -145,6 +162,10 @@ export function useMeetup(meetupId, user) {
       photo: user.photoURL || null,
       joinedAt: serverTimestamp(),
     })
+    // '참여한 모임' 목록용 — 참가자 서브컬렉션을 전부 뒤지지 않도록 내 문서에도 기록한다
+    try {
+      await setDoc(doc(db, 'users', user.uid), { joinedMeetups: arrayUnion(meetupId) }, { merge: true })
+    } catch (err) { console.error('참여 모임 기록 실패:', err) }
     try {
       await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(1) })
     } catch { /* 카운터 실패가 참가 자체를 막지 않게 한다 */ }
@@ -153,6 +174,9 @@ export function useMeetup(meetupId, user) {
   const leave = async () => {
     if (!user || !meetupId) return
     await deleteDoc(doc(db, 'meetups', meetupId, 'participants', user.uid))
+    try {
+      await setDoc(doc(db, 'users', user.uid), { joinedMeetups: arrayRemove(meetupId) }, { merge: true })
+    } catch (err) { console.error('참여 모임 기록 실패:', err) }
     try {
       await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(-1) })
     } catch { /* 위와 동일 */ }

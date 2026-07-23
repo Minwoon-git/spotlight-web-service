@@ -25,7 +25,7 @@ import MeetupListView from './components/MeetupListView'
 import MeetupDetailView from './components/MeetupDetailView'
 import MeetupWriteView from './components/MeetupWriteView'
 import ChoiceModal from './components/ChoiceModal'
-import { MEETUP_TYPES, TYPE_INFO } from './hooks/useMeetups'
+import { MEETUP_TYPES, TYPE_INFO, useJoinedMeetups } from './hooks/useMeetups'
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
@@ -59,6 +59,7 @@ function AppInner() {
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
   const { meetups, loading: meetupsLoading, addMeetup, updateMeetup, deleteMeetup } = useMeetups()
+  const joinedMeetups = useJoinedMeetups(user)
   const [editingMeetup, setEditingMeetup] = useState(null)
   // null | 'create'(무엇을 만들지) | 'meetupType'(모임 유형)
   const [choiceModal, setChoiceModal] = useState(null)
@@ -215,6 +216,9 @@ function AppInner() {
           <MeetupListView
             meetups={meetups}
             loading={meetupsLoading}
+            user={user}
+            joinedMeetups={joinedMeetups}
+            onAuthOpen={() => setAuthOpen(true)}
             onWrite={() => {
               if (!user) { setAuthOpen(true); return }
               setEditingMeetup(null)
