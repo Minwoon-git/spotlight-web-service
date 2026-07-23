@@ -214,7 +214,7 @@ export default function MeetupWriteView({
                   className="mw-input"
                   value={form.instructor}
                   onChange={e => set('instructor', e.target.value)}
-                  placeholder="예: 김作가"
+                  placeholder="예: 김작가"
                   maxLength={30}
                 />
               </label>
