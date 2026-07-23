@@ -97,7 +97,7 @@ export default function MeetupDetailView({
               <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
                 <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/>
               </svg>
-              {isSaved ? '찜함' : '찜하기'}
+              {isSaved ? '찜' : '찜하기'}
             </button>
             {isHost && <button className="md-act" onClick={() => onEdit(meetup)}>수정</button>}
             {canDelete && <button className="md-act danger" onClick={() => setConfirm('delete')}>삭제</button>}
