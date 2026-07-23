@@ -220,6 +220,16 @@ export function formatMeetupDate(createdAt) {
   return d.toLocaleDateString('ko-KR')
 }
 
+// 목록에 짧게 보여줄 지역명. 전체 주소에서 시/군/구 단위만 뽑는다.
+// 예) "서울 중구 청계천로 1길" → "중구", 못 찾으면 앞 두 토큰
+export function shortRegion(place) {
+  if (!place) return ''
+  const tokens = place.trim().split(/\s+/)
+  const unit = tokens.find(t => /(시|군|구)$/.test(t) && t.length > 1)
+  if (unit) return unit
+  return tokens.slice(0, 2).join(' ')
+}
+
 // 모임 일정 표기: 클럽은 활동 주기, 나머지는 날짜(+시간)
 export function scheduleText(m) {
   if (m.type === '클럽') return m.schedule || ''

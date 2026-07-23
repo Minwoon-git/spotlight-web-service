@@ -1,49 +1,36 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MEETUP_TYPES, TYPE_INFO, scheduleText } from '../hooks/useMeetups'
+import { MEETUP_TYPES, TYPE_INFO, scheduleText, shortRegion } from '../hooks/useMeetups'
 import './MeetupListView.css'
 
 function MeetupCard({ m }) {
   const full = !!m.capacity && (m.participantCount ?? 0) >= m.capacity
   return (
-    <li className="meetup-row">
-      <Link className="meetup-row-link" to={`/meetup/${m.id}`}>
+    <li className="meetup-item">
+      <Link className="meetup-item-link" to={`/meetup/${m.id}`}>
         <div className="meetup-thumb">
           {m.image
             ? <img src={m.image} alt={m.title} loading="lazy" />
             : <div className="meetup-thumb-empty">📷</div>
           }
+          <span className={`meetup-badge type-${m.type}`}>{m.type}</span>
           {full && <span className="meetup-full-badge">마감</span>}
         </div>
 
-        <div className="meetup-row-body">
-          <div className="meetup-row-head">
-            <span className={`meetup-badge type-${m.type}`}>{m.type}</span>
-            <h2 className="meetup-row-title">{m.title}</h2>
-          </div>
+        <p className="meetup-item-meta">
+          {[shortRegion(m.place), `${TYPE_INFO[m.type]?.member ?? '참여자'} ${m.participantCount ?? 0}명`]
+            .filter(Boolean).join(' · ')}
+        </p>
 
-          <div className="meetup-row-info">
-            {scheduleText(m) && <span>🗓 {scheduleText(m)}</span>}
-            {m.place && <span>📍 {m.place}</span>}
-            {m.type === '원데이클래스' && m.fee && <span>💰 {m.fee}</span>}
-          </div>
+        <h2 className="meetup-item-title">{m.title}</h2>
 
-          <div className="meetup-row-foot">
-            <span className="meetup-host">
-              {m.hostPhoto
-                ? <img src={m.hostPhoto} alt="" className="meetup-avatar" />
-                : <span className="meetup-avatar-placeholder">{m.host?.[0]?.toUpperCase()}</span>
-              }
-              {m.host}
-            </span>
-            <span className="meetup-dot">·</span>
-            <span className="meetup-count">
-              {m.capacity
-                ? `${m.participantCount ?? 0}/${m.capacity}명`
-                : `${TYPE_INFO[m.type]?.member ?? '참여자'} ${m.participantCount ?? 0}명`}
-            </span>
-          </div>
-        </div>
+        {scheduleText(m) && (
+          <p className="meetup-item-date">🗓 {scheduleText(m)}</p>
+        )}
+
+        {m.type === '원데이클래스' && m.fee && (
+          <p className="meetup-item-fee">💰 {m.fee}</p>
+        )}
       </Link>
     </li>
   )
@@ -112,7 +99,7 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
                 <small>첫 모임을 만들어보세요!</small>
               </div>
             ) : (
-              <ul className="meetup-list">
+              <ul className="meetup-grid">
                 {browseList.map(m => <MeetupCard key={m.id} m={m} />)}
               </ul>
             )}
@@ -126,7 +113,7 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
               {hosted.length === 0 ? (
                 <p className="meetup-section-empty">아직 만든 모임이 없어요.</p>
               ) : (
-                <ul className="meetup-list">
+                <ul className="meetup-grid">
                   {hosted.map(m => <MeetupCard key={m.id} m={m} />)}
                 </ul>
               )}
@@ -139,7 +126,7 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
               {joined.length === 0 ? (
                 <p className="meetup-section-empty">아직 참여한 모임이 없어요. 둘러보기에서 마음에 드는 모임을 찾아보세요!</p>
               ) : (
-                <ul className="meetup-list">
+                <ul className="meetup-grid">
                   {joined.map(m => <MeetupCard key={m.id} m={m} />)}
                 </ul>
               )}
