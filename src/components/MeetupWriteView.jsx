@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { TYPE_INFO } from '../hooks/useMeetups'
 import { compressImage } from '../utils/image'
+import LocationPicker from './LocationPicker'
 import './MeetupWriteView.css'
 
 export default function MeetupWriteView({
@@ -15,6 +16,8 @@ export default function MeetupWriteView({
     image: editingMeetup?.image ?? '',
     region: editingMeetup?.region ?? '',
     place: editingMeetup?.place ?? '',
+    lat: editingMeetup?.lat ?? null,
+    lng: editingMeetup?.lng ?? null,
     date: editingMeetup?.date ?? '',
     time: editingMeetup?.time ?? '',
     schedule: editingMeetup?.schedule ?? '',
@@ -149,29 +152,59 @@ export default function MeetupWriteView({
             </div>
           )}
 
-          <div className="mw-row">
-            <label className="mw-field">
-              <span className="mw-label">{isClub ? '활동 지역' : '장소'}</span>
-              <input
-                className="mw-input"
-                value={form.place}
-                onChange={e => set('place', e.target.value)}
-                placeholder={isClub ? '예: 서울 전역' : '예: 반포한강공원'}
-                maxLength={40}
-              />
-            </label>
-            <label className="mw-field">
-              <span className="mw-label">정원</span>
-              <input
-                className="mw-input"
-                type="number"
-                min="0"
-                value={form.capacity}
-                onChange={e => set('capacity', e.target.value)}
-                placeholder="비워두면 제한 없음"
-              />
-            </label>
-          </div>
+          {/* 클럽은 활동 범위라 자유 입력, 나머지는 실제 만나는 곳이라 지도에서 고른다 */}
+          {isClub ? (
+            <div className="mw-row">
+              <label className="mw-field">
+                <span className="mw-label">활동 지역</span>
+                <input
+                  className="mw-input"
+                  value={form.place}
+                  onChange={e => set('place', e.target.value)}
+                  placeholder="예: 서울 전역"
+                  maxLength={40}
+                />
+              </label>
+              <label className="mw-field">
+                <span className="mw-label">정원</span>
+                <input
+                  className="mw-input"
+                  type="number"
+                  min="0"
+                  value={form.capacity}
+                  onChange={e => set('capacity', e.target.value)}
+                  placeholder="비워두면 제한 없음"
+                />
+              </label>
+            </div>
+          ) : (
+            <>
+              <div className="mw-field">
+                <span className="mw-label">모이는 장소</span>
+                <LocationPicker
+                  initialAddress={form.place}
+                  placeholder="장소명 또는 주소 검색 (예: 반포한강공원)"
+                  hint="지도를 클릭하거나 위 검색창으로 모이는 장소를 선택하세요"
+                  onSelect={(loc) => {
+                    set('place', loc?.address ?? '')
+                    set('lat', loc?.lat ?? null)
+                    set('lng', loc?.lng ?? null)
+                  }}
+                />
+              </div>
+              <label className="mw-field">
+                <span className="mw-label">정원</span>
+                <input
+                  className="mw-input"
+                  type="number"
+                  min="0"
+                  value={form.capacity}
+                  onChange={e => set('capacity', e.target.value)}
+                  placeholder="비워두면 제한 없음"
+                />
+              </label>
+            </>
+          )}
 
           {isClass && (
             <div className="mw-row">

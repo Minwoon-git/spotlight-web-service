@@ -42,6 +42,9 @@ const toDocData = (data) => ({
   image: data.image ?? '',
   region: data.region ?? '',
   place: data.place ?? '',
+  // 지도에서 고른 경우에만 좌표가 있다 (클럽은 활동 범위라 좌표 없음)
+  lat: data.lat ?? null,
+  lng: data.lng ?? null,
   // 소셜링·원데이클래스는 특정 일시, 클럽은 활동 주기를 쓴다
   date: data.date ?? '',
   time: data.time ?? '',
