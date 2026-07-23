@@ -3,8 +3,16 @@ import { Link } from 'react-router-dom'
 import { MEETUP_TYPES, TYPE_INFO, scheduleText, shortRegion } from '../hooks/useMeetups'
 import './MeetupListView.css'
 
-function MeetupCard({ m }) {
+function MeetupCard({ m, isSaved, onToggleSave }) {
   const full = !!m.capacity && (m.participantCount ?? 0) >= m.capacity
+
+  // 카드 전체가 링크라 하트 클릭이 상세로 새지 않게 막는다
+  const handleSave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onToggleSave(m.id)
+  }
+
   return (
     <li className="meetup-item">
       <Link className="meetup-item-link" to={`/meetup/${m.id}`}>
@@ -15,6 +23,17 @@ function MeetupCard({ m }) {
           }
           <span className={`meetup-badge type-${m.type}`}>{m.type}</span>
           {full && <span className="meetup-full-badge">마감</span>}
+          <button
+            type="button"
+            className={`meetup-save-btn ${isSaved ? 'saved' : ''}`}
+            onClick={handleSave}
+            aria-label={isSaved ? '찜 해제' : '찜하기'}
+            aria-pressed={isSaved}
+          >
+            <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z"/>
+            </svg>
+          </button>
         </div>
 
         <p className="meetup-item-meta">
@@ -36,14 +55,24 @@ function MeetupCard({ m }) {
   )
 }
 
-export default function MeetupListView({ meetups, loading, user, joinedMeetups = [], onWrite, onAuthOpen }) {
+export default function MeetupListView({
+  meetups, loading, user, joinedMeetups = [], savedMeetups = [], onToggleSave, onWrite, onAuthOpen,
+}) {
   const [scope, setScope] = useState('browse') // browse | mine
   const [type, setType] = useState('전체')
 
   const hosted = user ? meetups.filter(m => m.hostId === user.uid) : []
   const joined = user ? meetups.filter(m => joinedMeetups.includes(m.id) && m.hostId !== user.uid) : []
+  const saved = user ? meetups.filter(m => savedMeetups.includes(m.id)) : []
 
   const browseList = type === '전체' ? meetups : meetups.filter(m => m.type === type)
+
+  // 로그인 안 한 상태에서 하트를 누르면 로그인부터 유도한다
+  const handleToggleSave = (id) => (user ? onToggleSave(id) : onAuthOpen())
+
+  const renderCards = (list) => list.map(m => (
+    <MeetupCard key={m.id} m={m} isSaved={savedMeetups.includes(m.id)} onToggleSave={handleToggleSave} />
+  ))
 
   return (
     <div className="meetup-page">
@@ -69,8 +98,8 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
             onClick={() => (user ? setScope('mine') : onAuthOpen())}
           >
             내 모임
-            {user && (hosted.length + joined.length > 0) && (
-              <span className="meetup-scope-count">{hosted.length + joined.length}</span>
+            {user && (hosted.length + joined.length + saved.length > 0) && (
+              <span className="meetup-scope-count">{hosted.length + joined.length + saved.length}</span>
             )}
           </button>
         </div>
@@ -99,9 +128,7 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
                 <small>첫 모임을 만들어보세요!</small>
               </div>
             ) : (
-              <ul className="meetup-grid">
-                {browseList.map(m => <MeetupCard key={m.id} m={m} />)}
-              </ul>
+              <ul className="meetup-grid">{renderCards(browseList)}</ul>
             )}
           </>
         ) : (
@@ -113,9 +140,7 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
               {hosted.length === 0 ? (
                 <p className="meetup-section-empty">아직 만든 모임이 없어요.</p>
               ) : (
-                <ul className="meetup-grid">
-                  {hosted.map(m => <MeetupCard key={m.id} m={m} />)}
-                </ul>
+                <ul className="meetup-grid">{renderCards(hosted)}</ul>
               )}
             </section>
 
@@ -126,9 +151,18 @@ export default function MeetupListView({ meetups, loading, user, joinedMeetups =
               {joined.length === 0 ? (
                 <p className="meetup-section-empty">아직 참여한 모임이 없어요. 둘러보기에서 마음에 드는 모임을 찾아보세요!</p>
               ) : (
-                <ul className="meetup-grid">
-                  {joined.map(m => <MeetupCard key={m.id} m={m} />)}
-                </ul>
+                <ul className="meetup-grid">{renderCards(joined)}</ul>
+              )}
+            </section>
+
+            <section className="meetup-section">
+              <h2 className="meetup-section-title">
+                찜한 모임 <span className="meetup-section-count">{saved.length}</span>
+              </h2>
+              {saved.length === 0 ? (
+                <p className="meetup-section-empty">아직 찜한 모임이 없어요. 관심 가는 모임의 하트를 눌러보세요!</p>
+              ) : (
+                <ul className="meetup-grid">{renderCards(saved)}</ul>
               )}
             </section>
           </>

@@ -102,20 +102,44 @@ export function useMeetups() {
   return { meetups, loading, addMeetup, updateMeetup, deleteMeetup }
 }
 
-// 내가 참여 중인 모임 id 목록 (주최한 모임은 별도로 구분하므로 여기 포함하지 않는다)
-export function useJoinedMeetups(user) {
-  const [joinedMeetups, setJoinedMeetups] = useState([])
+// 내 모임 관련 목록 — 참여 중(joined)과 찜한(saved) 모임 id.
+// 참가자 서브컬렉션을 전부 뒤지지 않도록 내 users 문서에 함께 기록해 둔다.
+// 주최한 모임은 hostId로 구분되므로 joined에는 넣지 않는다.
+export function useMyMeetupIds(user) {
+  const [ids, setIds] = useState({ joined: [], saved: [] })
 
   useEffect(() => {
-    if (!user) { setJoinedMeetups([]); return }
+    if (!user) { setIds({ joined: [], saved: [] }); return }
     const unsub = onSnapshot(doc(db, 'users', user.uid),
-      snap => setJoinedMeetups(snap.exists() ? (snap.data().joinedMeetups ?? []) : []),
-      err => console.error('참여 모임 불러오기 실패:', err),
+      snap => setIds({
+        joined: snap.exists() ? (snap.data().joinedMeetups ?? []) : [],
+        saved: snap.exists() ? (snap.data().savedMeetups ?? []) : [],
+      }),
+      err => console.error('내 모임 목록 불러오기 실패:', err),
     )
     return unsub
   }, [user])
 
-  return joinedMeetups
+  const toggleSave = async (meetupId) => {
+    if (!user || !meetupId) return
+    const isSaved = ids.saved.includes(meetupId)
+    // 응답을 기다리지 않고 먼저 반영해 하트가 즉시 바뀌게 한다
+    setIds(prev => ({
+      ...prev,
+      saved: isSaved ? prev.saved.filter(id => id !== meetupId) : [...prev.saved, meetupId],
+    }))
+    try {
+      await setDoc(
+        doc(db, 'users', user.uid),
+        { savedMeetups: isSaved ? arrayRemove(meetupId) : arrayUnion(meetupId) },
+        { merge: true },
+      )
+    } catch (err) {
+      console.error('모임 찜 저장 실패:', err)
+    }
+  }
+
+  return { joinedMeetups: ids.joined, savedMeetups: ids.saved, toggleSave }
 }
 
 export function useMeetup(meetupId, user) {
