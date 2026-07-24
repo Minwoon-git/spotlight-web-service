@@ -240,6 +240,7 @@ function AppInner() {
             : <MeetupWriteView
                 editingMeetup={editingMeetup}
                 initialType={newMeetupType}
+                canCreateClass={admin}
                 addMeetup={addMeetup}
                 updateMeetup={updateMeetup}
                 user={user}
@@ -309,7 +310,9 @@ function AppInner() {
           title="어떤 모임을 만들까요?"
           subtitle="유형에 따라 입력하는 정보가 달라져요."
           onClose={() => setChoiceModal(null)}
-          options={MEETUP_TYPES.map(type => ({
+          options={MEETUP_TYPES
+            .filter(type => type !== '원데이클래스' || admin) // 원데이클래스는 관리자만 개설
+            .map(type => ({
             emoji: MEETUP_EMOJI[type], label: type, desc: TYPE_INFO[type].desc,
             onSelect: () => {
               setNewMeetupType(type)

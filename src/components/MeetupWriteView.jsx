@@ -5,12 +5,14 @@ import LocationPicker from './LocationPicker'
 import './MeetupWriteView.css'
 
 export default function MeetupWriteView({
-  editingMeetup, initialType = '소셜링', addMeetup, updateMeetup, user, onDone, onCancel,
+  editingMeetup, initialType = '소셜링', canCreateClass = false, addMeetup, updateMeetup, user, onDone, onCancel,
 }) {
   const isEdit = !!editingMeetup
+  // 원데이클래스는 관리자만 개설 가능 — 권한 없이 진입하면 소셜링으로 되돌린다
+  const safeInitialType = initialType === '원데이클래스' && !canCreateClass ? '소셜링' : initialType
   const [form, setForm] = useState(() => ({
     // 유형은 만들기 전 팝업에서 고르고, 수정 시에는 기존 유형을 유지한다
-    type: editingMeetup?.type ?? initialType,
+    type: editingMeetup?.type ?? safeInitialType,
     title: editingMeetup?.title ?? '',
     description: editingMeetup?.description ?? '',
     image: editingMeetup?.image ?? '',
