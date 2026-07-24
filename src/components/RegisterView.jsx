@@ -273,9 +273,6 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                 >
                   <img src={form.photos[0].preview} alt="main" className="photo-main" />
                   <div className="photo-main-badge">대표</div>
-                  {form.photos.length > 1 && (
-                    <div className="photo-main-hint">아래 사진을 여기로 드래그하면 대표가 돼요</div>
-                  )}
                 </div>
               )}
 
@@ -303,6 +300,10 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                     </label>
                   )}
                 </div>
+              )}
+
+              {form.photos.length > 1 && (
+                <p className="photo-drag-hint">아래 사진을 위 영역으로 드래그하면 대표 사진으로 설정됩니다</p>
               )}
             </div>
 
