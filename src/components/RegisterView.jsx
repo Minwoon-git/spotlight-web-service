@@ -157,6 +157,26 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
       return { ...f, photos: [item, ...arr] }
     })
 
+  // 썸네일을 대표 영역으로 드래그해 대표 사진을 바꾼다
+  const [dragIndex, setDragIndex] = useState(null)
+  const [dragOverMain, setDragOverMain] = useState(false)
+
+  const handleThumbDragStart = (idx) => (e) => {
+    setDragIndex(idx)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  const handleMainDragOver = (e) => {
+    if (dragIndex === null) return
+    e.preventDefault()
+    setDragOverMain(true)
+  }
+  const handleMainDrop = (e) => {
+    e.preventDefault()
+    if (dragIndex !== null) moveFirst(dragIndex)
+    setDragIndex(null)
+    setDragOverMain(false)
+  }
+
   const validate = () => {
     const e = {}
     if (!form.name.trim())     e.name     = '스팟 이름을 입력해주세요'
@@ -245,21 +265,33 @@ export default function RegisterView({ addSpot, updateSpot, editingSpot, onNavig
                   <input type="file" accept="image/*" multiple onChange={handlePhotoInput} hidden />
                 </label>
               ) : (
-                <div className="photo-main-wrap">
+                <div
+                  className={`photo-main-wrap ${dragOverMain ? 'drag-over' : ''}`}
+                  onDragOver={handleMainDragOver}
+                  onDragLeave={() => setDragOverMain(false)}
+                  onDrop={handleMainDrop}
+                >
                   <img src={form.photos[0].preview} alt="main" className="photo-main" />
                   <div className="photo-main-badge">대표</div>
+                  {form.photos.length > 1 && (
+                    <div className="photo-main-hint">아래 사진을 여기로 드래그하면 대표가 돼요</div>
+                  )}
                 </div>
               )}
 
               {form.photos.length > 0 && (
                 <div className="photo-thumb-grid">
                   {form.photos.map((p, i) => (
-                    <div key={i} className={`photo-thumb-item ${i === 0 ? 'is-main' : ''}`}>
+                    <div
+                      key={i}
+                      className={`photo-thumb-item ${i === 0 ? 'is-main' : ''} ${dragIndex === i ? 'dragging' : ''}`}
+                      draggable={i !== 0}
+                      onDragStart={handleThumbDragStart(i)}
+                      onDragEnd={() => { setDragIndex(null); setDragOverMain(false) }}
+                    >
                       <img src={p.preview} alt={`photo-${i}`} />
+                      {i === 0 && <span className="thumb-main-tag">대표</span>}
                       <div className="thumb-actions">
-                        {i !== 0 && (
-                          <button type="button" className="thumb-btn" onClick={() => moveFirst(i)}>대표</button>
-                        )}
                         <button type="button" className="thumb-remove" onClick={() => removePhoto(i)}>✕</button>
                       </div>
                     </div>

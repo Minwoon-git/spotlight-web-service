@@ -190,6 +190,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+/* 썸네일을 대표 영역 위로 끌어왔을 때 강조 */
+.photo-main-wrap.drag-over {
+  border-color: var(--accent);
+}
+.photo-main-wrap.drag-over::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(99, 102, 241, 0.22);
+  pointer-events: none;
+}
+
+.photo-main-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .photo-main {
@@ -229,6 +259,27 @@
 
 .photo-thumb-item.is-main {
   border-color: var(--accent);
+}
+
+/* 대표가 아닌 썸네일은 드래그로 대표 지정 가능 */
+.photo-thumb-item[draggable="true"] {
+  cursor: grab;
+}
+.photo-thumb-item.dragging {
+  opacity: 0.4;
+}
+
+.thumb-main-tag {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  z-index: 1;
 }
 
 .photo-thumb-item img {
