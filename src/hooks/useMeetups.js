@@ -264,10 +264,11 @@ export function useMeetup(meetupId, user) {
     await deleteDoc(doc(db, 'meetups', meetupId, 'requests', uid))
   }
 
-  const addComment = async (content) => {
+  const addComment = async (content, parentId = null) => {
     if (!meetupId || !content.trim()) return
     await addDoc(collection(db, 'meetups', meetupId, 'comments'), {
       content: content.trim(),
+      parentId, // null이면 원댓글, 값이 있으면 대댓글
       author: user?.displayName || user?.email?.split('@')[0] || '익명',
       authorId: user?.uid || null,
       authorPhoto: user?.photoURL || null,

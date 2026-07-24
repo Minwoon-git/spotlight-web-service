@@ -319,6 +319,38 @@
   word-break: break-word;
 }
 
+.md-reply-toggle {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 0;
+}
+.md-reply-toggle:hover { color: var(--accent); }
+
+.md-replies {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.md-reply { background: var(--bg); }
+
+.md-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-left: 20px;
+}
+.md-reply-form .md-comment-submit { align-self: flex-end; }
+
 .md-comment-form { display: flex; flex-direction: column; gap: 10px; }
 
 .md-comment-input {

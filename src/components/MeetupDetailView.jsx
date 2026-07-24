@@ -18,6 +18,13 @@ export default function MeetupDetailView({
   const [sending, setSending] = useState(false)
   const [joining, setJoining] = useState(false)
   const [confirm, setConfirm] = useState(null) // 'delete' | 'leave' | commentId
+  const [replyTo, setReplyTo] = useState(null) // 대댓글 작성 중인 원댓글 id
+  const [replyText, setReplyText] = useState('')
+  const [replySending, setReplySending] = useState(false)
+
+  // 원댓글 / 대댓글 분리
+  const rootComments = comments.filter(c => !c.parentId)
+  const repliesOf = (parentId) => comments.filter(c => c.parentId === parentId)
 
   const isHost = !!user && meetup?.hostId === user.uid
   const canDelete = isHost || isAdmin
@@ -56,6 +63,21 @@ export default function MeetupDetailView({
       console.error('댓글 작성 실패:', err)
     } finally {
       setSending(false)
+    }
+  }
+
+  const handleAddReply = async (parentId) => {
+    if (!user) { onAuthOpen(); return }
+    if (!replyText.trim()) return
+    setReplySending(true)
+    try {
+      await addComment(replyText, parentId)
+      setReplyText('')
+      setReplyTo(null)
+    } catch (err) {
+      console.error('답글 작성 실패:', err)
+    } finally {
+      setReplySending(false)
     }
   }
 
@@ -214,29 +236,83 @@ export default function MeetupDetailView({
         </section>
 
         <section className="md-section">
-          <h2 className="md-section-title">문의 {comments.length}</h2>
+          <h2 className="md-section-title">댓글 {comments.length}</h2>
 
-          {comments.length === 0 && <p className="md-empty-line">궁금한 점을 물어보세요.</p>}
+          {rootComments.length === 0 && <p className="md-empty-line">첫 댓글을 남겨보세요.</p>}
 
           <ul className="md-comments">
-            {comments.map(c => (
-              <li key={c.id} className="md-comment">
-                <div className="md-comment-head">
-                  <span className="md-person">
-                    {c.authorPhoto
-                      ? <img src={c.authorPhoto} alt="" className="md-avatar" />
-                      : <span className="md-avatar-placeholder">{c.author?.[0]?.toUpperCase()}</span>
-                    }
-                    {c.author}
-                  </span>
-                  <span className="md-comment-date">{formatMeetupDate(c.createdAt)}</span>
-                  {(isAdmin || (user && c.authorId === user.uid)) && (
-                    <button className="md-comment-del" onClick={() => setConfirm(c.id)}>삭제</button>
+            {rootComments.map(c => {
+              const canDeleteComment = isAdmin || (user && c.authorId === user.uid)
+              return (
+                <li key={c.id} className="md-comment">
+                  <div className="md-comment-head">
+                    <span className="md-person">
+                      {c.authorPhoto
+                        ? <img src={c.authorPhoto} alt="" className="md-avatar" />
+                        : <span className="md-avatar-placeholder">{c.author?.[0]?.toUpperCase()}</span>
+                      }
+                      {c.author}
+                    </span>
+                    <span className="md-comment-date">{formatMeetupDate(c.createdAt)}</span>
+                    {canDeleteComment && (
+                      <button className="md-comment-del" onClick={() => setConfirm(c.id)}>삭제</button>
+                    )}
+                  </div>
+                  <p className="md-comment-body">{c.content}</p>
+                  <button
+                    className="md-reply-toggle"
+                    onClick={() => { setReplyTo(replyTo === c.id ? null : c.id); setReplyText('') }}
+                  >
+                    {replyTo === c.id ? '취소' : '답글'}
+                  </button>
+
+                  {/* 대댓글 목록 */}
+                  {repliesOf(c.id).length > 0 && (
+                    <ul className="md-replies">
+                      {repliesOf(c.id).map(r => (
+                        <li key={r.id} className="md-comment md-reply">
+                          <div className="md-comment-head">
+                            <span className="md-person">
+                              {r.authorPhoto
+                                ? <img src={r.authorPhoto} alt="" className="md-avatar" />
+                                : <span className="md-avatar-placeholder">{r.author?.[0]?.toUpperCase()}</span>
+                              }
+                              {r.author}
+                            </span>
+                            <span className="md-comment-date">{formatMeetupDate(r.createdAt)}</span>
+                            {(isAdmin || (user && r.authorId === user.uid)) && (
+                              <button className="md-comment-del" onClick={() => setConfirm(r.id)}>삭제</button>
+                            )}
+                          </div>
+                          <p className="md-comment-body">{r.content}</p>
+                        </li>
+                      ))}
+                    </ul>
                   )}
-                </div>
-                <p className="md-comment-body">{c.content}</p>
-              </li>
-            ))}
+
+                  {/* 대댓글 입력 */}
+                  {replyTo === c.id && (
+                    <div className="md-reply-form">
+                      <textarea
+                        className="md-comment-input"
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        placeholder={user ? '답글을 입력하세요' : '로그인하고 답글을 남겨보세요'}
+                        rows={2}
+                      />
+                      <button
+                        className="md-comment-submit"
+                        type="button"
+                        onClick={() => handleAddReply(c.id)}
+                        disabled={replySending}
+                      >
+                        {replySending ? '등록 중…' : '답글 등록'}
+                      </button>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
           </ul>
 
           <form className="md-comment-form" onSubmit={handleAddComment}>
@@ -244,11 +320,11 @@ export default function MeetupDetailView({
               className="md-comment-input"
               value={comment}
               onChange={e => setComment(e.target.value)}
-              placeholder={user ? '궁금한 점을 남겨보세요' : '로그인하고 문의를 남겨보세요'}
+              placeholder={user ? '댓글을 남겨보세요' : '로그인하고 댓글을 남겨보세요'}
               rows={3}
             />
             <button className="md-comment-submit" type="submit" disabled={sending}>
-              {sending ? '등록 중…' : '문의 남기기'}
+              {sending ? '등록 중…' : '댓글 등록'}
             </button>
           </form>
         </section>
@@ -256,11 +332,11 @@ export default function MeetupDetailView({
 
       {confirm && (
         <ConfirmModal
-          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? (isPending ? '신청 취소' : words.leave) : '문의 삭제'}
+          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? (isPending ? '신청 취소' : words.leave) : '댓글 삭제'}
           message={
-            confirm === 'delete' ? `이 모임을 삭제할까요? ${words.member}와 문의도 함께 사라지며 되돌릴 수 없어요.`
+            confirm === 'delete' ? `이 모임을 삭제할까요? ${words.member}와 댓글도 함께 사라지며 되돌릴 수 없어요.`
               : confirm === 'leave' ? (isPending ? '가입 신청을 취소할까요?' : `정말 ${words.leave.replace('하기', '')}할까요?`)
-              : '이 문의를 삭제할까요? 되돌릴 수 없어요.'
+              : '이 댓글을 삭제할까요? 되돌릴 수 없어요.'
           }
           confirmLabel={confirm === 'leave' ? (isPending ? '신청 취소' : words.leave.replace('하기', '')) : '삭제'}
           danger
