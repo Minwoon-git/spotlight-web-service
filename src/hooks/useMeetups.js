@@ -139,13 +139,29 @@ export function useMyMeetupIds(user) {
     }
   }
 
-  return { joinedMeetups: ids.joined, savedMeetups: ids.saved, toggleSave }
+  // 클럽 승인은 모임장이 하므로 신청자의 users 문서는 갱신되지 않는다.
+  // 승인된 뒤 신청자가 상세를 볼 때 본인 문서에 참여 사실을 반영(자가 치유)한다.
+  const syncJoined = async (meetupId, shouldBeJoined) => {
+    if (!user || !meetupId) return
+    const has = ids.joined.includes(meetupId)
+    if (has === shouldBeJoined) return
+    try {
+      await setDoc(
+        doc(db, 'users', user.uid),
+        { joinedMeetups: shouldBeJoined ? arrayUnion(meetupId) : arrayRemove(meetupId) },
+        { merge: true },
+      )
+    } catch (err) { console.error('참여 목록 동기화 실패:', err) }
+  }
+
+  return { joinedMeetups: ids.joined, savedMeetups: ids.saved, toggleSave, syncJoined }
 }
 
 export function useMeetup(meetupId, user) {
   const [meetup, setMeetup] = useState(null)
   const [loading, setLoading] = useState(true)
   const [participants, setParticipants] = useState([])
+  const [requests, setRequests] = useState([])
   const [comments, setComments] = useState([])
 
   useEffect(() => {
@@ -166,6 +182,16 @@ export function useMeetup(meetupId, user) {
     return unsub
   }, [meetupId])
 
+  // 가입 신청 목록 (클럽 승인제에서만 사용)
+  useEffect(() => {
+    if (!meetupId) return
+    const unsub = onSnapshot(collection(db, 'meetups', meetupId, 'requests'),
+      snap => setRequests(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('가입 신청 불러오기 실패:', err),
+    )
+    return unsub
+  }, [meetupId])
+
   useEffect(() => {
     if (!meetupId) return
     const q = query(collection(db, 'meetups', meetupId, 'comments'), orderBy('createdAt', 'asc'))
@@ -176,27 +202,46 @@ export function useMeetup(meetupId, user) {
     return unsub
   }, [meetupId])
 
+  // 클럽은 모임장 승인 후 가입, 나머지는 즉시 참여
+  const requiresApproval = meetup?.type === '클럽'
   const isJoined = !!user && participants.some(p => p.id === user.uid)
+  const isPending = !!user && requests.some(r => r.id === user.uid)
   const isFull = !!meetup?.capacity && participants.length >= meetup.capacity
 
+  const memberInfo = () => ({
+    name: user.displayName || user.email?.split('@')[0] || '익명',
+    photo: user.photoURL || null,
+  })
+
+  const addParticipantDoc = async (uid, info) => {
+    await setDoc(doc(db, 'meetups', meetupId, 'participants', uid), { ...info, joinedAt: serverTimestamp() })
+    try {
+      await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(1) })
+    } catch { /* 카운터 실패가 참여 자체를 막지 않게 한다 */ }
+  }
+
+  // 즉시 참여(소셜링·원데이클래스) 또는 가입 신청(클럽)
   const join = async () => {
     if (!user || !meetupId) return
-    await setDoc(doc(db, 'meetups', meetupId, 'participants', user.uid), {
-      name: user.displayName || user.email?.split('@')[0] || '익명',
-      photo: user.photoURL || null,
-      joinedAt: serverTimestamp(),
-    })
-    // '참여한 모임' 목록용 — 참가자 서브컬렉션을 전부 뒤지지 않도록 내 문서에도 기록한다
+    if (requiresApproval) {
+      await setDoc(doc(db, 'meetups', meetupId, 'requests', user.uid), {
+        ...memberInfo(), requestedAt: serverTimestamp(),
+      })
+      return
+    }
+    await addParticipantDoc(user.uid, memberInfo())
     try {
       await setDoc(doc(db, 'users', user.uid), { joinedMeetups: arrayUnion(meetupId) }, { merge: true })
     } catch (err) { console.error('참여 모임 기록 실패:', err) }
-    try {
-      await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(1) })
-    } catch { /* 카운터 실패가 참가 자체를 막지 않게 한다 */ }
   }
 
+  // 참여 취소 또는 신청 취소
   const leave = async () => {
     if (!user || !meetupId) return
+    if (isPending) {
+      await deleteDoc(doc(db, 'meetups', meetupId, 'requests', user.uid))
+      return
+    }
     await deleteDoc(doc(db, 'meetups', meetupId, 'participants', user.uid))
     try {
       await setDoc(doc(db, 'users', user.uid), { joinedMeetups: arrayRemove(meetupId) }, { merge: true })
@@ -204,6 +249,19 @@ export function useMeetup(meetupId, user) {
     try {
       await updateDoc(doc(db, 'meetups', meetupId), { participantCount: increment(-1) })
     } catch { /* 위와 동일 */ }
+  }
+
+  // 모임장: 가입 신청 수락
+  const approveRequest = async (req) => {
+    if (!meetupId) return
+    await addParticipantDoc(req.id, { name: req.name, photo: req.photo ?? null })
+    await deleteDoc(doc(db, 'meetups', meetupId, 'requests', req.id))
+  }
+
+  // 모임장: 가입 신청 거절
+  const rejectRequest = async (uid) => {
+    if (!meetupId) return
+    await deleteDoc(doc(db, 'meetups', meetupId, 'requests', uid))
   }
 
   const addComment = async (content) => {
@@ -228,7 +286,12 @@ export function useMeetup(meetupId, user) {
     } catch { /* 위와 동일 */ }
   }
 
-  return { meetup, loading, participants, comments, isJoined, isFull, join, leave, addComment, deleteComment }
+  return {
+    meetup, loading, participants, requests, comments,
+    requiresApproval, isJoined, isPending, isFull,
+    join, leave, approveRequest, rejectRequest,
+    addComment, deleteComment,
+  }
 }
 
 export function formatMeetupDate(createdAt) {

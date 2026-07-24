@@ -1,16 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMeetup, formatMeetupDate, scheduleText, TYPE_INFO } from '../hooks/useMeetups'
 import ConfirmModal from './ConfirmModal'
 import './MeetupDetailView.css'
 
 export default function MeetupDetailView({
-  user, isAdmin, savedMeetups = [], onToggleSave, onBack, onEdit, onDeleted, onAuthOpen,
+  user, isAdmin, savedMeetups = [], onToggleSave, onSyncJoined, onBack, onEdit, onDeleted, onAuthOpen,
 }) {
   const { id } = useParams()
   const {
-    meetup, loading, participants, comments,
-    isJoined, isFull, join, leave, addComment, deleteComment,
+    meetup, loading, participants, requests, comments,
+    requiresApproval, isJoined, isPending, isFull,
+    join, leave, approveRequest, rejectRequest, addComment, deleteComment,
   } = useMeetup(id, user)
 
   const [comment, setComment] = useState('')
@@ -22,6 +23,12 @@ export default function MeetupDetailView({
   const canDelete = isHost || isAdmin
   const words = TYPE_INFO[meetup?.type] ?? TYPE_INFO.소셜링
   const isSaved = !!meetup && savedMeetups.includes(meetup.id)
+
+  // 승인은 모임장이 하므로, 신청자가 상세를 열 때 본인 '참여한 모임' 목록을 실제 참여 여부와 맞춘다
+  useEffect(() => {
+    if (!user || !meetup || isHost) return
+    onSyncJoined?.(meetup.id, isJoined)
+  }, [user, meetup, isHost, isJoined, onSyncJoined])
 
   const handleJoin = async () => {
     if (!user) { onAuthOpen(); return }
@@ -75,7 +82,8 @@ export default function MeetupDetailView({
     )
   }
 
-  const joinDisabled = joining || (isFull && !isJoined)
+  // 대기 중이면 취소만 가능, 정원이 차면 신규 참여 불가
+  const joinDisabled = joining || (isFull && !isJoined && !isPending)
 
   return (
     <div className="md-page">
@@ -141,16 +149,48 @@ export default function MeetupDetailView({
         {!isHost && (
           <div className="md-join-bar">
             <button
-              className={`md-join-btn ${isJoined ? 'joined' : ''}`}
-              onClick={() => (isJoined ? setConfirm('leave') : handleJoin())}
+              className={`md-join-btn ${isJoined ? 'joined' : ''} ${isPending ? 'pending' : ''}`}
+              onClick={() => ((isJoined || isPending) ? setConfirm('leave') : handleJoin())}
               disabled={joinDisabled}
             >
               {joining ? '처리 중…'
+                : isPending ? '승인 대기 중 · 신청 취소'
                 : isJoined ? words.leave
                 : isFull ? words.closed
+                : requiresApproval ? '가입 신청하기'
                 : words.join}
             </button>
+            {requiresApproval && !isJoined && !isPending && !isFull && (
+              <p className="md-join-note">모임장이 신청을 수락하면 가입돼요.</p>
+            )}
           </div>
+        )}
+
+        {isHost && requiresApproval && (
+          <section className="md-section">
+            <h2 className="md-section-title">가입 신청 {requests.length}</h2>
+            {requests.length === 0 ? (
+              <p className="md-empty-line">대기 중인 신청이 없어요.</p>
+            ) : (
+              <ul className="md-requests">
+                {requests.map(r => (
+                  <li key={r.id} className="md-request">
+                    <span className="md-person">
+                      {r.photo
+                        ? <img src={r.photo} alt="" className="md-avatar" />
+                        : <span className="md-avatar-placeholder">{r.name?.[0]?.toUpperCase()}</span>
+                      }
+                      {r.name}
+                    </span>
+                    <div className="md-request-actions">
+                      <button className="md-req-approve" onClick={() => approveRequest(r)}>수락</button>
+                      <button className="md-req-reject" onClick={() => rejectRequest(r.id)}>거절</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         )}
 
         <section className="md-section">
@@ -216,13 +256,13 @@ export default function MeetupDetailView({
 
       {confirm && (
         <ConfirmModal
-          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? words.leave : '문의 삭제'}
+          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? (isPending ? '신청 취소' : words.leave) : '문의 삭제'}
           message={
             confirm === 'delete' ? `이 모임을 삭제할까요? ${words.member}와 문의도 함께 사라지며 되돌릴 수 없어요.`
-              : confirm === 'leave' ? `정말 ${words.leave.replace('하기', '')}할까요?`
+              : confirm === 'leave' ? (isPending ? '가입 신청을 취소할까요?' : `정말 ${words.leave.replace('하기', '')}할까요?`)
               : '이 문의를 삭제할까요? 되돌릴 수 없어요.'
           }
-          confirmLabel={confirm === 'leave' ? words.leave.replace('하기', '') : '삭제'}
+          confirmLabel={confirm === 'leave' ? (isPending ? '신청 취소' : words.leave.replace('하기', '')) : '삭제'}
           danger
           onCancel={() => setConfirm(null)}
           onConfirm={handleConfirm}

@@ -59,7 +59,7 @@ function AppInner() {
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
   const { meetups, loading: meetupsLoading, addMeetup, updateMeetup, deleteMeetup } = useMeetups()
-  const { joinedMeetups, savedMeetups, toggleSave: toggleMeetupSave } = useMyMeetupIds(user)
+  const { joinedMeetups, savedMeetups, toggleSave: toggleMeetupSave, syncJoined } = useMyMeetupIds(user)
   const [editingMeetup, setEditingMeetup] = useState(null)
   // null | 'create'(무엇을 만들지) | 'meetupType'(모임 유형)
   const [choiceModal, setChoiceModal] = useState(null)
@@ -255,6 +255,7 @@ function AppInner() {
             isAdmin={admin}
             savedMeetups={savedMeetups}
             onToggleSave={toggleMeetupSave}
+            onSyncJoined={syncJoined}
             onBack={() => navigate('/meetup')}
             onEdit={(m) => { setEditingMeetup(m); navigate('/meetup/write') }}
             onDeleted={async (meetupId) => { await deleteMeetup(meetupId); navigate('/meetup') }}
