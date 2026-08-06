@@ -69,15 +69,17 @@ export function useMeetups() {
   }, [])
 
   const addMeetup = async (data, user) => {
+    // 원데이클래스는 개설자가 '강사'라 수강생 명단에 넣지 않는다.
+    // 소셜링(참여자)·클럽(멤버)은 주최자도 함께 활동하므로 첫 참여자로 등록한다.
+    const hostJoins = data.type !== '원데이클래스'
     const ref = await addDoc(collection(db, 'meetups'), {
       ...toDocData(data),
       ...hostFields(user),
-      participantCount: 1, // 주최자가 첫 참여자
+      participantCount: hostJoins ? 1 : 0,
       commentCount: 0,
       createdAt: serverTimestamp(),
     })
-    // 주최자를 참여자 명단에 넣어 인원수와 목록이 실제와 맞게 한다
-    if (user?.uid) {
+    if (hostJoins && user?.uid) {
       try {
         await setDoc(doc(db, 'meetups', ref.id, 'participants', user.uid), {
           name: user.displayName || user.email?.split('@')[0] || '익명',
