@@ -41,7 +41,8 @@ export default function MeetupDetailView({
     if (!user) { onAuthOpen(); return }
     setJoining(true)
     try {
-      if (isJoined) await leave()
+      // 참여 중이거나 승인 대기 중이면 취소, 그 외에는 참여/신청
+      if (isJoined || isPending) await leave()
       else await join()
     } catch (err) {
       console.error('참가 처리 실패:', err)
