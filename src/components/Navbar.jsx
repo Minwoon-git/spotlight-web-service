@@ -2,11 +2,24 @@ import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import './Navbar.css'
 
-export default function Navbar({ view, onNavigate, onAuthOpen }) {
+export default function Navbar({
+  view, onNavigate, onAuthOpen,
+  pendingMeetups = [], requestOutcomes = [], onOpenMeetup, onDismissOutcome,
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
   const { user, logout } = useAuth() ?? {}
 
   const navigate = (v) => { onNavigate(v); setMenuOpen(false) }
+
+  const pendingTotal = pendingMeetups.reduce((sum, m) => sum + (m.count ?? 0), 0)
+  const notifTotal = pendingTotal + requestOutcomes.length
+  const notifEmpty = pendingMeetups.length === 0 && requestOutcomes.length === 0
+
+  const openMeetup = (id) => { setNotifOpen(false); onOpenMeetup?.(id) }
+
+  // 신청 결과를 확인하면 목록에서 제거하고 해당 모임으로 이동
+  const openOutcome = (id) => { onDismissOutcome?.(id); openMeetup(id) }
 
   return (
     <nav className="navbar">
@@ -26,6 +39,65 @@ export default function Navbar({ view, onNavigate, onAuthOpen }) {
         <div className="navbar-actions">
           {user ? (
             <div className="navbar-user">
+              <div className="navbar-notif">
+                <button
+                  className="navbar-notif-btn"
+                  onClick={() => setNotifOpen(o => !o)}
+                  aria-label="가입 신청 알림"
+                  aria-expanded={notifOpen}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                  {notifTotal > 0 && (
+                    <span className="navbar-notif-count">{notifTotal > 99 ? '99+' : notifTotal}</span>
+                  )}
+                </button>
+
+                {notifOpen && (
+                  <>
+                    <div className="navbar-notif-backdrop" onClick={() => setNotifOpen(false)} />
+                    <div className="navbar-notif-panel">
+                      {notifEmpty && <p className="navbar-notif-empty">새로운 알림이 없어요.</p>}
+
+                      {pendingMeetups.length > 0 && (
+                        <>
+                          <p className="navbar-notif-title">받은 가입 신청</p>
+                          <ul className="navbar-notif-list">
+                            {pendingMeetups.map(m => (
+                              <li key={m.id}>
+                                <button className="navbar-notif-item" onClick={() => openMeetup(m.id)}>
+                                  <span className="navbar-notif-item-title">{m.title}</span>
+                                  <span className="navbar-notif-item-count">{m.count}건</span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+
+                      {requestOutcomes.length > 0 && (
+                        <>
+                          <p className="navbar-notif-title">내 신청 결과</p>
+                          <ul className="navbar-notif-list">
+                            {requestOutcomes.map(m => (
+                              <li key={m.id}>
+                                <button className="navbar-notif-item" onClick={() => openOutcome(m.id)}>
+                                  <span className="navbar-notif-item-title">{m.title}</span>
+                                  <span className={`navbar-notif-outcome ${m.outcome}`}>
+                                    {m.outcome === 'approved' ? '승인됨' : '거절됨'}
+                                  </span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
               <button className="navbar-user-btn" onClick={() => navigate('mypage')}>
                 {user.photoURL
                   ? <img src={user.photoURL} alt="" className="user-avatar" />

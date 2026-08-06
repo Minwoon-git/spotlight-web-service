@@ -25,7 +25,7 @@ import MeetupListView from './components/MeetupListView'
 import MeetupDetailView from './components/MeetupDetailView'
 import MeetupWriteView from './components/MeetupWriteView'
 import ChoiceModal from './components/ChoiceModal'
-import { MEETUP_TYPES, TYPE_INFO, useMyMeetupIds } from './hooks/useMeetups'
+import { MEETUP_TYPES, TYPE_INFO, useMyMeetupIds, useJoinRequestOutcomes } from './hooks/useMeetups'
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
@@ -60,6 +60,7 @@ function AppInner() {
   const [authOpen, setAuthOpen] = useState(false)
   const { meetups, loading: meetupsLoading, addMeetup, updateMeetup, deleteMeetup } = useMeetups()
   const { joinedMeetups, savedMeetups, toggleSave: toggleMeetupSave, syncJoined } = useMyMeetupIds(user)
+  const { outcomes: requestOutcomes, dismissOutcome } = useJoinRequestOutcomes(user)
   const [editingMeetup, setEditingMeetup] = useState(null)
   // null | 'create'(무엇을 만들지) | 'meetupType'(모임 유형)
   const [choiceModal, setChoiceModal] = useState(null)
@@ -69,6 +70,21 @@ function AppInner() {
   const location = useLocation()
 
   const view = PATH_TO_VIEW[location.pathname] ?? 'home'
+
+  // 내가 운영하는 클럽 중 대기 중인 가입 신청이 있는 모임 — 헤더 알림(모임장용)
+  const pendingMeetups = user
+    ? meetups
+        .filter(m => m.hostId === user.uid && m.type === '클럽' && (m.requestCount ?? 0) > 0)
+        .map(m => ({ id: m.id, title: m.title, count: m.requestCount }))
+    : []
+
+  // 내가 신청한 클럽의 승인/거절 결과 — 헤더 알림(신청자용)
+  const outcomeItems = Object.entries(requestOutcomes)
+    .map(([id, outcome]) => {
+      const m = meetups.find(x => x.id === id)
+      return m ? { id, title: m.title, outcome } : null
+    })
+    .filter(Boolean)
 
   // 콘텐츠가 있는 화면(지도/명소 목록/글 등)에서만 애드센스를 로드한다.
   // 로그인 안내, 이메일 인증 안내, 인증 액션 처리 같은 화면은 제외 —
@@ -119,7 +135,15 @@ function AppInner() {
 
   return (
     <div className="app">
-      <Navbar view={view} onNavigate={handleNavigate} onAuthOpen={() => setAuthOpen(true)} />
+      <Navbar
+        view={view}
+        onNavigate={handleNavigate}
+        onAuthOpen={() => setAuthOpen(true)}
+        pendingMeetups={pendingMeetups}
+        requestOutcomes={outcomeItems}
+        onDismissOutcome={dismissOutcome}
+        onOpenMeetup={(id) => navigate(`/meetup/${id}`)}
+      />
       <BottomTabBar
         view={view}
         onNavigate={handleNavigate}
