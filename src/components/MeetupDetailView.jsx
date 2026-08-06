@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMeetup, formatMeetupDate, scheduleText, TYPE_INFO } from '../hooks/useMeetups'
+import { useMeetup, useClubActivities, formatMeetupDate, scheduleText, TYPE_INFO } from '../hooks/useMeetups'
 import ConfirmModal from './ConfirmModal'
+import ActivityWriteModal from './ActivityWriteModal'
 import './MeetupDetailView.css'
+
+// 후기 날짜 표기: 2026-08-02 → 8월 2일 (토)
+function formatActivityDate(date) {
+  if (!date) return ''
+  const d = new Date(`${date}T00:00:00`)
+  if (Number.isNaN(d.getTime())) return date
+  return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+}
 
 export default function MeetupDetailView({
   user, isAdmin, savedMeetups = [], onToggleSave, onSyncJoined, onBack, onEdit, onDeleted, onAuthOpen,
@@ -21,6 +30,11 @@ export default function MeetupDetailView({
   const [replyTo, setReplyTo] = useState(null) // 대댓글 작성 중인 원댓글 id
   const [replyText, setReplyText] = useState('')
   const [replySending, setReplySending] = useState(false)
+  const [showActivityForm, setShowActivityForm] = useState(false)
+
+  // 클럽만 모임 후기(활동 이력)를 쓴다
+  const isClub = meetup?.type === '클럽'
+  const { activities, addActivity, deleteActivity } = useClubActivities(isClub ? id : null)
 
   // 원댓글 / 대댓글 분리
   const rootComments = comments.filter(c => !c.parentId)
@@ -82,9 +96,16 @@ export default function MeetupDetailView({
     }
   }
 
+  const isActivityConfirm = typeof confirm === 'string' && confirm.startsWith('activity:')
+
   const handleConfirm = async () => {
     if (confirm === 'delete') { await onDeleted(meetup.id); return }
     if (confirm === 'leave') { await handleJoin(); return }
+    if (isActivityConfirm) {
+      await deleteActivity(confirm.slice('activity:'.length))
+      setConfirm(null)
+      return
+    }
     await deleteComment(confirm)
     setConfirm(null)
   }
@@ -236,6 +257,70 @@ export default function MeetupDetailView({
           )}
         </section>
 
+        {isClub && (
+          <section className="md-section">
+            <div className="md-activity-head">
+              <h2 className="md-section-title">모임 후기 {activities.length}</h2>
+              {(isHost || isJoined) && (
+                <button
+                  className="md-activity-add"
+                  onClick={() => (user ? setShowActivityForm(true) : onAuthOpen())}
+                >
+                  후기 남기기
+                </button>
+              )}
+            </div>
+
+            {activities.length === 0 ? (
+              <p className="md-empty-line">아직 후기가 없어요. 출사를 다녀오면 후기를 남겨보세요.</p>
+            ) : (
+              <ul className="md-activities">
+                {activities.map(a => (
+                  <li key={a.id} className="md-activity">
+                    <div className="md-activity-top">
+                      <div>
+                        <p className="md-activity-date">{formatActivityDate(a.date)}</p>
+                        <h3 className="md-activity-title">{a.title}</h3>
+                      </div>
+                      {(isAdmin || (user && a.authorId === user.uid)) && (
+                        <button className="md-activity-del" onClick={() => setConfirm(`activity:${a.id}`)}>삭제</button>
+                      )}
+                    </div>
+
+                    {a.place && <p className="md-activity-place">📍 {a.place}</p>}
+                    {a.note && <p className="md-activity-note">{a.note}</p>}
+
+                    {a.photos?.length > 0 && (
+                      <div className="md-activity-photos">
+                        {a.photos.map((src, i) => (
+                          <img key={i} src={src} alt={`${a.title} 사진 ${i + 1}`} loading="lazy" />
+                        ))}
+                      </div>
+                    )}
+
+                    {a.attendees?.length > 0 && (
+                      <div className="md-activity-attendees">
+                        <span className="md-activity-attendees-label">참여 {a.attendees.length}</span>
+                        {a.attendees.map(p => (
+                          <span key={p.id} className="md-person">
+                            {p.photo
+                              ? <img src={p.photo} alt="" className="md-avatar" />
+                              : <span className="md-avatar-placeholder">{p.name?.[0]?.toUpperCase()}</span>
+                            }
+                            {p.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <p className="md-activity-author">기록 · {a.author}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
         <section className="md-section">
           <h2 className="md-section-title">댓글 {comments.length}</h2>
 
@@ -333,16 +418,28 @@ export default function MeetupDetailView({
 
       {confirm && (
         <ConfirmModal
-          title={confirm === 'delete' ? '모임 삭제' : confirm === 'leave' ? (isPending ? '신청 취소' : words.leave) : '댓글 삭제'}
+          title={confirm === 'delete' ? '모임 삭제'
+            : confirm === 'leave' ? (isPending ? '신청 취소' : words.leave)
+            : isActivityConfirm ? '후기 삭제'
+            : '댓글 삭제'}
           message={
             confirm === 'delete' ? `이 모임을 삭제할까요? ${words.member}와 댓글도 함께 사라지며 되돌릴 수 없어요.`
               : confirm === 'leave' ? (isPending ? '가입 신청을 취소할까요?' : `정말 ${words.leave.replace('하기', '')}할까요?`)
+              : isActivityConfirm ? '이 후기를 삭제할까요? 되돌릴 수 없어요.'
               : '이 댓글을 삭제할까요? 되돌릴 수 없어요.'
           }
           confirmLabel={confirm === 'leave' ? (isPending ? '신청 취소' : words.leave.replace('하기', '')) : '삭제'}
           danger
           onCancel={() => setConfirm(null)}
           onConfirm={handleConfirm}
+        />
+      )}
+
+      {showActivityForm && (
+        <ActivityWriteModal
+          members={participants}
+          onSubmit={(data) => addActivity(data, user)}
+          onClose={() => setShowActivityForm(false)}
         />
       )}
     </div>

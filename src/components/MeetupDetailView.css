@@ -246,6 +246,103 @@
 
 .md-section { border-top: 1px solid var(--border); padding-top: 24px; margin-top: 24px; }
 
+/* ── 모임 후기 (클럽 활동 이력) ── */
+.md-activity-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.md-activity-head .md-section-title { margin: 0; }
+
+.md-activity-add {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 15px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+.md-activity-add:hover { opacity: 0.9; }
+
+.md-activities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.md-activity {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.md-activity-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.md-activity-date { margin: 0 0 2px; font-size: 12.5px; color: var(--text-secondary); }
+.md-activity-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--text); }
+
+.md-activity-del {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.md-activity-del:hover { color: #EF4444; }
+
+.md-activity-place { margin: 10px 0 0; font-size: 13px; color: var(--text-secondary); }
+
+.md-activity-note {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.md-activity-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.md-activity-photos img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.md-activity-attendees {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+.md-activity-attendees-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.md-activity-author { margin: 12px 0 0; font-size: 12px; color: var(--text-secondary); }
+
 .md-section-title {
   font-size: 16px;
   font-weight: 700;

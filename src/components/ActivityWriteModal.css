@@ -1,0 +1,218 @@
+.activity-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+}
+
+.activity-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg, #fff);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+}
+
+.activity-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.activity-modal-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.activity-close {
+  border: none;
+  background: none;
+  font-size: 16px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.activity-close:hover { background: var(--border-light); }
+
+.activity-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-row {
+  display: flex;
+  gap: 12px;
+}
+.activity-row .activity-field { flex: 1; }
+
+.activity-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.activity-label b { color: #EF4444; }
+
+.activity-count { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+
+.activity-input,
+.activity-textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--white, #fff);
+}
+.activity-input:focus,
+.activity-textarea:focus { outline: none; border-color: var(--accent); }
+.activity-input.error,
+.activity-textarea.error { border-color: #EF4444; }
+.activity-textarea { resize: vertical; }
+
+.activity-error { font-size: 12px; color: #EF4444; }
+
+/* 사진 */
+.activity-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.activity-photo-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.activity-photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.activity-photo-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.activity-photo-remove:hover { background: rgba(15, 23, 42, 0.9); }
+
+.activity-photo-add {
+  aspect-ratio: 1;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.activity-photo-add:hover { border-color: var(--accent); color: var(--accent); }
+.activity-photo-add.loading { cursor: default; }
+
+/* 참여 멤버 */
+.activity-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.activity-member {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 5px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--white, #fff);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+.activity-member.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.activity-member-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.activity-member-avatar.placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.activity-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+}
+.activity-btn.secondary {
+  background: var(--white, #fff);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+.activity-btn.secondary:hover { border-color: var(--text-secondary); }
+.activity-btn.primary { background: var(--accent); color: #fff; }
+.activity-btn.primary:hover { opacity: 0.92; }
+.activity-btn.primary:disabled { opacity: 0.6; cursor: default; }
+
+@media (max-width: 520px) {
+  .activity-overlay { padding: 0; }
+  .activity-modal { max-width: 100%; min-height: 100%; border-radius: 0; }
+}

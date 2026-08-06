@@ -398,6 +398,45 @@ export function useMeetup(meetupId, user) {
   }
 }
 
+// 클럽 활동 이력 — 출사를 다녀온 뒤 멤버가 남기는 기록.
+// 보기는 누구나, 작성은 멤버(모임장 포함), 참여 멤버는 작성자가 골라 담는다.
+export function useClubActivities(clubId) {
+  const [activities, setActivities] = useState([])
+
+  useEffect(() => {
+    if (!clubId) { setActivities([]); return }
+    const q = query(collection(db, 'meetups', clubId, 'activities'), orderBy('date', 'desc'))
+    const unsub = onSnapshot(q,
+      snap => setActivities(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('활동 이력 불러오기 실패:', err),
+    )
+    return unsub
+  }, [clubId])
+
+  const addActivity = async (data, user) => {
+    if (!clubId) return
+    await addDoc(collection(db, 'meetups', clubId, 'activities'), {
+      title: data.title.trim(),
+      date: data.date,
+      place: data.place?.trim() ?? '',
+      note: data.note?.trim() ?? '',
+      photos: data.photos ?? [],
+      attendees: data.attendees ?? [], // [{ id, name, photo }]
+      author: user?.displayName || user?.email?.split('@')[0] || '익명',
+      authorId: user?.uid || null,
+      authorPhoto: user?.photoURL || null,
+      createdAt: serverTimestamp(),
+    })
+  }
+
+  const deleteActivity = async (activityId) => {
+    if (!clubId) return
+    await deleteDoc(doc(db, 'meetups', clubId, 'activities', activityId))
+  }
+
+  return { activities, addActivity, deleteActivity }
+}
+
 export function formatMeetupDate(createdAt) {
   if (!createdAt) return ''
   const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt)
