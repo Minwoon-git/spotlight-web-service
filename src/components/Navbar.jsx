@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { formatMeetupDate } from '../hooks/useMeetups'
 import './Navbar.css'
 
 export default function Navbar({
@@ -68,7 +69,10 @@ export default function Navbar({
                             {pendingMeetups.map(m => (
                               <li key={m.id}>
                                 <button className="navbar-notif-item" onClick={() => openMeetup(m.id)}>
-                                  <span className="navbar-notif-item-title">{m.title}</span>
+                                  <span className="navbar-notif-item-main">
+                                    <span className="navbar-notif-item-title">{m.title}</span>
+                                    {m.time && <span className="navbar-notif-item-time">{formatMeetupDate(m.time)}</span>}
+                                  </span>
                                   <span className="navbar-notif-item-count">{m.count}건</span>
                                 </button>
                               </li>
@@ -84,7 +88,10 @@ export default function Navbar({
                             {requestOutcomes.map(m => (
                               <li key={m.id}>
                                 <button className="navbar-notif-item" onClick={() => openOutcome(m.id)}>
-                                  <span className="navbar-notif-item-title">{m.title}</span>
+                                  <span className="navbar-notif-item-main">
+                                    <span className="navbar-notif-item-title">{m.title}</span>
+                                    {m.time && <span className="navbar-notif-item-time">{formatMeetupDate(m.time)}</span>}
+                                  </span>
                                   <span className={`navbar-notif-outcome ${m.outcome}`}>
                                     {m.outcome === 'approved' ? '승인됨' : '거절됨'}
                                   </span>

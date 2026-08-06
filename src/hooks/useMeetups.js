@@ -161,7 +161,7 @@ export function useMyMeetupIds(user) {
 // 모임 문서의 카운터는 신청자가 모임 문서를 수정할 권한이 없어 올릴 수 없으므로,
 // 모임장이 자기 클럽의 requests 서브컬렉션을 직접 구독해 실제 신청 문서 수를 센다.
 export function useHostedRequestCounts(user, meetups) {
-  const [counts, setCounts] = useState({}) // { [meetupId]: number }
+  const [counts, setCounts] = useState({}) // { [meetupId]: { count, latestAt } }
 
   // 내가 개설한 클럽 id — 문자열 키로 고정해 불필요한 재구독을 막는다
   const clubKey = user
@@ -173,7 +173,15 @@ export function useHostedRequestCounts(user, meetups) {
     const ids = clubKey.split(',')
     const unsubs = ids.map(id =>
       onSnapshot(collection(db, 'meetups', id, 'requests'),
-        snap => setCounts(prev => ({ ...prev, [id]: snap.size })),
+        snap => {
+          // 가장 최근 신청 시각 (알림에 '~분 전' 표시용)
+          let latestAt = null
+          snap.forEach(d => {
+            const t = d.data().requestedAt
+            if (t && (!latestAt || (t.toMillis?.() ?? 0) > (latestAt.toMillis?.() ?? 0))) latestAt = t
+          })
+          setCounts(prev => ({ ...prev, [id]: { count: snap.size, latestAt } }))
+        },
         err => console.error('가입 신청 수 불러오기 실패:', err),
       ),
     )
@@ -191,7 +199,7 @@ export function useHostedRequestCounts(user, meetups) {
 //   - request 사라짐 + 참여자 명단에 없음 → 거절됨
 export function useJoinRequestOutcomes(user) {
   const [requestedIds, setRequestedIds] = useState([])
-  const [outcomes, setOutcomes] = useState({}) // { [meetupId]: 'approved' | 'rejected' }
+  const [outcomes, setOutcomes] = useState({}) // { [meetupId]: { outcome: 'approved'|'rejected', time } }
 
   useEffect(() => {
     if (!user) { setRequestedIds([]); return }
@@ -214,10 +222,15 @@ export function useJoinRequestOutcomes(user) {
           })
           return
         }
-        // 신청이 사라짐 → 참여자면 승인, 아니면 거절
+        // 신청이 사라짐 → 참여자면 승인(참여 시각 joinedAt), 아니면 거절(시각 정보 없음)
         try {
           const pSnap = await getDoc(doc(db, 'meetups', id, 'participants', user.uid))
-          setOutcomes(prev => ({ ...prev, [id]: pSnap.exists() ? 'approved' : 'rejected' }))
+          setOutcomes(prev => ({
+            ...prev,
+            [id]: pSnap.exists()
+              ? { outcome: 'approved', time: pSnap.data().joinedAt ?? null }
+              : { outcome: 'rejected', time: null },
+          }))
         } catch (err) { console.error('가입 결과 판정 실패:', err) }
       }),
     )

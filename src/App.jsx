@@ -75,15 +75,15 @@ function AppInner() {
   // 내가 운영하는 클럽 중 대기 중인 가입 신청이 있는 모임 — 헤더 알림(모임장용)
   const pendingMeetups = user
     ? meetups
-        .filter(m => m.hostId === user.uid && m.type === '클럽' && (hostedRequestCounts[m.id] ?? 0) > 0)
-        .map(m => ({ id: m.id, title: m.title, count: hostedRequestCounts[m.id] }))
+        .filter(m => m.hostId === user.uid && m.type === '클럽' && (hostedRequestCounts[m.id]?.count ?? 0) > 0)
+        .map(m => ({ id: m.id, title: m.title, count: hostedRequestCounts[m.id].count, time: hostedRequestCounts[m.id].latestAt }))
     : []
 
   // 내가 신청한 클럽의 승인/거절 결과 — 헤더 알림(신청자용)
   const outcomeItems = Object.entries(requestOutcomes)
-    .map(([id, outcome]) => {
+    .map(([id, info]) => {
       const m = meetups.find(x => x.id === id)
-      return m ? { id, title: m.title, outcome } : null
+      return m ? { id, title: m.title, outcome: info.outcome, time: info.time } : null
     })
     .filter(Boolean)
 

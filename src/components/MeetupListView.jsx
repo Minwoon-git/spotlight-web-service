@@ -80,7 +80,7 @@ export default function MeetupListView({
       isSaved={savedMeetups.includes(m.id)}
       onToggleSave={handleToggleSave}
       currentUid={user?.uid}
-      pendingCount={m.hostId === user?.uid ? (requestCounts[m.id] ?? 0) : 0}
+      pendingCount={m.hostId === user?.uid ? (requestCounts[m.id]?.count ?? 0) : 0}
     />
   ))
 
