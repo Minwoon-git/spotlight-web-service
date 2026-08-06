@@ -74,7 +74,6 @@ export function useMeetups() {
       ...hostFields(user),
       participantCount: 1, // 주최자가 첫 참여자
       commentCount: 0,
-      requestCount: 0, // 대기 중인 가입 신청 수 (클럽 승인제)
       createdAt: serverTimestamp(),
     })
     // 주최자를 참여자 명단에 넣어 인원수와 목록이 실제와 맞게 한다
@@ -156,6 +155,32 @@ export function useMyMeetupIds(user) {
   }
 
   return { joinedMeetups: ids.joined, savedMeetups: ids.saved, toggleSave, syncJoined }
+}
+
+// 모임장 관점: 내가 개설한 클럽들의 '대기 중인 가입 신청 수'를 실시간으로 센다.
+// 모임 문서의 카운터는 신청자가 모임 문서를 수정할 권한이 없어 올릴 수 없으므로,
+// 모임장이 자기 클럽의 requests 서브컬렉션을 직접 구독해 실제 신청 문서 수를 센다.
+export function useHostedRequestCounts(user, meetups) {
+  const [counts, setCounts] = useState({}) // { [meetupId]: number }
+
+  // 내가 개설한 클럽 id — 문자열 키로 고정해 불필요한 재구독을 막는다
+  const clubKey = user
+    ? meetups.filter(m => m.hostId === user.uid && m.type === '클럽').map(m => m.id).join(',')
+    : ''
+
+  useEffect(() => {
+    if (!user || !clubKey) { setCounts({}); return }
+    const ids = clubKey.split(',')
+    const unsubs = ids.map(id =>
+      onSnapshot(collection(db, 'meetups', id, 'requests'),
+        snap => setCounts(prev => ({ ...prev, [id]: snap.size })),
+        err => console.error('가입 신청 수 불러오기 실패:', err),
+      ),
+    )
+    return () => unsubs.forEach(u => u())
+  }, [user, clubKey])
+
+  return counts
 }
 
 // 신청자 관점: 내가 낸 클럽 가입 신청의 결과(승인/거절)를 추적한다.
@@ -282,9 +307,6 @@ export function useMeetup(meetupId, user) {
       await setDoc(doc(db, 'meetups', meetupId, 'requests', user.uid), {
         ...memberInfo(), requestedAt: serverTimestamp(),
       })
-      try {
-        await updateDoc(doc(db, 'meetups', meetupId), { requestCount: increment(1) })
-      } catch { /* 카운터 실패가 신청 자체를 막지 않게 한다 */ }
       // 신청자 본인 문서에 신청 사실을 남겨 결과(승인/거절)를 추적한다
       try {
         await setDoc(doc(db, 'users', user.uid), { requestedMeetups: arrayUnion(meetupId) }, { merge: true })
@@ -302,9 +324,6 @@ export function useMeetup(meetupId, user) {
     if (!user || !meetupId) return
     if (isPending) {
       await deleteDoc(doc(db, 'meetups', meetupId, 'requests', user.uid))
-      try {
-        await updateDoc(doc(db, 'meetups', meetupId), { requestCount: increment(-1) })
-      } catch { /* 위와 동일 */ }
       // 본인이 취소한 신청은 '거절'로 오인되지 않도록 추적 목록에서 뺀다
       try {
         await setDoc(doc(db, 'users', user.uid), { requestedMeetups: arrayRemove(meetupId) }, { merge: true })
@@ -325,18 +344,12 @@ export function useMeetup(meetupId, user) {
     if (!meetupId) return
     await addParticipantDoc(req.id, { name: req.name, photo: req.photo ?? null })
     await deleteDoc(doc(db, 'meetups', meetupId, 'requests', req.id))
-    try {
-      await updateDoc(doc(db, 'meetups', meetupId), { requestCount: increment(-1) })
-    } catch { /* 위와 동일 */ }
   }
 
   // 모임장: 가입 신청 거절
   const rejectRequest = async (uid) => {
     if (!meetupId) return
     await deleteDoc(doc(db, 'meetups', meetupId, 'requests', uid))
-    try {
-      await updateDoc(doc(db, 'meetups', meetupId), { requestCount: increment(-1) })
-    } catch { /* 위와 동일 */ }
   }
 
   const addComment = async (content, parentId = null) => {

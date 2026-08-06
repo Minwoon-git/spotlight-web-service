@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom'
 import { MEETUP_TYPES, TYPE_INFO, scheduleText, shortRegion } from '../hooks/useMeetups'
 import './MeetupListView.css'
 
-function MeetupCard({ m, isSaved, onToggleSave, currentUid }) {
+function MeetupCard({ m, isSaved, onToggleSave, currentUid, pendingCount = 0 }) {
   const full = !!m.capacity && (m.participantCount ?? 0) >= m.capacity
-  // 클럽 모임장에게만, 대기 중인 가입 신청 수를 배지로 알린다
-  const pendingCount = (m.type === '클럽' && m.hostId === currentUid) ? (m.requestCount ?? 0) : 0
 
   // 카드 전체가 링크라 하트 클릭이 상세로 새지 않게 막는다
   const handleSave = (e) => {
@@ -61,7 +59,7 @@ function MeetupCard({ m, isSaved, onToggleSave, currentUid }) {
 }
 
 export default function MeetupListView({
-  meetups, loading, user, joinedMeetups = [], savedMeetups = [], onToggleSave, onWrite, onAuthOpen,
+  meetups, loading, user, joinedMeetups = [], savedMeetups = [], requestCounts = {}, onToggleSave, onWrite, onAuthOpen,
 }) {
   const [scope, setScope] = useState('browse') // browse | mine
   const [type, setType] = useState('전체')
@@ -82,6 +80,7 @@ export default function MeetupListView({
       isSaved={savedMeetups.includes(m.id)}
       onToggleSave={handleToggleSave}
       currentUid={user?.uid}
+      pendingCount={m.hostId === user?.uid ? (requestCounts[m.id] ?? 0) : 0}
     />
   ))
 
