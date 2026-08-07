@@ -331,7 +331,10 @@ export default function SpotDetailModal({
             <span>저장 {(spot.saves ?? 0).toLocaleString()}</span>
             <span>방문자 사진 {allCommunity.length}장</span>
           </div>
-          <Link className="detail-page-link" to={`/spot/${spot.id}`} onClick={onClose}>
+          {/* 모달은 이미 /spot/{id} URL에 있으므로, backgroundLocation을 비우고
+              현재 히스토리 엔트리를 교체해 전체 SpotDetailPage로 전환한다.
+              (onClose=뒤로가기를 호출하면 안 됨 — 이동과 충돌한다) */}
+          <Link className="detail-page-link" to={`/spot/${spot.id}`} replace state={null}>
             상세 페이지에서 보기 →
           </Link>
         </div>
