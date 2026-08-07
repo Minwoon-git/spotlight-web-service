@@ -155,6 +155,12 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
         <div className="spotpage-actions">
           <button className="spotpage-btn" onClick={() => onOpenMap?.(spot)}>지도에서 보기</button>
         </div>
+
+        {/* Einstein Personalization "함께 본 스팟" 추천 존.
+            콘솔 Web Campaign이 이 요소에 추천 카드를 주입한다. 제목·카드 마크업은
+            템플릿에서 렌더하므로, 추천이 없으면 비어 있어 아무것도 보이지 않는다.
+            data-spot-id는 참고용(앵커는 SpotDetail pageType의 catalogObject에서 잡힘). */}
+        <div id="spot-similar-recs" className="spotpage-recs" data-spot-id={spot.id} />
       </div>
     </div>
   )

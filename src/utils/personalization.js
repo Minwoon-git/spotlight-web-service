@@ -26,6 +26,8 @@ function toCatalogAttributes(spot) {
     url: typeof window !== 'undefined' ? `${window.location.origin}/spot/${spot.id}` : undefined,
     // description: "함께 본 스팟" 레시피의 Similar Items(name+description 매칭) 폴백용
     description: spot.description,
+    // imageUrl: 추천 카드 썸네일용(내장 필드). 대표 사진 1장.
+    imageUrl: Array.isArray(spot.photos) ? spot.photos[0] : undefined,
     address: spot.address,
     season: spot.season,
     bestTime: spot.bestTime,
