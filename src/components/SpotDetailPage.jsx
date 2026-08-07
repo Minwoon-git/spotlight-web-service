@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { mockSpots } from '../data/mockSpots'
+import { reinitSitemap } from '../utils/personalization'
 import './SpotDetailPage.css'
 
 const extractTime = (str) => {
@@ -62,6 +63,14 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
     setMeta('og:description', desc, 'property')
     if (spot.photos?.[0]) setMeta('og:image', spot.photos[0], 'property')
     return () => { document.title = prevTitle }
+  }, [spot])
+
+  // 콘솔 Web Campaign이 #spot-similar-recs 콘텐츠 존에 추천을 주입하려면, 이 요소가
+  // DOM에 있는 상태에서 사이트맵(SpotDetail pageType + contentZones)이 평가돼야 한다.
+  // /spot/{id} 직접 진입(공유·SEO) 시 비콘은 이 페이지가 렌더되기 전에 사이트맵을
+  // 평가하므로, 스팟 로드 후 reinit을 한 번 호출해 요소가 존재하는 상태로 재평가시킨다.
+  useEffect(() => {
+    if (spot) reinitSitemap()
   }, [spot])
 
   if (loading) {
