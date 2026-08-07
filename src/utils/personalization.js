@@ -16,13 +16,16 @@ function getSDK() {
 //   bestTime : String
 //   tags     : MultiString (배열)
 //   likes    : Integer
-// name은 내장(built-in) 속성이라 스키마에 없어도 항상 수집된다.
+// name·description은 내장(built-in) 속성이라 스키마에 없어도 항상 수집된다.
+// description은 Similar Items 재료가 유사도를 계산하는 텍스트 필드라 함께 보낸다.
 function toCatalogAttributes(spot) {
   return {
     name: spot.name,
     // url은 내장 속성이자 추천 노출의 필수 조건이다. 콘솔 sitemap 리스너가
     // 상세보기/좋아요에서 쓰는 /spot/{id} 규칙과 동일하게 맞춘다.
     url: typeof window !== 'undefined' ? `${window.location.origin}/spot/${spot.id}` : undefined,
+    // description: "함께 본 스팟" 레시피의 Similar Items(name+description 매칭) 폴백용
+    description: spot.description,
     address: spot.address,
     season: spot.season,
     bestTime: spot.bestTime,
