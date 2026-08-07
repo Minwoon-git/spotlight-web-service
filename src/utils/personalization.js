@@ -9,19 +9,50 @@ function getSDK() {
   return typeof window !== 'undefined' ? window.SalesforceInteractions : undefined
 }
 
+// 콘솔 Catalog 스키마(Settings > Catalog and Profile Objects > Spot)에 정의된
+// 커스텀 속성과 이름·타입을 1:1로 맞춘다. 여기서 벗어난 필드를 보내면 무시된다.
+//   address  : String
+//   season   : String
+//   bestTime : String
+//   tags     : MultiString (배열)
+//   likes    : Integer
+// name은 내장(built-in) 속성이라 스키마에 없어도 항상 수집된다.
+function toCatalogAttributes(spot) {
+  return {
+    name: spot.name,
+    // url은 내장 속성이자 추천 노출의 필수 조건이다. 콘솔 sitemap 리스너가
+    // 상세보기/좋아요에서 쓰는 /spot/{id} 규칙과 동일하게 맞춘다.
+    url: typeof window !== 'undefined' ? `${window.location.origin}/spot/${spot.id}` : undefined,
+    address: spot.address,
+    season: spot.season,
+    bestTime: spot.bestTime,
+    tags: spot.tags ?? [],
+    likes: spot.likes,
+  }
+}
+
 function toCatalogObject(spot) {
   return {
     type: 'Spot',
     id: String(spot.id),
-    attributes: {
-      name: spot.name,
-      description: spot.description,
-    },
-    relatedCatalogObjects: {
-      Tag: spot.tags ?? [],
-      Season: spot.season ? [spot.season] : [],
-    },
+    attributes: toCatalogAttributes(spot),
   }
+}
+
+// 콘솔 sitemap 리스너(상세보기/좋아요/저장)는 DOM의 data-spot-id만 읽을 수 있어
+// name·url 정도만 이벤트에 실을 수 있었다. 전체 속성을 실으려면 리스너가 id로
+// 조회할 수 있는 데이터가 있어야 하므로, 스팟 id → 카탈로그 속성 맵을 전역에
+// 노출한다. 콘솔 리스너는 window.__spotlightCatalog[id]로 전체 속성을 가져간다.
+// (register 이벤트와 동일한 toCatalogAttributes를 써서 속성 형태를 일치시킨다.)
+export function syncSpotCatalog(spots) {
+  if (typeof window === 'undefined' || !Array.isArray(spots)) return
+
+  const map = {}
+  for (const spot of spots) {
+    if (spot?.id == null) continue
+    map[String(spot.id)] = toCatalogAttributes(spot)
+  }
+  window.__spotlightCatalog = map
 }
 
 function sendSpotInteraction(name, spot) {

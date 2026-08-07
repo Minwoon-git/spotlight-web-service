@@ -29,7 +29,7 @@ import { MEETUP_TYPES, TYPE_INFO, useMyMeetupIds, useJoinRequestOutcomes, useHos
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
-import { trackSpotRegister, reinitSitemap } from './utils/personalization'
+import { trackSpotRegister, reinitSitemap, syncSpotCatalog } from './utils/personalization'
 import { useAdSense } from './hooks/useAdSense'
 import './App.css'
 
@@ -101,6 +101,12 @@ function AppInner() {
     return false
   })()
   useAdSense(isContentRoute)
+
+  // 콘솔 sitemap 리스너(상세보기/좋아요/저장)가 data-spot-id만으로 전체 카탈로그
+  // 속성을 이벤트에 실을 수 있도록, 스팟 목록이 바뀔 때마다 id→속성 맵을 전역에 노출한다.
+  useEffect(() => {
+    syncSpotCatalog(spots)
+  }, [spots])
 
   // 최초 로드는 콘솔에 등록된 sitemap이 이미 매칭했으므로, 이후 라우트 변경 시에만
   // reinit()을 호출해 새 경로의 pageType을 다시 매칭시킨다.
