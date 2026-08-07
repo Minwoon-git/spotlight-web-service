@@ -53,8 +53,17 @@ function AppInner() {
   const { spots, mySpots, totalCount, userCount, addSpot, updateSpot, deleteSpot } = useSpots(user)
   const { savedSpots, handleSaveToggle } = useSavedSpots(user)
   const { likedSpots, handleLikeToggle } = useLikedSpots(user)
-  const [selectedSpot, setSelectedSpot] = useState(null)
-  const { contributions, addContribution, deleteContribution } = useContributions(selectedSpot?.id, user)
+  const navigate = useNavigate()
+  const location = useLocation()
+  // 모달을 URL로 구동한다: 카드 클릭 시 /spot/{id}로 이동하되 backgroundLocation을
+  // state에 담아 배경 페이지(탐색/홈 등)는 그대로 유지한다. 이렇게 하면 URL이
+  // /spot/{id}가 되어 콘솔 sitemap의 SpotDetail pageType이 매칭되고, 추천 앵커(지금
+  // 보고 있는 스팟)가 잡힌다. 공유 가능한 URL·뒤로가기로 닫기·SEO 이점은 덤.
+  const backgroundLocation = location.state?.backgroundLocation
+  const modalSpotId = (backgroundLocation ? location.pathname : '').match(/^\/spot\/(.+)$/)?.[1] ?? null
+  const modalSpot = modalSpotId ? (spots.find(s => String(s.id) === modalSpotId) ?? null) : null
+  const openSpot = (spot) => navigate(`/spot/${spot.id}`, { state: { backgroundLocation: location } })
+  const { contributions, addContribution, deleteContribution } = useContributions(modalSpot?.id, user)
   const admin = isAdmin(user)
   const [editingSpot, setEditingSpot] = useState(null)
   const [authOpen, setAuthOpen] = useState(false)
@@ -67,10 +76,8 @@ function AppInner() {
   const [choiceModal, setChoiceModal] = useState(null)
   const [newMeetupType, setNewMeetupType] = useState('소셜링')
 
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const view = PATH_TO_VIEW[location.pathname] ?? 'home'
+  // 모달이 열려 있을 때(backgroundLocation 존재)는 배경 경로 기준으로 탭 하이라이트
+  const view = PATH_TO_VIEW[(backgroundLocation || location).pathname] ?? 'home'
 
   // 내가 운영하는 클럽 중 대기 중인 가입 신청이 있는 모임 — 헤더 알림(모임장용)
   const pendingMeetups = user
@@ -160,7 +167,7 @@ function AppInner() {
         }}
       />
 
-      <Routes>
+      <Routes location={backgroundLocation || location}>
         <Route path="/" element={
           <HeroSection
             spots={spots}
@@ -170,7 +177,7 @@ function AppInner() {
             onRegister={() => handleNavigate('register')}
             onNavigate={handleNavigate}
             onAuthOpen={() => setAuthOpen(true)}
-            onSelectSpot={setSelectedSpot}
+            onSelectSpot={openSpot}
           />
         } />
 
@@ -183,14 +190,14 @@ function AppInner() {
             onRegister={() => handleNavigate('register')}
             onNavigate={handleNavigate}
             onAuthOpen={() => setAuthOpen(true)}
-            onSelectSpot={setSelectedSpot}
+            onSelectSpot={openSpot}
           />
         } />
 
         <Route path="/explore" element={
           <MapView
             spots={spots}
-            onSelectSpot={setSelectedSpot}
+            onSelectSpot={openSpot}
             savedSpots={savedSpots}
           />
         } />
@@ -200,7 +207,7 @@ function AppInner() {
             spots={spots}
             mySpots={mySpots}
             savedSpots={savedSpots}
-            onSelectSpot={setSelectedSpot}
+            onSelectSpot={openSpot}
             onUnsave={handleSaveToggle}
             onDelete={deleteSpot}
             onEdit={handleEdit}
@@ -240,7 +247,7 @@ function AppInner() {
           <SpotDetailPage
             spots={spots}
             onBack={() => handleNavigate('explore')}
-            onOpenMap={(spot) => { setSelectedSpot(spot); handleNavigate('explore') }}
+            onOpenMap={(spot) => navigate(`/spot/${spot.id}`, { state: { backgroundLocation: { pathname: '/explore', search: '', hash: '' } } })}
           />
         } />
         <Route path="/meetup" element={
@@ -303,20 +310,20 @@ function AppInner() {
         <Route path="*" element={<Navigate to="/main" replace />} />
       </Routes>
 
-      {selectedSpot && (
+      {modalSpot && (
         <SpotDetailModal
-          key={selectedSpot.id}
-          spot={spots.find(s => s.id === selectedSpot.id) ?? selectedSpot}
-          isSaved={savedSpots.includes(selectedSpot.id)}
-          onSave={() => handleSaveToggle(selectedSpot.id)}
-          isLiked={likedSpots.includes(selectedSpot.id)}
-          onLike={() => handleLikeToggle(selectedSpot)}
-          onClose={() => setSelectedSpot(null)}
+          key={modalSpot.id}
+          spot={modalSpot}
+          isSaved={savedSpots.includes(modalSpot.id)}
+          onSave={() => handleSaveToggle(modalSpot.id)}
+          isLiked={likedSpots.includes(modalSpot.id)}
+          onLike={() => handleLikeToggle(modalSpot)}
+          onClose={() => navigate(-1)}
           contributions={contributions}
           onAddContribution={addContribution}
           onAuthOpen={() => setAuthOpen(true)}
           isAdmin={admin}
-          onDeleteSpot={async () => { await deleteSpot(selectedSpot.id); setSelectedSpot(null) }}
+          onDeleteSpot={async () => { await deleteSpot(modalSpot.id); navigate(-1) }}
           onDeleteContribution={deleteContribution}
         />
       )}
