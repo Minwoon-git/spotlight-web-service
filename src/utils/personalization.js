@@ -9,6 +9,15 @@ function getSDK() {
   return typeof window !== 'undefined' ? window.SalesforceInteractions : undefined
 }
 
+// imageUrl은 추천 카드 썸네일용 "URL"이어야 한다. 일부 사용자 등록 스팟은 사진을
+// base64 data URI(수백 KB)로 저장하는데, 이를 그대로 카탈로그 속성에 실으면 조회
+// 이벤트 페이로드가 커져 이벤트 API가 413(Content Too Large)로 거부한다 → 조회 유실.
+// 따라서 http(s) URL만 imageUrl로 보내고 data URI 등 비-URL 값은 제외한다.
+function toImageUrl(photos) {
+  const first = Array.isArray(photos) ? photos[0] : undefined
+  return typeof first === 'string' && /^https?:\/\//.test(first) ? first : undefined
+}
+
 // 콘솔 Catalog 스키마(Settings > Catalog and Profile Objects > Spot)에 정의된
 // 커스텀 속성과 이름·타입을 1:1로 맞춘다. 여기서 벗어난 필드를 보내면 무시된다.
 //   address  : String
@@ -26,8 +35,8 @@ function toCatalogAttributes(spot) {
     url: typeof window !== 'undefined' ? `${window.location.origin}/spot/${spot.id}` : undefined,
     // description: "함께 본 스팟" 레시피의 Similar Items(name+description 매칭) 폴백용
     description: spot.description,
-    // imageUrl: 추천 카드 썸네일용(내장 필드). 대표 사진 1장.
-    imageUrl: Array.isArray(spot.photos) ? spot.photos[0] : undefined,
+    // imageUrl: 추천 카드 썸네일용(내장 필드). http(s) URL만 (base64 data URI 제외 — 413 방지).
+    imageUrl: toImageUrl(spot.photos),
     address: spot.address,
     season: spot.season,
     bestTime: spot.bestTime,
