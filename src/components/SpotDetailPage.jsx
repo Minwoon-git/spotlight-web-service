@@ -73,11 +73,17 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
     if (spot) reinitSitemap()
   }, [spot])
 
+  // 추천 존 컨테이너(#spot-similar-recs)는 어느 상태에서도 DOM에 존재해야 한다.
+  // Firestore 스팟은 비동기 로딩이라 "로딩 중" 화면 동안에도 이 요소가 있어야
+  // 콘솔 사이트맵 평가(및 Sitemap Editor 스냅샷)가 콘텐츠 존을 찾을 수 있다.
+  const recsZone = <div id="spot-similar-recs" className="spotpage-recs" data-spot-id={spot?.id ?? id} />
+
   if (loading) {
     return (
       <div className="spotpage">
         <div className="spotpage-container">
           <p className="spotpage-loading">스팟 정보를 불러오는 중…</p>
+          {recsZone}
         </div>
       </div>
     )
@@ -90,6 +96,7 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
           <button className="spotpage-back" onClick={onBack}>← 돌아가기</button>
           <h1 className="spotpage-title">스팟을 찾을 수 없어요</h1>
           <p className="spotpage-addr">삭제되었거나 잘못된 주소일 수 있어요.</p>
+          {recsZone}
         </div>
       </div>
     )
@@ -169,7 +176,7 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
             콘솔 Web Campaign이 이 요소에 추천 카드를 주입한다. 제목·카드 마크업은
             템플릿에서 렌더하므로, 추천이 없으면 비어 있어 아무것도 보이지 않는다.
             data-spot-id는 참고용(앵커는 SpotDetail pageType의 catalogObject에서 잡힘). */}
-        <div id="spot-similar-recs" className="spotpage-recs" data-spot-id={spot.id} />
+        {recsZone}
       </div>
     </div>
   )
