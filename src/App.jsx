@@ -123,6 +123,11 @@ function AppInner() {
       isFirstRender.current = false
       return
     }
+    // SpotDetail 풀페이지(/spot/:id, 모달 아님)는 SpotDetailPage가 스팟 로드 후 reinit을
+    // 호출한다. 여기서 또 호출하면 '스팟 상세 페이지 방문'이 중복 발생(Viewed 이중집계)하므로
+    // 건너뛴다. 모달은 backgroundLocation이 있고 SpotDetailPage가 마운트되지 않으므로 여기서 처리.
+    const isFullSpotPage = location.pathname.startsWith('/spot/') && !location.state?.backgroundLocation
+    if (isFullSpotPage) return
     reinitSitemap()
   }, [location.pathname])
 
