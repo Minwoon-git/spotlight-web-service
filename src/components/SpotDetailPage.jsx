@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { mockSpots } from '../data/mockSpots'
-import { reinitSitemap } from '../utils/personalization'
 import './SpotDetailPage.css'
 
 const extractTime = (str) => {
@@ -65,17 +64,11 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
     return () => { document.title = prevTitle }
   }, [spot])
 
-  // 콘솔 Web Campaign이 #spot-similar-recs 콘텐츠 존에 추천을 주입하려면, 이 요소가
-  // DOM에 있는 상태에서 사이트맵(SpotDetail pageType + contentZones)이 평가돼야 한다.
-  // /spot/{id} 직접 진입(공유·SEO) 시 비콘은 이 페이지가 렌더되기 전에 사이트맵을
-  // 평가하므로, 스팟 로드 후 reinit을 한 번 호출해 요소가 존재하는 상태로 재평가시킨다.
-  useEffect(() => {
-    if (spot) reinitSitemap()
-  }, [spot])
-
   // 추천 존 컨테이너(#spot-similar-recs)는 어느 상태에서도 DOM에 존재해야 한다.
   // Firestore 스팟은 비동기 로딩이라 "로딩 중" 화면 동안에도 이 요소가 있어야
   // 콘솔 사이트맵 평가(및 Sitemap Editor 스냅샷)가 콘텐츠 존을 찾을 수 있다.
+  // (reinit은 App.jsx 한 곳에서만 호출해 View 이벤트 중복 발생을 막는다. 이 컨테이너를
+  //  항상 렌더해두면 비콘 초기 평가 시점에도 콘텐츠 존이 해결된다.)
   const recsZone = <div id="spot-similar-recs" className="spotpage-recs" data-spot-id={spot?.id ?? id} />
 
   if (loading) {

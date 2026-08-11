@@ -123,11 +123,9 @@ function AppInner() {
       isFirstRender.current = false
       return
     }
-    // SpotDetail 풀페이지(/spot/:id, 모달 아님)는 SpotDetailPage가 스팟 로드 후 reinit을
-    // 호출한다. 여기서 또 호출하면 '스팟 상세 페이지 방문'이 중복 발생(Viewed 이중집계)하므로
-    // 건너뛴다. 모달은 backgroundLocation이 있고 SpotDetailPage가 마운트되지 않으므로 여기서 처리.
-    const isFullSpotPage = location.pathname.startsWith('/spot/') && !location.state?.backgroundLocation
-    if (isFullSpotPage) return
+    // reinit은 이 한 곳에서만 호출한다(모달·풀페이지·기타 경로 공통). 최초 로드/직접 진입은
+    // 비콘이 이미 사이트맵을 평가해 View를 1번 쏘므로 여기선 스킵(첫 렌더 skip). 이렇게 하면
+    // 상세 페이지 조회 View 이벤트가 어떤 진입 방식이든 정확히 1번만 발생한다(이중집계 방지).
     reinitSitemap()
   }, [location.pathname])
 
