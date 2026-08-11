@@ -64,14 +64,21 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
     return () => { document.title = prevTitle }
   }, [spot])
 
-  // 캠페인이 #spot-similar-recs에 주입하는 추천 카드 중 "현재 스팟 자신"(자기추천)을 제거한다.
-  // Personalization의 clientside 필터가 렌더 경로상 실행되지 않아, 앱에서 직접 감시·제거한다.
-  // 캠페인 주입이 비동기라 MutationObserver로 카드가 들어올 때마다 검사한다.
+  // 캠페인이 주입하는 추천 블록(.ein-recs)을 앱에서 직접 보정한다.
+  //  1) 캠페인 타겟이 잘못 잡혀 엉뚱한 위치(.spotpage-tags 등)에 주입되면 → #spot-similar-recs로 이동
+  //  2) 현재 보고 있는 스팟 자신이 추천에 나오면(자기추천) 해당 카드 제거
+  // 캠페인 주입/재주입이 비동기라 MutationObserver로 변화가 있을 때마다 보정한다.
   useEffect(() => {
     const zone = document.getElementById('spot-similar-recs')
     if (!zone) return
+    const container = zone.closest('.spotpage-container') || document.body
     const currentPath = `/spot/${id}`
-    const removeSelf = () => {
+    const fix = () => {
+      // 1) 엉뚱한 곳에 주입된 추천 블록을 콘텐츠 존으로 이동
+      document.querySelectorAll('.ein-recs').forEach((recs) => {
+        if (recs.parentElement !== zone) zone.appendChild(recs)
+      })
+      // 2) 자기추천 카드 제거
       zone.querySelectorAll('a[href]').forEach((a) => {
         let path = ''
         try { path = new URL(a.getAttribute('href'), window.location.origin).pathname }
@@ -79,9 +86,9 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
         if (path === currentPath) (a.closest('.ein-rec-card') || a).remove()
       })
     }
-    removeSelf()
-    const obs = new MutationObserver(removeSelf)
-    obs.observe(zone, { childList: true, subtree: true })
+    fix()
+    const obs = new MutationObserver(fix)
+    obs.observe(container, { childList: true, subtree: true })
     return () => obs.disconnect()
   }, [id])
 
