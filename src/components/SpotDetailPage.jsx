@@ -64,6 +64,27 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
     return () => { document.title = prevTitle }
   }, [spot])
 
+  // 캠페인이 #spot-similar-recs에 주입하는 추천 카드 중 "현재 스팟 자신"(자기추천)을 제거한다.
+  // Personalization의 clientside 필터가 렌더 경로상 실행되지 않아, 앱에서 직접 감시·제거한다.
+  // 캠페인 주입이 비동기라 MutationObserver로 카드가 들어올 때마다 검사한다.
+  useEffect(() => {
+    const zone = document.getElementById('spot-similar-recs')
+    if (!zone) return
+    const currentPath = `/spot/${id}`
+    const removeSelf = () => {
+      zone.querySelectorAll('a[href]').forEach((a) => {
+        let path = ''
+        try { path = new URL(a.getAttribute('href'), window.location.origin).pathname }
+        catch { path = a.getAttribute('href') || '' }
+        if (path === currentPath) (a.closest('.ein-rec-card') || a).remove()
+      })
+    }
+    removeSelf()
+    const obs = new MutationObserver(removeSelf)
+    obs.observe(zone, { childList: true, subtree: true })
+    return () => obs.disconnect()
+  }, [id])
+
   // 추천 존 컨테이너(#spot-similar-recs)는 어느 상태에서도 DOM에 존재해야 한다.
   // Firestore 스팟은 비동기 로딩이라 "로딩 중" 화면 동안에도 이 요소가 있어야
   // 콘솔 사이트맵 평가(및 Sitemap Editor 스냅샷)가 콘텐츠 존을 찾을 수 있다.
