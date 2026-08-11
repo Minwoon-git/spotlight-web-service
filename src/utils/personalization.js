@@ -23,10 +23,14 @@ function toImageUrl(photos) {
 //   address  : String
 //   season   : String
 //   bestTime : String
-//   tags     : MultiString (배열)
 //   likes    : Integer
 // name·description은 내장(built-in) 속성이라 스키마에 없어도 항상 수집된다.
 // description은 Similar Items 재료가 유사도를 계산하는 텍스트 필드라 함께 보낸다.
+//
+// 주의: `tags`는 Personalization commerce 모델의 예약 필드다. 문자열 배열로 보내면
+// 서버가 built-in Tag 객체(type 속성 필요)로 파싱하려다 실패해 "Invalid Item"으로
+// 아이템 전체(및 조회 집계)를 거부한다. 그래서 tags는 전송하지 않는다. 태그 데이터가
+// 필요하면 예약어가 아닌 다른 속성명(예: spotTags)으로 스키마에 추가해 보낸다.
 function toCatalogAttributes(spot) {
   return {
     name: spot.name,
@@ -40,7 +44,6 @@ function toCatalogAttributes(spot) {
     address: spot.address,
     season: spot.season,
     bestTime: spot.bestTime,
-    tags: spot.tags ?? [],
     likes: spot.likes,
   }
 }
