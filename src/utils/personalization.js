@@ -96,14 +96,17 @@ export function syncSpotCatalog(spots) {
 //   host    : String
 // name(=title)·description·url·imageUrl은 내장 속성.
 function toMeetupCatalogAttributes(meetup) {
-  const place = meetup.place || meetup.region
+  // 클럽은 '주로 모이는 곳'(지도)이 spotPlace, '활동 지역'(자유입력)이 place.
+  // 소셜링·원데이클래스는 지도로 고른 장소가 place다. region(구) 추출은 구체 주소인
+  // spotPlace를 우선 사용해 "이 근처" 매칭 정확도를 높인다.
+  const place = meetup.place || meetup.spotPlace || meetup.region
   return {
     name: meetup.title,
     url: typeof window !== 'undefined' ? `${window.location.origin}/meetup/${meetup.id}` : undefined,
     description: meetup.description,
     // 모임 대표 이미지도 http(s)만 (base64 data URI 제외 — 413 방지)
     imageUrl: toHttpUrl(meetup.image),
-    region: toDistrict(place),
+    region: toDistrict(meetup.spotPlace || meetup.place || meetup.region),
     place,
     type: meetup.type,
     // 클럽은 활동 주기(schedule), 나머지는 날짜(+시간)
