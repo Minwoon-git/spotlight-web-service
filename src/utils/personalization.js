@@ -21,14 +21,19 @@ function toImageUrl(photos) {
   return toHttpUrl(Array.isArray(photos) ? photos[0] : undefined)
 }
 
-// 주소 문자열에서 시/군/구 단위를 뽑는다(예: "서울 종로구 사직로 161" → "종로구").
-// 스팟↔모임 "같은 구" 매칭의 공통 키라, 스팟 주소와 모임 장소에 같은 규칙을 쓴다.
-// (useMeetups.js의 shortRegion과 동일 로직 — 의존성 없이 personalization에 인라인.)
+// 주소 문자열에서 행정구역 단위를 뽑는다. "같은 구" 매칭의 공통 키라, 구/군을 우선한다.
+//   "서울 종로구 사직로 161"   → "종로구"
+//   "서울특별시 마포구 …"       → "마포구"  (시가 먼저 잡히지 않도록 구/군 우선)
+//   "서울특별시" (구 없음)      → "서울특별시"
+// 구/군이 없을 때만 시로, 그것도 없으면 앞 두 토큰으로 폴백한다.
 function toDistrict(str) {
   if (!str) return undefined
   const tokens = String(str).trim().split(/\s+/)
-  const unit = tokens.find(t => /(시|군|구)$/.test(t) && t.length > 1)
-  return unit || tokens.slice(0, 2).join(' ') || undefined
+  const gu = tokens.find(t => /(구|군)$/.test(t) && t.length > 1)
+  if (gu) return gu
+  const si = tokens.find(t => /시$/.test(t) && t.length > 1)
+  if (si) return si
+  return tokens.slice(0, 2).join(' ') || undefined
 }
 
 // 콘솔 Catalog 스키마(Settings > Catalog and Profile Objects > Spot)에 정의된
