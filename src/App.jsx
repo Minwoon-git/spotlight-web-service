@@ -29,7 +29,7 @@ import { MEETUP_TYPES, TYPE_INFO, useMyMeetupIds, useJoinRequestOutcomes, useHos
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
-import { trackSpotRegister, reinitSitemap, syncSpotCatalog } from './utils/personalization'
+import { trackSpotRegister, reinitSitemap, syncSpotCatalog, syncMeetupCatalog } from './utils/personalization'
 import { useAdSense } from './hooks/useAdSense'
 import './App.css'
 
@@ -114,6 +114,11 @@ function AppInner() {
   useEffect(() => {
     syncSpotCatalog(spots)
   }, [spots])
+
+  // 모임 목록이 바뀔 때마다 id→속성 맵을 노출한다(콘솔 MeetupDetail 리스너가 읽음).
+  useEffect(() => {
+    syncMeetupCatalog(meetups)
+  }, [meetups])
 
   // 최초 로드는 콘솔에 등록된 sitemap이 이미 매칭했으므로, 이후 라우트 변경 시에만
   // reinit()을 호출해 새 경로의 pageType을 다시 매칭시킨다.

@@ -9,13 +9,26 @@ function getSDK() {
   return typeof window !== 'undefined' ? window.SalesforceInteractions : undefined
 }
 
-// imageUrl은 추천 카드 썸네일용 "URL"이어야 한다. 일부 사용자 등록 스팟은 사진을
+// imageUrl은 추천 카드 썸네일용 "URL"이어야 한다. 일부 사용자 등록 스팟/모임은 사진을
 // base64 data URI(수백 KB)로 저장하는데, 이를 그대로 카탈로그 속성에 실으면 조회
 // 이벤트 페이로드가 커져 이벤트 API가 413(Content Too Large)로 거부한다 → 조회 유실.
 // 따라서 http(s) URL만 imageUrl로 보내고 data URI 등 비-URL 값은 제외한다.
+function toHttpUrl(value) {
+  return typeof value === 'string' && /^https?:\/\//.test(value) ? value : undefined
+}
+
 function toImageUrl(photos) {
-  const first = Array.isArray(photos) ? photos[0] : undefined
-  return typeof first === 'string' && /^https?:\/\//.test(first) ? first : undefined
+  return toHttpUrl(Array.isArray(photos) ? photos[0] : undefined)
+}
+
+// 주소 문자열에서 시/군/구 단위를 뽑는다(예: "서울 종로구 사직로 161" → "종로구").
+// 스팟↔모임 "같은 구" 매칭의 공통 키라, 스팟 주소와 모임 장소에 같은 규칙을 쓴다.
+// (useMeetups.js의 shortRegion과 동일 로직 — 의존성 없이 personalization에 인라인.)
+function toDistrict(str) {
+  if (!str) return undefined
+  const tokens = String(str).trim().split(/\s+/)
+  const unit = tokens.find(t => /(시|군|구)$/.test(t) && t.length > 1)
+  return unit || tokens.slice(0, 2).join(' ') || undefined
 }
 
 // 콘솔 Catalog 스키마(Settings > Catalog and Profile Objects > Spot)에 정의된
@@ -70,6 +83,50 @@ export function syncSpotCatalog(spots) {
     map[String(spot.id)] = toCatalogAttributes(spot)
   }
   window.__spotlightCatalog = map
+}
+
+// 모임(Meetup) 카탈로그 — 스팟과 동일한 이벤트 방식. 콘솔 Catalog Object "Meetup"
+// 스키마와 속성명을 1:1로 맞춘다. 스팟→모임 크로스셀("이 근처 출사 모임")의 재료로,
+// region(구)은 스팟 주소의 구와 매칭하는 키다.
+//   region  : String  (매칭용 구 단위)
+//   place   : String  (표시용 전체 장소)
+//   type    : String  (소셜링/클럽/원데이클래스)
+//   schedule: String  (일정 표시용)
+//   capacity/participantCount : Integer
+//   host    : String
+// name(=title)·description·url·imageUrl은 내장 속성.
+function toMeetupCatalogAttributes(meetup) {
+  const place = meetup.place || meetup.region
+  return {
+    name: meetup.title,
+    url: typeof window !== 'undefined' ? `${window.location.origin}/meetup/${meetup.id}` : undefined,
+    description: meetup.description,
+    // 모임 대표 이미지도 http(s)만 (base64 data URI 제외 — 413 방지)
+    imageUrl: toHttpUrl(meetup.image),
+    region: toDistrict(place),
+    place,
+    type: meetup.type,
+    // 클럽은 활동 주기(schedule), 나머지는 날짜(+시간)
+    schedule: meetup.type === '클럽'
+      ? (meetup.schedule || '')
+      : (meetup.date ? (meetup.time ? `${meetup.date} ${meetup.time}` : meetup.date) : ''),
+    capacity: meetup.capacity,
+    participantCount: meetup.participantCount,
+    host: meetup.host,
+  }
+}
+
+// 콘솔 sitemap의 MeetupDetail 리스너가 data(id)만으로 전체 속성을 이벤트에 실을 수
+// 있도록, 모임 id→속성 맵을 전역에 노출한다. (스팟의 __spotlightCatalog와 동일 계약.)
+export function syncMeetupCatalog(meetups) {
+  if (typeof window === 'undefined' || !Array.isArray(meetups)) return
+
+  const map = {}
+  for (const meetup of meetups) {
+    if (meetup?.id == null) continue
+    map[String(meetup.id)] = toMeetupCatalogAttributes(meetup)
+  }
+  window.__spotlightMeetupCatalog = map
 }
 
 function sendSpotInteraction(name, spot) {
