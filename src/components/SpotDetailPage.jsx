@@ -99,12 +99,20 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
   //  항상 렌더해두면 비콘 초기 평가 시점에도 콘텐츠 존이 해결된다.)
   const recsZone = <div id="spot-similar-recs" className="spotpage-recs" data-spot-id={spot?.id ?? id} />
 
+  // "근처 추천 모임" 크로스셀 콘텐츠 존(spot_nearby_meetups). 콘솔 캠페인이 여기에
+  // 모임 카드를 인라인으로 주입한다. data-address에 현재 스팟 주소를 실어, 템플릿이
+  // 같은 구(區) 모임을 우선 필터링하는 데 쓴다. (스팟 추천 팝업과 달리 본문 흐름 안에 표시.)
+  const nearbyMeetupsZone = (
+    <div id="spot-nearby-meetups" className="spotpage-nearby-meetups" data-address={spot?.address ?? ''} />
+  )
+
   if (loading) {
     return (
       <div className="spotpage">
         <div className="spotpage-container">
           <p className="spotpage-loading">스팟 정보를 불러오는 중…</p>
           {recsZone}
+          {nearbyMeetupsZone}
         </div>
       </div>
     )
@@ -118,6 +126,7 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
           <h1 className="spotpage-title">스팟을 찾을 수 없어요</h1>
           <p className="spotpage-addr">삭제되었거나 잘못된 주소일 수 있어요.</p>
           {recsZone}
+          {nearbyMeetupsZone}
         </div>
       </div>
     )
@@ -198,6 +207,9 @@ export default function SpotDetailPage({ spots = [], onBack, onOpenMap }) {
             템플릿에서 렌더하므로, 추천이 없으면 비어 있어 아무것도 보이지 않는다.
             data-spot-id는 참고용(앵커는 SpotDetail pageType의 catalogObject에서 잡힘). */}
         {recsZone}
+
+        {/* "근처 추천 모임" 크로스셀 존. 캠페인이 같은 구(區) 모임 카드를 인라인 주입. */}
+        {nearbyMeetupsZone}
       </div>
     </div>
   )
