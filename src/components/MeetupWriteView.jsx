@@ -18,6 +18,7 @@ export default function MeetupWriteView({
     image: editingMeetup?.image ?? '',
     region: editingMeetup?.region ?? '',
     place: editingMeetup?.place ?? '',
+    spotPlace: editingMeetup?.spotPlace ?? '',
     lat: editingMeetup?.lat ?? null,
     lng: editingMeetup?.lng ?? null,
     date: editingMeetup?.date ?? '',
@@ -154,31 +155,47 @@ export default function MeetupWriteView({
             </div>
           )}
 
-          {/* 클럽은 활동 범위라 자유 입력, 나머지는 실제 만나는 곳이라 지도에서 고른다 */}
+          {/* 클럽은 활동 범위(자유 입력)와 주로 모이는 곳(지도, 선택)을 함께 받는다.
+              나머지는 실제 만나는 곳이라 지도에서만 고른다. */}
           {isClub ? (
-            <div className="mw-row">
-              <label className="mw-field">
-                <span className="mw-label">활동 지역</span>
-                <input
-                  className="mw-input"
-                  value={form.place}
-                  onChange={e => set('place', e.target.value)}
-                  placeholder="예: 서울 전역"
-                  maxLength={40}
+            <>
+              <div className="mw-row">
+                <label className="mw-field">
+                  <span className="mw-label">활동 지역</span>
+                  <input
+                    className="mw-input"
+                    value={form.place}
+                    onChange={e => set('place', e.target.value)}
+                    placeholder="예: 서울 전역"
+                    maxLength={40}
+                  />
+                </label>
+                <label className="mw-field">
+                  <span className="mw-label">정원</span>
+                  <input
+                    className="mw-input"
+                    type="number"
+                    min="0"
+                    value={form.capacity}
+                    onChange={e => set('capacity', e.target.value)}
+                    placeholder="비워두면 제한 없음"
+                  />
+                </label>
+              </div>
+              <div className="mw-field">
+                <span className="mw-label">주로 모이는 곳 <small className="mw-optional">선택</small></span>
+                <LocationPicker
+                  initialAddress={form.spotPlace}
+                  placeholder="장소명 또는 주소 검색 (예: 반포한강공원)"
+                  hint="정기 모임 장소가 있다면 지도에서 골라주세요"
+                  onSelect={(loc) => {
+                    set('spotPlace', loc?.address ?? '')
+                    set('lat', loc?.lat ?? null)
+                    set('lng', loc?.lng ?? null)
+                  }}
                 />
-              </label>
-              <label className="mw-field">
-                <span className="mw-label">정원</span>
-                <input
-                  className="mw-input"
-                  type="number"
-                  min="0"
-                  value={form.capacity}
-                  onChange={e => set('capacity', e.target.value)}
-                  placeholder="비워두면 제한 없음"
-                />
-              </label>
-            </div>
+              </div>
+            </>
           ) : (
             <>
               <div className="mw-field">

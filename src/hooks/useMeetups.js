@@ -43,7 +43,10 @@ const toDocData = (data) => ({
   image: data.image ?? '',
   region: data.region ?? '',
   place: data.place ?? '',
-  // 지도에서 고른 경우에만 좌표가 있다 (클럽은 활동 범위라 좌표 없음)
+  // 클럽은 '활동 지역'(place, 넓은 범위)과 별도로 주로 모이는 곳을 지도에서 고를 수 있다.
+  // 소셜링·원데이클래스는 spotPlace를 쓰지 않고 place가 곧 모이는 장소다.
+  spotPlace: data.spotPlace ?? '',
+  // 지도에서 고른 경우에만 좌표가 있다 (소셜링·원데이클래스의 place, 또는 클럽의 spotPlace)
   lat: data.lat ?? null,
   lng: data.lng ?? null,
   // 소셜링·원데이클래스는 특정 일시, 클럽은 활동 주기를 쓴다

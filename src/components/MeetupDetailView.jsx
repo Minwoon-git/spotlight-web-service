@@ -176,6 +176,9 @@ export default function MeetupDetailView({
           {meetup.place && (
             <div><dt>{meetup.type === '클럽' ? '활동 지역' : '장소'}</dt><dd>{meetup.place}</dd></div>
           )}
+          {meetup.type === '클럽' && meetup.spotPlace && (
+            <div><dt>모이는 곳</dt><dd>📍 {meetup.spotPlace}</dd></div>
+          )}
           {meetup.instructor && <div><dt>강사</dt><dd>{meetup.instructor}</dd></div>}
           {meetup.fee && <div><dt>수강료</dt><dd>{meetup.fee}</dd></div>}
           <div>
