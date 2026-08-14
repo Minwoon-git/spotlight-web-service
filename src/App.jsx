@@ -25,7 +25,7 @@ import MeetupListView from './components/MeetupListView'
 import MeetupDetailView from './components/MeetupDetailView'
 import MeetupWriteView from './components/MeetupWriteView'
 import ChoiceModal from './components/ChoiceModal'
-import { MEETUP_TYPES, TYPE_INFO, useMyMeetupIds, useJoinRequestOutcomes, useHostedRequestCounts } from './hooks/useMeetups'
+import { MEETUP_TYPES, TYPE_INFO, needsApproval, useMyMeetupIds, useJoinRequestOutcomes, useHostedRequestCounts } from './hooks/useMeetups'
 import { useMeetups } from './hooks/useMeetups'
 import { isAdmin } from './utils/admin'
 import { isEmailVerified } from './utils/auth'
@@ -79,10 +79,10 @@ function AppInner() {
   // 모달이 열려 있을 때(backgroundLocation 존재)는 배경 경로 기준으로 탭 하이라이트
   const view = PATH_TO_VIEW[(backgroundLocation || location).pathname] ?? 'home'
 
-  // 내가 운영하는 클럽 중 대기 중인 가입 신청이 있는 모임 — 헤더 알림(모임장용)
+  // 내가 운영하는 모임 중 대기 중인 신청이 있는 모임 — 헤더 알림(모임장용)
   const pendingMeetups = user
     ? meetups
-        .filter(m => m.hostId === user.uid && m.type === '클럽' && (hostedRequestCounts[m.id]?.count ?? 0) > 0)
+        .filter(m => m.hostId === user.uid && needsApproval(m.type) && (hostedRequestCounts[m.id]?.count ?? 0) > 0)
         .map(m => ({ id: m.id, title: m.title, count: hostedRequestCounts[m.id].count, time: hostedRequestCounts[m.id].latestAt }))
     : []
 

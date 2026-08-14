@@ -8,24 +8,28 @@ import { db } from '../firebase'
 
 export const MEETUP_TYPES = ['소셜링', '클럽', '원데이클래스']
 
+// 세 유형 모두 개설자 승인 후 참여한다 — 신청하면 개설자가 수락/거절한다.
+export const APPROVAL_TYPES = ['소셜링', '클럽', '원데이클래스']
+export const needsApproval = (type) => APPROVAL_TYPES.includes(type)
+
 export const TYPE_INFO = {
   소셜링: {
     desc: '하루 함께 출사 나갈 사람을 구해요',
     hint: '어떤 사진을 찍으러 가는지, 준비물이 있는지 적어주세요.',
-    // 유형마다 참여의 성격이 달라 호칭을 나눈다
-    member: '참여자', join: '참여하기', leave: '참여 취소하기',
+    // 유형마다 참여의 성격이 달라 호칭을 나눈다. apply는 승인제 신청 문구의 명사부.
+    member: '참여자', join: '참여하기', leave: '참여 취소하기', apply: '참여 신청',
     closed: '모집이 마감됐어요', hostRole: '호스트',
   },
   클럽: {
     desc: '정기적으로 함께 활동할 사진 모임이에요',
     hint: '활동 방식, 모임 분위기, 어떤 분과 함께하고 싶은지 적어주세요.',
-    member: '멤버', join: '가입하기', leave: '탈퇴하기',
+    member: '멤버', join: '가입하기', leave: '탈퇴하기', apply: '가입 신청',
     closed: '정원이 찼어요', hostRole: '모임장',
   },
   원데이클래스: {
     desc: '작가님께 배우는 하루 강좌예요',
     hint: '수업 내용, 준비물, 수강 대상을 적어주세요.',
-    member: '수강생', join: '수강 신청하기', leave: '신청 취소하기',
+    member: '수강생', join: '수강 신청하기', leave: '신청 취소하기', apply: '수강 신청',
     closed: '신청이 마감됐어요', hostRole: '개설자',
   },
 }
@@ -168,9 +172,9 @@ export function useMyMeetupIds(user) {
 export function useHostedRequestCounts(user, meetups) {
   const [counts, setCounts] = useState({}) // { [meetupId]: { count, latestAt } }
 
-  // 내가 개설한 클럽 id — 문자열 키로 고정해 불필요한 재구독을 막는다
+  // 내가 개설한 모임 id — 문자열 키로 고정해 불필요한 재구독을 막는다
   const clubKey = user
-    ? meetups.filter(m => m.hostId === user.uid && m.type === '클럽').map(m => m.id).join(',')
+    ? meetups.filter(m => m.hostId === user.uid && needsApproval(m.type)).map(m => m.id).join(',')
     : ''
 
   useEffect(() => {
@@ -280,7 +284,7 @@ export function useMeetup(meetupId, user) {
     return unsub
   }, [meetupId])
 
-  // 가입 신청 목록 (클럽 승인제에서만 사용)
+  // 가입 신청 목록 (승인제 — 모든 유형에서 사용)
   useEffect(() => {
     if (!meetupId) return
     const unsub = onSnapshot(collection(db, 'meetups', meetupId, 'requests'),
@@ -300,8 +304,8 @@ export function useMeetup(meetupId, user) {
     return unsub
   }, [meetupId])
 
-  // 클럽은 모임장 승인 후 가입, 나머지는 즉시 참여
-  const requiresApproval = meetup?.type === '클럽'
+  // 세 유형 모두 개설자 승인 후 참여한다
+  const requiresApproval = needsApproval(meetup?.type)
   const isJoined = !!user && participants.some(p => p.id === user.uid)
   const isPending = !!user && requests.some(r => r.id === user.uid)
   const isFull = !!meetup?.capacity && participants.length >= meetup.capacity
@@ -318,7 +322,7 @@ export function useMeetup(meetupId, user) {
     } catch { /* 카운터 실패가 참여 자체를 막지 않게 한다 */ }
   }
 
-  // 즉시 참여(소셜링·원데이클래스) 또는 가입 신청(클럽)
+  // 승인제 — 참여자 명단에 바로 넣지 않고 신청(requests)만 남긴다
   const join = async () => {
     if (!user || !meetupId) return
     if (requiresApproval) {

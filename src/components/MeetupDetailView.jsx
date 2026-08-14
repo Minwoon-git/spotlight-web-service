@@ -204,18 +204,18 @@ export default function MeetupDetailView({
                 : isPending ? '승인 대기 중 · 신청 취소'
                 : isJoined ? words.leave
                 : isFull ? words.closed
-                : requiresApproval ? '가입 신청하기'
+                : requiresApproval ? `${words.apply}하기`
                 : words.join}
             </button>
             {requiresApproval && !isJoined && !isPending && !isFull && (
-              <p className="md-join-note">모임장이 신청을 수락하면 가입돼요.</p>
+              <p className="md-join-note">{words.hostRole} 승인 후 참여할 수 있어요.</p>
             )}
           </div>
         )}
 
         {isHost && requiresApproval && (
           <section className="md-section">
-            <h2 className="md-section-title">가입 신청 {requests.length}</h2>
+            <h2 className="md-section-title">{words.apply} {requests.length}</h2>
             {requests.length === 0 ? (
               <p className="md-empty-line">대기 중인 신청이 없어요.</p>
             ) : (
@@ -427,7 +427,7 @@ export default function MeetupDetailView({
             : '댓글 삭제'}
           message={
             confirm === 'delete' ? `이 모임을 삭제할까요? ${words.member}와 댓글도 함께 사라지며 되돌릴 수 없어요.`
-              : confirm === 'leave' ? (isPending ? '가입 신청을 취소할까요?' : `정말 ${words.leave.replace('하기', '')}할까요?`)
+              : confirm === 'leave' ? (isPending ? `${words.apply}을 취소할까요?` : `정말 ${words.leave.replace('하기', '')}할까요?`)
               : isActivityConfirm ? '이 후기를 삭제할까요? 되돌릴 수 없어요.'
               : '이 댓글을 삭제할까요? 되돌릴 수 없어요.'
           }
